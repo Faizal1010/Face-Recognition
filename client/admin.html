@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <h2>Upload Image</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label for="imageLabel">Enter label for the image:</label>
+    <input type="text" name="label" id="imageLabel" required placeholder="Enter label" />
+    <input type="file" name="image" id="imageInput" accept="image/*" required multiple />
+    <button type="submit">Upload</button>
+  </form>
+
+  <h2>Uploaded Images</h2>
+  <button id="deleteSelected" disabled>Delete Selected</button>
+  <input type="text" id="newLabel" placeholder="Enter new label" />
+  <button id="changeLabel" disabled>Change Label</button>
+
+  <div id="imageGallery"></div>
+
+  <script>
+    let selectedImages = [];
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      const files = document.getElementById('imageInput').files;
+      const label = document.getElementById('imageLabel').value;
+      formData.append('label', label);
+      for (let i = 0; i < files.length; i++) {
+        formData.append('image', files[i]);
+      }
+      const response = await fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.text();
+      alert(result);
+      loadImages();
+    });
+
+    async function loadImages() {
+      const response = await fetch('http://localhost:3000/images');
+      const images = await response.json();
+      const gallery = document.getElementById('imageGallery');
+      gallery.innerHTML = '';
+      selectedImages = [];
+      toggleBulkActions();
+
+      images.forEach((img) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = `data:image/jpeg;base64,${img.data}`;
+        imgElement.width = 150;
+        imgElement.style.margin = '10px';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.onchange = () => toggleSelection(img.id, checkbox.checked);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = async () => {
+          await fetch(`http://localhost:3000/delete/${img.id}`, { method: 'DELETE' });
+          loadImages();
+        };
+
+        const div = document.createElement('div');
+        div.appendChild(checkbox);
+        div.appendChild(imgElement);
+        div.appendChild(deleteBtn);
+        gallery.appendChild(div);
+      });
+    }
+
+    function toggleSelection(id, isSelected) {
+      if (isSelected) {
+        selectedImages.push(id);
+      } else {
+        selectedImages = selectedImages.filter((imageId) => imageId !== id);
+      }
+      toggleBulkActions();
+    }
+
+    function toggleBulkActions() {
+      document.getElementById('deleteSelected').disabled = selectedImages.length === 0;
+      document.getElementById('changeLabel').disabled = selectedImages.length === 0;
+    }
+    console.log("selected images are :", selectedImages)
+    document.getElementById('deleteSelected').addEventListener('click', async () => {
+      await fetch('http://localhost:3000/delete-multiple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedImages }),
+      });
+      loadImages();
+    });
+
+    document.getElementById('changeLabel').addEventListener('click', async () => {
+      const newLabel = document.getElementById('newLabel').value.trim();
+      if (!newLabel) return alert('Enter a valid label');
+      await fetch('http://localhost:3000/update-label', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedImages, label: newLabel }),
+      });
+      loadImages();
+    });
+
+    window.onload = loadImages;
+  </script>
+</body>
+</html>

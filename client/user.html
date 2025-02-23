@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Face Recognition</title>
+</head>
+<body>
+  <h1>Face Recognition</h1>
+  
+  <input type="file" id="imageInput" accept="image/*" required />
+  <button id="submitButton" type="button">Find My Photos</button> <!-- Explicit type="button" -->
+
+  <h2>Matched Images</h2>
+  <div id="matchedGallery"></div>
+
+  <script>document.getElementById('submitButton').addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  
+    const fileInput = document.getElementById('imageInput');
+    if (fileInput.files.length === 0) {
+      alert('Please upload an image!');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+  
+    try {
+      const response = await fetch('http://localhost:3000/recognize', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();  // Get error from server
+        throw new Error(`Server responded with ${response.status}: ${errorText}`);
+      }
+  
+      const images = await response.json();
+      console.log('Received images:', images);
+  
+      const gallery = document.getElementById('matchedGallery');
+      gallery.innerHTML = '';
+  
+      if (images.length === 0) {
+        gallery.innerHTML = '<p>No matching images found.</p>';
+        return;
+      }
+  
+      images.forEach((img) => {
+        const imgElement = document.createElement('img');
+        imgElement.src = `data:image/jpeg;base64,${img}`;
+        imgElement.width = 150;
+        imgElement.style.margin = '10px';
+        gallery.appendChild(imgElement);
+      });
+  
+    } catch (err) {
+      console.error('Fetch error:', err);
+      alert(`An error occurred: ${err.message}`);
+    }
+    return false;
+  });
+  </script>
+</body>
+</html>
