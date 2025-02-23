@@ -63,15 +63,15 @@ exports.getLabels = (req, res) => {
 };
 
 exports.updateLabels = (req, res) => {
-  const { imageIds, newLabel } = req.body;
-  console.log("imageIds : ",imageIds)
-  console.log("newLabel : ",newLabel)
+  const { ids, label } = req.body;
+  console.log("ids : ",ids)
+  console.log("label : ",label)
 
-  if (!imageIds || imageIds.length === 0) {
+  if (!ids || ids.length === 0) {
     return res.status(400).json({ error: 'No image IDs provided' });
   }
 
-  db.query('UPDATE images SET label = ? WHERE id IN (?)', [newLabel, imageIds], (err, result) => {
+  db.query('UPDATE images SET label = ? WHERE id IN (?)', [label, ids], (err, result) => {
     if (err) {
       console.error('Error updating labels:', err);
       return res.status(500).json({ error: 'Error updating labels' });
@@ -83,19 +83,20 @@ exports.updateLabels = (req, res) => {
 
 exports.deleteSelectedImages = (req, res) => {
   console.log("handler hit")
-  const { imageIds } = req.body;
+  const { ids } = req.body;
+  console.log("imageIds", ids)
 
-  if (!imageIds || imageIds.length === 0) {
+  if (!ids || ids.length === 0) {
     return res.status(400).json({ error: 'No image IDs provided' });
   }
 
-  db.query('DELETE FROM imageData WHERE image_id IN (?)', [imageIds], (err, result) => {
+  db.query('DELETE FROM imageData WHERE image_id IN (?)', [ids], (err, result) => {
     if (err) {
       console.error('Error deleting image data:', err);
       return res.status(500).json({ error: 'Error deleting image data' });
     }
 
-    db.query('DELETE FROM images WHERE id IN (?)', [imageIds], (err, result) => {
+    db.query('DELETE FROM images WHERE id IN (?)', [ids], (err, result) => {
       if (err) {
         console.error('Error deleting images:', err);
         return res.status(500).json({ error: 'Error deleting images' });
@@ -106,3 +107,25 @@ exports.deleteSelectedImages = (req, res) => {
   });
 };
 
+exports.getImagesByLabels = (req, res) => {
+  const { labels } = req.body;
+  console.log("Selected labels:", labels);
+
+  if (!labels || labels.length === 0) {
+    return res.status(400).json({ error: "No labels provided" });
+  }
+
+  db.query('SELECT id, image FROM images WHERE label IN (?)', [labels], (err, results) => {
+    if (err) {
+      console.error("Error fetching images by labels:", err);
+      return res.status(500).json({ error: "Error fetching images" });
+    }
+
+    const images = results.map(r => ({
+      id: r.id,
+      data: Buffer.from(r.image).toString('base64')
+    }));
+
+    res.json(images);
+  });
+};

@@ -7,6 +7,7 @@
 </head>
 <body>
   <h1>Admin Dashboard</h1>
+  
   <h2>Upload Image</h2>
   <form id="uploadForm" enctype="multipart/form-data">
     <label for="imageLabel">Enter label for the image:</label>
@@ -14,6 +15,11 @@
     <input type="file" name="image" id="imageInput" accept="image/*" required multiple />
     <button type="submit">Upload</button>
   </form>
+
+  <h2>Filter Images by Label</h2>
+  <div id="labelFilters">
+    <label><input type="checkbox" id="allCheckbox" checked /> All</label>
+  </div>
 
   <h2>Uploaded Images</h2>
   <button id="deleteSelected" disabled>Delete Selected</button>
@@ -24,6 +30,7 @@
 
   <script>
     let selectedImages = [];
+    let selectedLabels = []; 
 
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -43,11 +50,59 @@
       loadImages();
     });
 
+    async function loadLabels() {
+      const response = await fetch('http://localhost:3000/get-labels');
+      const labels = await response.json();
+      const labelFilters = document.getElementById('labelFilters');
+
+      new Set(labels).forEach(label => {
+        const labelContainer = document.createElement('label');
+        const checkbox = document.createElement('input');
+        
+        checkbox.type = 'checkbox';
+        checkbox.value = label;
+        checkbox.classList.add('labelCheckbox');
+
+        labelContainer.appendChild(checkbox);
+        labelContainer.appendChild(document.createTextNode(` ${label}`));
+        labelFilters.appendChild(labelContainer);
+      });
+
+      document.getElementById('allCheckbox').addEventListener('change', toggleAll);
+      document.querySelectorAll('.labelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
+
+      loadImages(); 
+    }
+
+    function toggleAll() {
+      const allChecked = document.getElementById('allCheckbox').checked;
+      document.querySelectorAll('.labelCheckbox').forEach(cb => cb.checked = false);
+      selectedLabels = allChecked ? [] : selectedLabels;
+      loadImages();
+    }
+
+    function updateSelectedLabels() {
+      selectedLabels = [...document.querySelectorAll('.labelCheckbox:checked')].map(cb => cb.value);
+      document.getElementById('allCheckbox').checked = selectedLabels.length === 0;
+      loadImages();
+    }
+
     async function loadImages() {
-      const response = await fetch('http://localhost:3000/images');
-      const images = await response.json();
       const gallery = document.getElementById('imageGallery');
       gallery.innerHTML = '';
+
+      let url = selectedLabels.length > 0 ? 'http://localhost:3000/label-based-fetch' : 'http://localhost:3000/images';
+      const options = selectedLabels.length > 0 ? {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ labels: selectedLabels })
+      } : {};
+
+      const response = await fetch(url, options);
+      const images = await response.json();
+      
+      console.log('images from label', images)
+
       selectedImages = [];
       toggleBulkActions();
 
@@ -59,7 +114,8 @@
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.onchange = () => toggleSelection(img.id, checkbox.checked);
+        checkbox.value = img.id;
+        checkbox.onchange = updateSelectedImages;
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
@@ -76,12 +132,8 @@
       });
     }
 
-    function toggleSelection(id, isSelected) {
-      if (isSelected) {
-        selectedImages.push(id);
-      } else {
-        selectedImages = selectedImages.filter((imageId) => imageId !== id);
-      }
+    function updateSelectedImages() {
+      selectedImages = [...document.querySelectorAll('#imageGallery input[type="checkbox"]:checked')].map(cb => cb.value);
       toggleBulkActions();
     }
 
@@ -89,9 +141,9 @@
       document.getElementById('deleteSelected').disabled = selectedImages.length === 0;
       document.getElementById('changeLabel').disabled = selectedImages.length === 0;
     }
-    console.log("selected images are :", selectedImages)
+
     document.getElementById('deleteSelected').addEventListener('click', async () => {
-      await fetch('http://localhost:3000/delete-multiple', {
+      await fetch('http://localhost:3000/remove-multiple', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedImages }),
@@ -110,7 +162,7 @@
       loadImages();
     });
 
-    window.onload = loadImages;
+    window.onload = loadLabels;
   </script>
 </body>
 </html>
