@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Nest Dashboard</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:image" content="" />
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg" />
+        <!-- Template CSS -->
+        <script src="assets/js/vendors/color-modes.js"></script>
+        <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const token = localStorage.getItem('token');
+        
+                if (!token) {
+                    alert('Access denied. Please log in.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                    return;
+                }
+        
+                // Decode the JWT to verify the user's role
+                const decodedToken = decodeJWT(token);
+        
+                if (!decodedToken || decodedToken.role !== 'admin') {
+                    alert('Unauthorized access. Admins only.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                }
+            });
+        
+            // Function to decode the JWT and extract the payload
+            function decodeJWT(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                    return payload;
+                } catch (error) {
+                    console.error('Error decoding JWT token:', error);
+                    return null;
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="screen-overlay"></div>
+        <aside class="navbar-aside" id="offcanvas_aside">
+            <div class="aside-top">
+                <a href="index.html" class="brand-wrap">
+                    <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+                </a>
+                <div>
+                    <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+                </div>
+            </div>
+            <nav>
+                <ul class="menu-aside">
+                    <li class="menu-item active">
+                        <a class="menu-link" href="index.html">
+                            <i class="icon material-icons md-home"></i>
+                            <span class="text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-products-list.html">
+                            <i class="icon material-icons md-shopping_bag"></i>
+                            <span class="text">Products</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-products-list.html">Product List</a>
+                            <a href="page-products-grid.html">Product grid</a>
+                            <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
+                            <a href="page-categories.html">Categories</a>
+                        </div>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-orders-1.html">
+                            <i class="icon material-icons md-shopping_cart"></i>
+                            <span class="text">Orders</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-orders-2.html">Order list 2</a>
+                            <a href="page-orders-detail.html">Order detail</a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="customers.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;">
+                                <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/>
+                            </svg>
+                            <span class="text">Customers</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-sellers-cards.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM320-500q25 0 42.5-17.5T380-560q0-25-17.5-42.5T320-620q-25 0-42.5 17.5T260-560q0 25 17.5 42.5T320-500Zm360 0q25 0 42.5-17.5T740-560q0-25-17.5-42.5T680-620q-25 0-42.5 17.5T620-560q0 25 17.5 42.5T680-500Zm0-60Zm-360 0Z"/></svg>Quotations</a>
+                        <div class="submenu">
+                            <a href="page-sellers-cards.html">Proposed Quotations</a>
+                            <a href="given-quotation.html">Given Quotations</a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="page-form-product-1.html">
+                            <i class="icon material-icons md-add_box"></i>
+                            <span class="text">Add Products</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-transactions-1.html">
+                            <i class="icon material-icons md-monetization_on"></i>
+                            <span class="text">Transactions</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-transactions-2.html">Transaction 2</a>
+                        </div>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="#">
+                            <i class="icon material-icons md-person"></i>
+                            <span class="text">Account</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-account-login.html">User login</a>
+                            <a href="page-account-register.html">User registration</a>
+                            <a href="page-error-404.html">Error 404</a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="page-notification-list.html">
+                            <i class="icon material-icons md-comment"></i>
+                            <span class="text">Notifications</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="page-brands.html"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="M841-518v318q0 33-23.5 56.5T761-120H201q-33 0-56.5-23.5T121-200v-318q-23-21-35.5-54t-.5-72l42-136q8-26 28.5-43t47.5-17h556q27 0 47 16.5t29 43.5l42 136q12 39-.5 71T841-518Zm-272-42q27 0 41-18.5t11-41.5l-22-140h-78v148q0 21 14 36.5t34 15.5Zm-180 0q23 0 37.5-15.5T441-612v-148h-78l-22 140q-4 24 10.5 42t37.5 18Zm-178 0q18 0 31.5-13t16.5-33l22-154h-78l-40 134q-6 20 6.5 43t41.5 23Zm540 0q29 0 42-23t6-43l-42-134h-76l22 154q3 20 16.5 33t31.5 13ZM201-200h560v-282q-5 2-6.5 2H751q-27 0-47.5-9T663-518q-18 18-41 28t-49 10q-27 0-50.5-10T481-518q-17 18-39.5 28T393-480q-29 0-52.5-10T299-518q-21 21-41.5 29.5T211-480h-4.5q-2.5 0-5.5-2v282Zm560 0H201h560Z"/></svg></i> <span class="text">Frontend Site</span> </a>
+                    </li>
+                    <!-- <li class="menu-item">
+                        <a class="menu-link" disabled href="#">
+                            <i class="icon material-icons md-pie_chart"></i>
+                            <span class="text">Statistics</span>
+                        </a>
+                    </li> -->
+                </ul>
+                <hr />
+                <ul class="menu-aside">
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="#">
+                            <i class="icon material-icons md-settings"></i>
+                            <span class="text">Settings</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-settings-1.html">Setting sample 1</a>
+                        </div>
+                    </li>
+                    <!-- <li class="menu-item">
+                        <a class="menu-link" href="page-blank.html">
+                            <i class="icon material-icons md-local_offer"></i>
+                            <span class="text"> Starter page </span>
+                        </a>
+                    </li> -->
+                </ul>
+                <br />
+                <br />
+            </nav>
+        </aside>
+        <main class="main-wrap">
+            <header class="main-header navbar">
+                <div class="col-search">
+                    <form class="searchform">
+                        <div class="input-group">
+                            <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
+                            <button class="btn btn-light bg" type="button"><i class="material-icons md-search"></i></button>
+                        </div>
+                        <datalist id="search_terms">
+                            <option value="Products"></option>
+                            <option value="New orders"></option>
+                            <option value="Apple iphone"></option>
+                            <option value="Ahmed Hassan"></option>
+                        </datalist>
+                    </form>
+                </div>
+                <div class="col-nav">
+                    <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon" href="#">
+                                <i class="material-icons md-notifications animation-shake"></i>
+                                <span class="badge rounded-pill">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                                <a class="dropdown-item text-brand" href="#"><img src="assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                            </div>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="assets/imgs/people/avatar-2.png" alt="User" /></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                                <div class="dropdown-divider"></div>
+                                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </header>
+            <section class="content-main">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="content-header">
+                            <h2 class="content-title">Add New Order</h2>
+                            <button id="add-product-button" class="btn btn-md rounded font-sm hover-up">Save</button>
+                        </div>
+                    </div>
+                    <form id="orderForm" style="max-width: 600px; margin: 20px auto; padding: 20px; background-color: #1a1a2e; border-radius: 10px; color: #f5f5f5; font-family: Arial, sans-serif; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+                        <h2 style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #f5f5f5;">Order Form</h2>
+                      
+                        <!-- Order ID Field -->
+                        <label for="orderId" style="display: block; margin-bottom: 5px; font-size: 14px;">Order ID:</label>
+                        <input readonly type="text" id="orderId" name="orderId" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; background-color: rgb(153, 153, 153);" required>
+                        
+                        <!-- Customer Name Field -->
+                        <label for="customerName" style="font-weight: bold;">Client Name:<span style="color: red;">*</span></label>
+                        <select onchange="fillDetailsOfClient(this)" id="customerName" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                          <option value="" selected>Select Client</option>
+                          <!-- Add more client options as needed -->
+                        </select>
+
+                        <!-- Customer ID Field -->
+                        <label for="customerId" style="display: block; margin-bottom: 5px; font-size: 14px;">Customer ID:</label>
+                        <input readonly type="text" id="customerId" name="customerId" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; background-color: rgb(153, 153, 153);" required>
+
+                        <!-- Customer Email Field -->
+                        <label for="customerEmail" style="display: block; margin-bottom: 5px; font-size: 14px;">Customer Email:</label>
+                        <input readonly type="text" id="customerEmail" name="customerEmail" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; background-color: rgb(153, 153, 153);" required>
+                      
+                        <!-- Product Rows Section -->
+                        <div id="productRows" style="margin-bottom: 20px;">
+                          <!-- Dynamically created rows will be here -->
+                        </div>
+                      
+                        <!-- Button to Add New Row -->
+                        <button type="button" id="addRowButton" style="width: 100%; padding: 12px; background-color: #007bff; border: none; border-radius: 5px; color: #fff; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
+                          Add Product Row
+                        </button>
+                      
+                        <!-- Total Price Display -->
+                        <div style="text-align: right; font-size: 16px; font-weight: bold; margin-bottom: 15px;">
+                          Total Price: <span style="color: #28a745;">$<span id="totalPrice">0</span></span>
+                        </div>
+                      
+                        <!-- Submit Button -->
+                        <button type="submit" style="width: 100%; padding: 12px; background-color: #28a745; border: none; border-radius: 5px; color: #fff; font-size: 16px; cursor: pointer; transition: background-color 0.3s;">
+                          Submit
+                        </button>
+                      
+                        <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #aaa;">
+                          All fields are required
+                        </p>
+                      </form>
+                      
+                      <template id="productRowTemplate">
+                        <div class="product-row" style="margin-bottom: 10px;">
+                          <select class="product-select" style="width: 200px; padding: 5px; margin-right: 10px; border-radius: 5px;">
+                            <option value="" disabled selected>Select Product</option>
+                            <!-- Products will be populated here -->
+                          </select>
+                          <input type="text" class="product-details" placeholder="Details" style="width: 200px; padding: 5px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                          <input type="number" class="product-price" placeholder="Price" style="width: 100px; padding: 5px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                          <button type="button" class="delete-row" style="padding: 5px 10px; background-color: #dc3545; color: #fff; border: none; border-radius: 5px; cursor: pointer;">Delete</button>
+                        </div>
+                      </template> 
+                </div>
+            </section>
+            <footer class="main-footer font-xs">
+                <div class="row pb-30 pt-15">
+                    <div class="col-sm-6">
+                        <script>
+                            document.write(new Date().getFullYear());
+                        </script>
+                        &copy; Nest - HTML Ecommerce Template .
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end">All rights reserved</div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+        <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+        <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/vendors/select2.min.js"></script>
+        <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+        <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+        <!-- Main Script -->
+        <script src="assets/js/main.js?v=6.0" type="text/javascript"></script>
+
+
+
+
+<!-- script for displaying client details -->
+        <script>
+            let customerName;
+                fetch(`http://localhost:8000/clients/get-client`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'appliaction/json'
+                    }
+                }).then(response=>response.json())
+                .then(data=>{
+                    console.log(data.clients)
+                    const clientsDropdown = document.getElementById('customerName')
+                    
+                    data.clients.forEach(client=>{
+                        const option = document.createElement('option')
+                        option.value = client._id
+                        option.textContent = client.FirstName + " " + client.LastName
+
+                        clientsDropdown.appendChild(option)
+                    })
+                })
+
+
+                function fillDetailsOfClient (e){
+                    fetch(`http://localhost:8000/clients/by-id-client/${e.value}`,{
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response=>response.json())
+                    .then(data=>{
+                        console.log('data is', data)
+                        const customerEmail = document.getElementById('customerEmail')
+                        customerEmail.value = data.client.Email
+
+                        const customerId = document.getElementById('customerId')
+                        customerId.value = data.client.CustomerId
+
+                        customerName = data.client.FirstName + " " + data.client.LastName
+                    })
+                }
+        </script>
+
+
+<!-- script for filling the details -->
+        <script>
+                                const getRandomLetter = () => {
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Generate random number (2 digits)
+const getRandomNumber = () => {
+    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
+};
+
+// Generate random final letter (1 letter)
+const getFinalLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Combine all parts
+const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
+const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
+const finalLetter = getFinalLetter();  // One random letter for the end
+
+// Store the final product code
+const orderCode = '0' + lettersPart + numberPart + finalLetter;
+
+const orderId = document.getElementById('orderId')
+orderId.value = orderCode
+
+
+
+        </script>
+
+
+
+
+
+
+
+
+
+
+<!-- dynamically set prices of each products -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const productRows = document.getElementById('productRows');
+        const addRowButton = document.getElementById('addRowButton');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const orderForm = document.getElementById('orderForm');
+        let finalPrice;
+    
+        let productRowsData = []; // Track data for each row
+        let products = []; // Store fetched products
+    
+        // Fetch products from the backend
+        fetch('http://localhost:8000/products/getProduct/getAll', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                products = data.products || []; // Store fetched products
+                createProductRow(); // Create the first row once products are available
+            })
+            .catch((error) => {
+                console.error('Error fetching products:', error);
+            });
+    
+        // Update total price
+        function updateTotalPrice() {
+            const totalPrice = productRowsData.reduce((sum, row) => sum + (parseFloat(row.productPrice) || 0), 0);
+            totalPriceEl.textContent = totalPrice.toFixed(2);
+            finalPrice = totalPrice
+        }
+    
+        // Create a new product row
+        function createProductRow() {
+            const row = document.createElement('div');
+            row.classList.add('product-row');
+            row.style.marginBottom = '10px';
+    
+            // Unique ID for this row
+            const rowId = `row-${Date.now()}`;
+            const rowData = { id: rowId, productName: '', productPrice: 0, productProperties: '' };
+            productRowsData.push(rowData);
+    
+            // Product select dropdown
+            const select = document.createElement('select');
+            select.classList.add('product-select');
+            select.style.width = '200px';
+            select.style.padding = '5px';
+            select.style.marginRight = '10px';
+            select.style.borderRadius = '5px';
+    
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = 'Select Product';
+            select.appendChild(defaultOption);
+    
+            products.forEach((product) => {
+                const option = document.createElement('option');
+                option.value = product.ProductCode;
+                option.textContent = product.ProductTitle;
+                select.appendChild(option);
+            });
+    
+            const productDetails = document.createElement('input');
+            productDetails.type = 'text';
+            productDetails.classList.add('product-details');
+            productDetails.placeholder = 'Details';
+            productDetails.style.width = '200px';
+            productDetails.style.marginRight = '10px';
+    
+            const productPrice = document.createElement('input');
+            productPrice.type = 'number';
+            productPrice.classList.add('product-price');
+            productPrice.placeholder = 'Price';
+            productPrice.style.width = '100px';
+            productPrice.style.marginRight = '10px';
+    
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.classList.add('delete-row');
+            deleteButton.textContent = 'Delete';
+            deleteButton.style.backgroundColor = '#dc3545';
+            deleteButton.style.color = '#fff';
+            deleteButton.style.borderRadius = '5px';
+    
+            row.appendChild(select);
+            row.appendChild(productDetails);
+            row.appendChild(productPrice);
+            row.appendChild(deleteButton);
+            productRows.appendChild(row);
+    
+            // Event listeners
+            select.addEventListener('change', () => {
+                const productCode = select.value;
+                rowData.productName = products.find((p) => p.ProductCode === productCode)?.ProductTitle || '';
+            });
+    
+            productPrice.addEventListener('input', () => {
+                rowData.productPrice = parseFloat(productPrice.value) || 0;
+                updateTotalPrice();
+            });
+    
+            productDetails.addEventListener('input', () => {
+                rowData.productProperties = productDetails.value || '';
+            });
+    
+            deleteButton.addEventListener('click', () => {
+                const rowIndex = productRowsData.findIndex((data) => data.id === rowId);
+                if (rowIndex !== -1) {
+                    productRowsData.splice(rowIndex, 1);
+                }
+                row.remove();
+                updateTotalPrice();
+            });
+        }
+    
+        // Add row button click
+        addRowButton.addEventListener('click', createProductRow);
+    
+        // Form submission
+        orderForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+    
+            const orderId = document.getElementById('orderId').value;
+            const customerId = document.getElementById('customerId').value;
+    
+            const formData = {
+                orderId,
+                customerId,
+                customerName,
+                products: productRowsData.map((row) => ({
+                    productName: row.productName,
+                    productPrice: row.productPrice,
+                    productProperties: row.productProperties,
+                })),
+                totalPrice: parseFloat(totalPriceEl.textContent),
+            };
+    
+            console.log(formData.products);
+            fetch('http://localhost:8000/orders/add-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to create order');
+                    }
+                    fetch('http://localhost:8000/clients/dueAmount-add',{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({additionalAmount: finalPrice, CustomerId:formData.customerId})
+                    })
+                    return response.json();
+                })
+                .then((data) => {
+                    alert('Order created successfully!');
+                })
+                .catch((error) => {
+                    alert('Error creating order.');
+                });
+        });
+    });
+    </script>
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Script to ensure that there are >=4 images -->
+<!-- <script>
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+    const files = event.target.files;
+    const errorMessage = document.getElementById('error-message');
+
+    if (files.length > 4) {
+        // Show error message
+        errorMessage.style.display = 'block';
+
+        // Clear the input
+        event.target.value = '';
+    } else {
+        // Hide error message if valid
+        errorMessage.style.display = 'none';
+    }
+});
+</script> -->
+
+<!-- Script to display categories from backend -->
+        <!-- <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('http://localhost:8000/categories/getcategories')
+                .then(response => response.json())
+                .then(data => {
+                    const categories = data.categories;
+                    renderCategories(categories);
+                });
+            });
+        
+            const renderCategories = (categories) => {
+                const selectForm = document.getElementById('add-product-category');
+                selectForm.innerHTML = '';
+        
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.textContent = category.Name;
+                    option.value = category.Name;
+                    selectForm.appendChild(option);
+                });
+            }
+        </script> -->
+        
+
+        <!-- <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sendFile = () => {
+                    const imageInput = document.getElementById('imageInput');
+                    if (!imageInput) {
+                        console.error("File input element with ID 'imageInput' not found.");
+                        return;
+                    }
+        
+                    const files = imageInput.files;
+                    const productTitle = document.getElementById('add-product-title').value; // Get the product title
+        
+                    if (!productTitle) {
+                        alert('Product title is required.');
+                        return;
+                    }
+        
+                    if (files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('productTitle', productTitle); // Include product title in FormData
+        
+                        for (const file of files) {
+                            formData.append('images', file); // Add each file to FormData
+                        }
+        
+                        fetch('http://localhost:8000/upload-product', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                            .then((response) => response.text())
+                            .then((data) => {
+                                alert('Images uploaded successfully!');
+                                console.log(data);
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                    } else {
+                        alert('Please select images to upload.');
+                    }
+                };
+        
+                document.getElementById('add-product-button').addEventListener('click', () => {
+                    const getRandomLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Generate random number (2 digits)
+const getRandomNumber = () => {
+    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
+};
+
+// Generate random final letter (1 letter)
+const getFinalLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Combine all parts
+const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
+const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
+const finalLetter = getFinalLetter();  // One random letter for the end
+
+// Store the final product code
+const ProductCode = 'P' + lettersPart + numberPart + finalLetter;
+console.log(ProductCode)
+                    const imageInput = document.getElementById('imageInput');
+                    if (!imageInput) {
+                        console.error("File input element with ID 'imageInput' not found.");
+                        return;
+                    }
+        
+                    const fileNames = imageInput.files
+                        ? Array.from(imageInput.files).map((file) => file.name)
+                        : [];
+        
+                    const productObject = {
+                        ProductDescription: document.getElementById('add-product-description').value,
+                        ProductProperties: document.getElementById('properties').value,
+                        ProductTitle: document.getElementById('add-product-title').value,
+                        Category: document.getElementById('add-product-category').value,
+                        ProductCode: ProductCode,
+                        Images: fileNames, // Use the extracted file names here
+                    };
+        
+                    console.log(productObject);
+        
+                    fetch('http://localhost:8000/products/addproducts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(productObject),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                sendFile();
+                                alert('Product added successfully');
+                            } else {
+                                alert('Some problem occurred while adding');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            alert("An error occurred while adding the product");
+                        });
+                });
+            });
+        </script> -->
+        <script>
+            document.getElementById('logout').addEventListener('click', function () {
+        // Remove the token from localStorage
+        localStorage.removeItem('token');
+        
+        // Alert user about successful logout
+        alert('You have been logged out successfully!');
+        
+        // Redirect to login page
+        window.location.href = 'page-account-login.html'; // Redirect to login page after logout
+        });
+        </script>
+    </body>
+</html>

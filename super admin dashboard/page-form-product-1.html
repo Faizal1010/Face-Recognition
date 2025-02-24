@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Nest Dashboard</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:image" content="" />
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg" />
+        <!-- Template CSS -->
+        <script src="assets/js/vendors/color-modes.js"></script>
+        <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const token = localStorage.getItem('token');
+        
+                if (!token) {
+                    alert('Access denied. Please log in.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                    return;
+                }
+        
+                // Decode the JWT to verify the user's role
+                const decodedToken = decodeJWT(token);
+        
+                if (!decodedToken || decodedToken.role !== 'admin') {
+                    alert('Unauthorized access. Admins only.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                }
+            });
+        
+            // Function to decode the JWT and extract the payload
+            function decodeJWT(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                    return payload;
+                } catch (error) {
+                    console.error('Error decoding JWT token:', error);
+                    return null;
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="screen-overlay"></div>
+        <aside class="navbar-aside" id="offcanvas_aside">
+            <div class="aside-top">
+                <a href="index.html" class="brand-wrap">
+                    <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+                </a>
+                <div>
+                    <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+                </div>
+            </div>
+            <nav>
+                <ul class="menu-aside">
+                    <li class="menu-item">
+                        <a class="menu-link" href="index.html">
+                            <i class="icon material-icons md-home"></i>
+                            <span class="text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-products-list.html">
+                            <i class="icon material-icons md-shopping_bag"></i>
+                            <span class="text">Products</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-products-list.html">Product List</a>
+                            <a href="page-products-grid.html">Product grid</a>
+                            <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
+                            <a href="page-categories.html">Categories</a>
+                        </div>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-orders-1.html">
+                            <i class="icon material-icons md-shopping_cart"></i>
+                            <span class="text">Orders</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-orders-2.html">Order list 2</a>
+                            <a href="page-orders-detail.html">Order detail</a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="customers.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;">
+                                <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/>
+                            </svg>
+                            <span class="text">Customers</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-sellers-cards.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM320-500q25 0 42.5-17.5T380-560q0-25-17.5-42.5T320-620q-25 0-42.5 17.5T260-560q0 25 17.5 42.5T320-500Zm360 0q25 0 42.5-17.5T740-560q0-25-17.5-42.5T680-620q-25 0-42.5 17.5T620-560q0 25 17.5 42.5T680-500Zm0-60Zm-360 0Z"/></svg>Quotations</a>
+                        <div class="submenu">
+                            <a href="page-sellers-cards.html">Proposed Quotations</a>
+                            <a href="given-quotation.html">Given Quotations</a>
+                        </div>
+                    </li>
+                    <li class="menu-item active">
+                        <a class="menu-link" href="page-form-product-1.html">
+                            <i class="icon material-icons md-add_box"></i>
+                            <span class="text">Add Products</span>
+                        </a>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="page-transactions-1.html">
+                            <i class="icon material-icons md-monetization_on"></i>
+                            <span class="text">Transactions</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-transactions-2.html">Transaction 2</a>
+                        </div>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="#">
+                            <i class="icon material-icons md-person"></i>
+                            <span class="text">Account</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-account-login.html">User login</a>
+                            <a href="page-account-register.html">User registration</a>
+                            <a href="page-error-404.html">Error 404</a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="page-notification-list.html">
+                            <i class="icon material-icons md-comment"></i>
+                            <span class="text">Notifications</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="page-brands.html"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="M841-518v318q0 33-23.5 56.5T761-120H201q-33 0-56.5-23.5T121-200v-318q-23-21-35.5-54t-.5-72l42-136q8-26 28.5-43t47.5-17h556q27 0 47 16.5t29 43.5l42 136q12 39-.5 71T841-518Zm-272-42q27 0 41-18.5t11-41.5l-22-140h-78v148q0 21 14 36.5t34 15.5Zm-180 0q23 0 37.5-15.5T441-612v-148h-78l-22 140q-4 24 10.5 42t37.5 18Zm-178 0q18 0 31.5-13t16.5-33l22-154h-78l-40 134q-6 20 6.5 43t41.5 23Zm540 0q29 0 42-23t6-43l-42-134h-76l22 154q3 20 16.5 33t31.5 13ZM201-200h560v-282q-5 2-6.5 2H751q-27 0-47.5-9T663-518q-18 18-41 28t-49 10q-27 0-50.5-10T481-518q-17 18-39.5 28T393-480q-29 0-52.5-10T299-518q-21 21-41.5 29.5T211-480h-4.5q-2.5 0-5.5-2v282Zm560 0H201h560Z"/></svg></i> <span class="text">Frontend Site</span> </a>
+                    </li>
+                    <!-- <li class="menu-item">
+                        <a class="menu-link" disabled href="#">
+                            <i class="icon material-icons md-pie_chart"></i>
+                            <span class="text">Statistics</span>
+                        </a>
+                    </li> -->
+                </ul>
+                <hr />
+                <ul class="menu-aside">
+                    <li class="menu-item has-submenu">
+                        <a class="menu-link" href="#">
+                            <i class="icon material-icons md-settings"></i>
+                            <span class="text">Settings</span>
+                        </a>
+                        <div class="submenu">
+                            <a href="page-settings-1.html">Setting sample 1</a>
+                        </div>
+                    </li>
+                    <!-- <li class="menu-item">
+                        <a class="menu-link" href="page-blank.html">
+                            <i class="icon material-icons md-local_offer"></i>
+                            <span class="text"> Starter page </span>
+                        </a>
+                    </li> -->
+                </ul>
+                <br />
+                <br />
+            </nav>
+        </aside>
+        <main class="main-wrap">
+            <header class="main-header navbar">
+                <div class="col-search">
+                    <form class="searchform">
+                        <div class="input-group">
+                            <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
+                            <button class="btn btn-light bg" type="button"><i class="material-icons md-search"></i></button>
+                        </div>
+                        <datalist id="search_terms">
+                            <option value="Products"></option>
+                            <option value="New orders"></option>
+                            <option value="Apple iphone"></option>
+                            <option value="Ahmed Hassan"></option>
+                        </datalist>
+                    </form>
+                </div>
+                <div class="col-nav">
+                    <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon" href="#">
+                                <i class="material-icons md-notifications animation-shake"></i>
+                                <span class="badge rounded-pill">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                                <a class="dropdown-item text-brand" href="#"><img src="assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                            </div>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="assets/imgs/people/avatar-2.png" alt="User" /></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                                <div class="dropdown-divider"></div>
+                                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </header>
+            <section class="content-main">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="content-header">
+                            <h2 class="content-title">Add New Product</h2>
+                            <!-- <div>
+                                <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
+                            </div> -->
+                            <button id="add-product-button" class="btn btn-md rounded font-sm hover-up">Publish</button>
+                        </div>
+                    </div>
+                    <form style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 800px; margin: auto; font-family: Arial, sans-serif;">
+                        <!-- Name -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="name" style="margin-bottom: 5px;">Name: <span style="color: red;">*</span></label>
+                          <input id="add-product-title" type="text" placeholder="Name" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        </div>
+                      
+                        <!-- Product Code -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="product-code" style="margin-bottom: 5px;">Product Code: <span style="color: red;">*</span>
+                          </label>
+                          <div style="display: flex; align-items: center; gap: 5px;">
+                            <input readonly id="add-product-code" type="text" placeholder="Product Code will be automatically generated" style="flex: 1; padding: 10px; border: 1px solid #5a5757; border-radius: 5px; background-color: #5a5757;">
+                            <!-- <button type="button" style="padding: 8px 12px; border: none; background: #f0f0f0; border-radius: 5px; cursor: pointer;">🔄</button> -->
+                          </div>
+                        </div>
+                      
+                        <!-- Category -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="category" style="margin-bottom: 5px;">Category: <span style="color: red;">*</span></label>
+                          <select id="add-product-category" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                            <!-- <option value="" selected>Category</option> -->
+                          </select>
+                        </div>
+                      
+                        <!-- Description -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="description" style="margin-bottom: 5px;">Description:</label>
+                          <textarea id="add-product-description" rows="3" placeholder="Description" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+                        </div>
+
+                        <!-- Properties -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="properties" style="margin-bottom: 5px;">Properties:</label>
+                          <textarea id="properties" rows="3" placeholder="Description" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+                        </div>
+                      
+                        <!-- Image -->
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label style="margin-bottom: 5px;">Image:</label>
+                          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <input type="file" id="imageInput" accept="image/*" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; " multiple>
+                            <p id="error-message" style="color: red; display: none;">You can only select up to 4 images!</p>
+                            <!-- <span style="font-size: 12px; color: gray;">Allowed file types: png, jpg, jpeg.</span> -->
+                          </div>
+                        </div>
+                      
+                        <!-- Buttons -->
+                        <div style="flex: 1 1 100%; display: flex; justify-content: flex-end; gap: 10px;">
+                          <!-- <button type="button" style="padding: 10px 20px; background: gray; color: white; border: none; border-radius: 5px;">Cancel</button> -->
+                        </div>
+                      </form>
+                      
+                    <!-- <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Basic</h4>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Product title  </label>
+                                        <input id="add-product-title" type="text" placeholder="Type here" class="form-control" id="product_name" />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Full description</label>
+                                        <textarea id="add-product-description" placeholder="Type here" class="form-control" rows="4"></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <div class="mb-4">
+                                                <label class="form-label">Regular price</label>
+                                                <div class="row gx-2">
+                                                    <input id="add-product-regular-price" placeholder="$" type="text" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="mb-4">
+                                                <label class="form-label">Promotional price</label>
+                                                <input id="add-product-promotional-price" placeholder="$" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label">Currency</label>
+                                            <select id="add-product-currency" class="form-select">
+                                                <option>INR</option>
+                                                <option>USD</option>
+                                                <option>EUR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Tax rate</label>
+                                        <input id="add-product-tax-rate" type="text" placeholder="%" class="form-control" id="product_name" />
+                                    </div>
+                                    <label class="form-check mb-4">
+                                        <input id="chk" class="form-check-input" type="checkbox" value="" />
+                                        <span class="form-check-label"> Popular </span>
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Shipping</h4>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="mb-4">
+                                                <label for="product_name" class="form-label">Width</label>
+                                                <input id="add-product-width" type="text" placeholder="inch" class="form-control" id="product_name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="mb-4">
+                                                <label for="product_name" class="form-label">Height</label>
+                                                <input id="add-product-height" type="text" placeholder="inch" class="form-control" id="product_name" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Weight</label>
+                                        <input id="add-product-weight" type="text" placeholder="gam" class="form-control" id="product_name" />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Shipping fees</label>
+                                        <input id="add-product-shipping-fees" type="text" placeholder="$" class="form-control" id="product_name" />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Media</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-upload">
+                                    <img src="assets/imgs/theme/upload.svg" alt="" />
+                                    <input id="add-product-media" class="form-control" accept="image/*" type="file" required multiple/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Organization</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row gx-2">
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Category</label>
+                                        <select id="add-product-category" class="form-select">
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Sub-category</label>
+                                        <select class="form-select">
+                                            <option>Nissan</option>
+                                            <option>Honda</option>
+                                            <option>Mercedes</option>
+                                            <option>Chevrolet</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Tags</label>
+                                        <input id="add-product-tags" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </section>
+            <footer class="main-footer font-xs">
+                <div class="row pb-30 pt-15">
+                    <div class="col-sm-6">
+                        <script>
+                            document.write(new Date().getFullYear());
+                        </script>
+                        &copy; Nest - HTML Ecommerce Template .
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end">All rights reserved</div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+        <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+        <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/vendors/select2.min.js"></script>
+        <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+        <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+        <!-- Main Script -->
+        <script src="assets/js/main.js?v=6.0" type="text/javascript"></script>
+
+
+<!-- Script to ensure that there are >=4 images -->
+<script>
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+    const files = event.target.files;
+    const errorMessage = document.getElementById('error-message');
+
+    if (files.length > 4) {
+        // Show error message
+        errorMessage.style.display = 'block';
+
+        // Clear the input
+        event.target.value = '';
+    } else {
+        // Hide error message if valid
+        errorMessage.style.display = 'none';
+    }
+});
+</script>
+
+<!-- Script to display categories from backend -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('http://localhost:8000/categories/getcategories')
+                .then(response => response.json())
+                .then(data => {
+                    const categories = data.categories;
+                    renderCategories(categories);
+                });
+            });
+        
+            const renderCategories = (categories) => {
+                const selectForm = document.getElementById('add-product-category');
+                selectForm.innerHTML = '';
+        
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.textContent = category.Name;
+                    option.value = category.Name;
+                    selectForm.appendChild(option);
+                });
+            }
+        </script>
+        
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sendFile = () => {
+                    const imageInput = document.getElementById('imageInput');
+                    if (!imageInput) {
+                        console.error("File input element with ID 'imageInput' not found.");
+                        return;
+                    }
+        
+                    const files = imageInput.files;
+                    const productTitle = document.getElementById('add-product-title').value; // Get the product title
+        
+                    if (!productTitle) {
+                        alert('Product title is required.');
+                        return;
+                    }
+        
+                    if (files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('productTitle', productTitle); // Include product title in FormData
+        
+                        for (const file of files) {
+                            formData.append('images', file); // Add each file to FormData
+                        }
+        
+                        fetch('http://localhost:8000/upload-product', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                            .then((response) => response.text())
+                            .then((data) => {
+                                alert('Images uploaded successfully!');
+                                console.log(data);
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                    } else {
+                        alert('Please select images to upload.');
+                    }
+                };
+        
+                document.getElementById('add-product-button').addEventListener('click', () => {
+                    const getRandomLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Generate random number (2 digits)
+const getRandomNumber = () => {
+    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
+};
+
+// Generate random final letter (1 letter)
+const getFinalLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+
+// Combine all parts
+const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
+const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
+const finalLetter = getFinalLetter();  // One random letter for the end
+
+// Store the final product code
+const ProductCode = 'P' + lettersPart + numberPart + finalLetter;
+console.log(ProductCode)
+                    const imageInput = document.getElementById('imageInput');
+                    if (!imageInput) {
+                        console.error("File input element with ID 'imageInput' not found.");
+                        return;
+                    }
+        
+                    const fileNames = imageInput.files
+                        ? Array.from(imageInput.files).map((file) => file.name)
+                        : [];
+        
+                    const productObject = {
+                        ProductDescription: document.getElementById('add-product-description').value,
+                        ProductProperties: document.getElementById('properties').value,
+                        ProductTitle: document.getElementById('add-product-title').value,
+                        Category: document.getElementById('add-product-category').value,
+                        ProductCode: ProductCode,
+                        Images: fileNames, // Use the extracted file names here
+                    };
+        
+                    console.log(productObject);
+        
+                    fetch('http://localhost:8000/products/addproducts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(productObject),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                sendFile();
+                                alert('Product added successfully');
+                            } else {
+                                alert('Some problem occurred while adding');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            alert("An error occurred while adding the product");
+                        });
+                });
+            });
+        </script>
+        
+
+
+
+
+
+
+
+
+
+        <script>
+            document.getElementById('logout').addEventListener('click', function () {
+        // Remove the token from localStorage
+        localStorage.removeItem('token');
+        
+        // Alert user about successful logout
+        alert('You have been logged out successfully!');
+        
+        // Redirect to login page
+        window.location.href = 'page-account-login.html'; // Redirect to login page after logout
+        });
+        </script>
+    </body>
+</html>

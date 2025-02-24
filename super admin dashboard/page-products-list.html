@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nest Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="" />
+    <meta property="og:type" content="" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="assets/imgs/theme/favicon.svg"
+    />
+    <!-- Template CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/dayjs.min.js"></script>
+    <script src="assets/js/vendors/color-modes.js"></script>
+    <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const token = localStorage.getItem('token');
+  
+          if (!token) {
+              alert('Access denied. Please log in.');
+              window.location.href = 'page-account-login.html'; // Redirect to login page
+              return;
+          }
+  
+          // Decode the JWT to verify the user's role
+          const decodedToken = decodeJWT(token);
+  
+          if (!decodedToken || decodedToken.role !== 'admin') {
+              alert('Unauthorized access. Admins only.');
+              window.location.href = 'page-account-login.html'; // Redirect to login page
+          }
+      });
+  
+      // Function to decode the JWT and extract the payload
+      function decodeJWT(token) {
+          try {
+              const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+              return payload;
+          } catch (error) {
+              console.error('Error decoding JWT token:', error);
+              return null;
+          }
+      }
+  </script>
+  </head>
+
+  <body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+      <div class="aside-top">
+          <a href="index.html" class="brand-wrap">
+              <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+          </a>
+          <div>
+              <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+          </div>
+      </div>
+      <nav>
+          <ul class="menu-aside">
+              <li class="menu-item">
+                  <a class="menu-link" href="index.html">
+                      <i class="icon material-icons md-home"></i>
+                      <span class="text">Dashboard</span>
+                  </a>
+              </li>
+              <li class="menu-item active has-submenu">
+                  <a class="menu-link" href="page-products-list.html">
+                      <i class="icon material-icons md-shopping_bag"></i>
+                      <span class="text">Products</span>
+                  </a>
+                  <div class="submenu">
+                      <a class="active" href="page-products-list.html">Product List</a>
+                      <a href="page-products-grid.html">Product grid</a>
+                      <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
+                      <a href="page-categories.html">Categories</a>
+                  </div>
+              </li>
+              <li class="menu-item has-submenu">
+                  <a class="menu-link" href="page-orders-1.html">
+                      <i class="icon material-icons md-shopping_cart"></i>
+                      <span class="text">Orders</span>
+                  </a>
+                  <div class="submenu">
+                      <a href="page-orders-2.html">Order list 2</a>
+                      <a href="page-orders-detail.html">Order detail</a>
+                  </div>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="customers.html">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;">
+                          <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/>
+                      </svg>
+                      <span class="text">Customers</span>
+                  </a>
+              </li>
+              <li class="menu-item has-submenu">
+                  <a class="menu-link" href="page-sellers-cards.html">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM320-500q25 0 42.5-17.5T380-560q0-25-17.5-42.5T320-620q-25 0-42.5 17.5T260-560q0 25 17.5 42.5T320-500Zm360 0q25 0 42.5-17.5T740-560q0-25-17.5-42.5T680-620q-25 0-42.5 17.5T620-560q0 25 17.5 42.5T680-500Zm0-60Zm-360 0Z"/></svg>Quotations</a>
+                  <div class="submenu">
+                      <a href="page-sellers-cards.html">Proposed Quotations</a>
+                      <a href="given-quotation.html">Given Quotations</a>
+                  </div>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-form-product-1.html">
+                      <i class="icon material-icons md-add_box"></i>
+                      <span class="text">Add Products</span>
+                  </a>
+              </li>
+              <li class="menu-item has-submenu">
+                  <a class="menu-link" href="page-transactions-1.html">
+                      <i class="icon material-icons md-monetization_on"></i>
+                      <span class="text">Transactions</span>
+                  </a>
+                  <div class="submenu">
+                      <a href="page-transactions-2.html">Transaction 2</a>
+                  </div>
+              </li>
+              <li class="menu-item has-submenu">
+                  <a class="menu-link" href="#">
+                      <i class="icon material-icons md-person"></i>
+                      <span class="text">Account</span>
+                  </a>
+                  <div class="submenu">
+                      <a href="page-account-login.html">User login</a>
+                      <a href="page-account-register.html">User registration</a>
+                      <a href="page-error-404.html">Error 404</a>
+                  </div>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-notification-list.html">
+                      <i class="icon material-icons md-comment"></i>
+                      <span class="text">Notifications</span>
+                  </a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-brands.html"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="M841-518v318q0 33-23.5 56.5T761-120H201q-33 0-56.5-23.5T121-200v-318q-23-21-35.5-54t-.5-72l42-136q8-26 28.5-43t47.5-17h556q27 0 47 16.5t29 43.5l42 136q12 39-.5 71T841-518Zm-272-42q27 0 41-18.5t11-41.5l-22-140h-78v148q0 21 14 36.5t34 15.5Zm-180 0q23 0 37.5-15.5T441-612v-148h-78l-22 140q-4 24 10.5 42t37.5 18Zm-178 0q18 0 31.5-13t16.5-33l22-154h-78l-40 134q-6 20 6.5 43t41.5 23Zm540 0q29 0 42-23t6-43l-42-134h-76l22 154q3 20 16.5 33t31.5 13ZM201-200h560v-282q-5 2-6.5 2H751q-27 0-47.5-9T663-518q-18 18-41 28t-49 10q-27 0-50.5-10T481-518q-17 18-39.5 28T393-480q-29 0-52.5-10T299-518q-21 21-41.5 29.5T211-480h-4.5q-2.5 0-5.5-2v282Zm560 0H201h560Z"/></svg></i> <span class="text">Frontend Site</span> </a>
+              </li>
+              <!-- <li class="menu-item">
+                  <a class="menu-link" disabled href="#">
+                      <i class="icon material-icons md-pie_chart"></i>
+                      <span class="text">Statistics</span>
+                  </a>
+              </li> -->
+          </ul>
+          <hr />
+          <ul class="menu-aside">
+              <li class="menu-item has-submenu">
+                  <a class="menu-link" href="#">
+                      <i class="icon material-icons md-settings"></i>
+                      <span class="text">Settings</span>
+                  </a>
+                  <div class="submenu">
+                      <a href="page-settings-1.html">Setting sample 1</a>
+                  </div>
+              </li>
+              <!-- <li class="menu-item">
+                  <a class="menu-link" href="page-blank.html">
+                      <i class="icon material-icons md-local_offer"></i>
+                      <span class="text"> Starter page </span>
+                  </a>
+              </li> -->
+          </ul>
+          <br />
+          <br />
+      </nav>
+  </aside>
+    <main class="main-wrap">
+      <header class="main-header navbar">
+        <div class="col-search">
+          <form class="searchform">
+            <div class="input-group">
+              <input
+                list="search_terms"
+                type="text"
+                class="form-control"
+                placeholder="Search term"
+              />
+              <button class="btn btn-light bg" type="button">
+                <i class="material-icons md-search"></i>
+              </button>
+            </div>
+            <datalist id="search_terms">
+              <option value="Products"></option>
+              <option value="New orders"></option>
+              <option value="Apple iphone"></option>
+              <option value="Ahmed Hassan"></option>
+            </datalist>
+          </form>
+        </div>
+        <div class="col-nav">
+          <button
+            class="btn btn-icon btn-mobile me-auto"
+            data-trigger="#offcanvas_aside"
+          >
+            <i class="material-icons md-apps"></i>
+          </button>
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link btn-icon" href="#">
+                <i class="material-icons md-notifications animation-shake"></i>
+                <span class="badge rounded-pill">3</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link btn-icon darkmode" href="#">
+                <i class="material-icons md-nights_stay"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="requestfullscreen nav-link btn-icon"
+                ><i class="material-icons md-cast"></i
+              ></a>
+            </li>
+            <li class="dropdown nav-item">
+              <a
+                class="dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                id="dropdownLanguage"
+                aria-expanded="false"
+                ><i class="material-icons md-public"></i
+              ></a>
+              <div
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="dropdownLanguage"
+              >
+                <a class="dropdown-item text-brand" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-us.png"
+                    alt="English"
+                  />English</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-fr.png"
+                    alt="Français"
+                  />Français</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-jp.png"
+                    alt="Français"
+                  />日本語</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-cn.png"
+                    alt="Français"
+                  />中国人</a
+                >
+              </div>
+            </li>
+            <li class="dropdown nav-item">
+              <a
+                class="dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                id="dropdownAccount"
+                aria-expanded="false"
+              >
+                <img
+                  class="img-xs rounded-circle"
+                  src="assets/imgs/people/avatar-2.png"
+                  alt="User"
+              /></a>
+              <div
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="dropdownAccount"
+              >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-perm_identity"></i>Edit
+                  Profile</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-settings"></i>Account Settings</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-account_balance_wallet"></i
+                  >Wallet</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-receipt"></i>Billing</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-help_outline"></i>Help center</a
+                >
+                <div class="dropdown-divider"></div>
+                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+
+              </div>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <section class="content-main">
+        <div class="content-header">
+          <div>
+            <h2 class="content-title card-title">Products List</h2>
+            <p>Lorem ipsum dolor sit amet.</p>
+          </div>
+          <div>
+            <a href="page-form-product-1.html" class="btn btn-primary btn-sm rounded">Create new</a>
+          </div>
+        </div>
+        <div class="card mb-4">
+          <header class="card-header">
+            <div class="row align-items-center">
+              <div class="col col-check flex-grow-0">
+                <div class="form-check ms-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                </div>
+              </div>
+              <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                <select id="get-products-category" class="form-select">
+                </select>
+              </div>
+              <div class="col-md-4 col-6 d-flex">
+                <input id="TagInput" type="text" placeholder="Search by tag name" value="" class="form-control me-2" />
+                <button onclick="retrieveBYTag()" class="btn btn-primary btn-sm rounded">Search</button>
+              </div>
+              <div class="col-md-2 col-6">
+                <select class="form-select">
+                  <option selected>Status</option>
+                  <option>Active</option>
+                  <option>Disabled</option>
+                  <option>Show all</option>
+                </select>
+              </div>
+            </div>
+          </header>
+          
+          <!-- card-header end// -->
+          <div id="card-body" class="card-body">
+
+          </div>
+          <!-- card-body end// -->
+        </div>
+        <!-- card end// -->
+        <div class="pagination-area mt-30 mb-50">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+              <li class="page-item active">
+                <a class="page-link" href="#">01</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">02</a></li>
+              <li class="page-item"><a class="page-link" href="#">03</a></li>
+              <li class="page-item">
+                <a class="page-link dot" href="#">...</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">16</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#"
+                  ><i class="material-icons md-chevron_right"></i
+                ></a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+      <!-- content-main end// -->
+      <footer class="main-footer font-xs">
+        <div class="row pb-30 pt-15">
+          <div class="col-sm-6">
+            <script>
+              document.write(new Date().getFullYear());
+            </script>
+            &copy; Nest - HTML Ecommerce Template .
+          </div>
+          <div class="col-sm-6">
+            <div class="text-sm-end">All rights reserved</div>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+
+
+
+    <div id="popup-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+      <div style="position: relative; width: 80%; margin: 50px auto; background: #222736; padding: 20px; border-radius: 10px; max-height: 90%; overflow-y: auto;">
+        <button id="close-popup" style="color:black; position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+        <section class="content-main">
+          <h2 style="color: white;">Update Product</h2>
+          <form id="update-product-form">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <div style="flex: 1;">
+                <label for="product-name" style="color: white;">Name:</label>
+                <input type="text" id="product-name" placeholder="Name" class="form-control" required />
+              </div>
+              <div style="flex: 1;">
+                <label for="product-code" style="color: white;">Product Code: *This cant be changed</label>
+                <input type="text" id="product-code" placeholder="Product Code" class="form-control" readonly/>
+              </div>
+            </div>
+          
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <div style="flex: 1;">
+                <label for="product-category" style="color: white;">Category:</label>
+                <select id="product-category" class="form-select" required></select>
+              </div>
+              <div style="flex: 1;">
+                <label for="product-description" style="color: white;">Description:</label>
+                <textarea id="product-description" placeholder="Description" class="form-control" rows="4"></textarea>
+              </div>
+            </div>
+          
+            <!-- Dynamically display images here -->
+            <div id="product-images-container" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <!-- Image slots will be added here dynamically -->
+            </div>
+          
+            <button id="submitUpdate" type="button" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Update</button>
+          </form>
+        </section>
+      </div>
+    </div>
+    
+
+    
+    <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/vendors/select2.min.js"></script>
+    <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <!-- Main Script -->
+    <script src="assets/js/main.js" type="text/javascript"></script>
+
+
+
+
+    <!-- script to render products with specific tags -->
+    <script>
+      function renderTag(products) {
+        const cardBody = document.getElementById('card-body');
+    
+        cardBody.innerHTML = '';
+
+        if(!products){
+          cardBody.innerHTML = '<h3>No product found with this tag</h3>';
+        }else{
+          products.forEach(product => {
+            const productArticle = document.createElement('article');
+          productArticle.classList.add('itemlist');
+    
+          productArticle.innerHTML = 
+            `<div class="row align-items-center">
+              <div class="col col-check flex-grow-0">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" />
+                </div>
+              </div>
+              <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
+                <a class="itemside" href="#">
+                  <div class="left">
+                    <img
+                      src="./assets/ProductsImages/${product.ProductTitle}.jpg"
+                      class="img-sm img-thumbnail"
+                      alt="Item"
+                    />
+                  </div>
+                  <div class="info">
+                    <h6 class="mb-0">${product.ProductTitle}</h6>
+                    </div>
+                </a>
+              </div>
+              <div class="col-lg-2 col-sm-2 col-4 col-price">
+                <span>₹${product.RegularPrice}</span>
+                </div>
+                <div class="col-lg-2 col-sm-2 col-4 col-status">
+                  <span class="badge rounded-pill ${product.active ? 'alert-success' : 'alert-warning'}">
+                    ${product.active ? 'Active' : 'Archived'}
+                    </span>
+                    </div>
+                    <div class="col-lg-1 col-sm-2 col-4 col-date">
+                      <span>${new Date(product.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
+                        <a href="#" class="btn btn-sm font-sm rounded btn-brand">
+                  <i class="material-icons md-edit"></i> Edit
+                </a>
+                <a href="#" class="btn btn-sm font-sm btn-light rounded delete-product" data-id="${product._id}" data-title="${product.ProductTitle}">
+                  <i class="material-icons md-delete_forever"></i> Delete
+                </a>
+              </div>
+              </div>`;
+              
+              cardBody.appendChild(productArticle);
+            });
+          }
+      };
+      const retrieveBYTag = (e) => {
+        const TagInput = document.getElementById('TagInput')
+        const TagName = TagInput.value
+        
+        fetch(`http://localhost:8000/products/retrieveByTagName/${TagName}`,{
+          method : 'GET',
+          headers : {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response=>response.json())
+        .then(data=>renderTag(data.products))
+      }
+    </script>
+
+            <!-- script for adding categories -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () =>{
+        fetch("http://localhost:8000/categories/getcategories")
+        .then(response=>response.json())
+        .then(data=>{
+          const categories = data.categories
+          displayCategories(categories)
+        })
+      })
+
+      const displayCategories = (categories) => {
+        const displaycategory = document.getElementById('get-products-category')
+        displaycategory.innerHTML = ''
+      
+        categories.forEach(category => {
+          const option1 = document.createElement('option')
+          option1.innerHTML = `<option>${category.Name}</option>`
+          displaycategory.appendChild(option1)
+
+        });
+      }
+    </script>
+
+
+<!-- script for rendering products from database, editing and deleting them -->
+<script>
+
+  document.getElementById('submitUpdate').addEventListener('click', (event) => {
+location.reload()
+    const updateObject = {
+      productName : productName.value,
+      productUpdateId : productUpdateId,
+      productCode : productCode.value,
+      productDescription : productDescription.value,
+      categoryDropdown : categoryDropdown.value,
+      oldCategory : oldCategory,
+      imagesArray : updatedImageNames
+    }
+    fetch('http://localhost:8000/productsUpdate/update-details',{
+      method: "PUT",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateObject)
+    })
+  })
+
+
+
+
+
+  const form = document.getElementById('update-product-form');
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  console.log('Form submitted');
+});
+
+  let updatedImageNames = [];
+  let oldarray = []
+  let productName
+  let productCode
+  let categoryDropdown
+  let productDescription
+  let oldCategory
+  let productUpdateId
+
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const categorySelector = document.getElementById('get-products-category');
+    const cardBody = document.getElementById('card-body');
+    const popupContainer = document.getElementById('popup-container');
+    const closePopupButton = document.getElementById('close-popup');
+
+    // Fetch and render products by category
+    categorySelector.addEventListener('click', () => {
+      const category = categorySelector.value;
+      fetch(`http://localhost:8000/products/getproducts/${category}`)
+        .then((response) => response.json())
+        .then((data) => renderProducts(data))
+        .catch((error) => console.error('Error fetching products:', error));
+    });
+
+    // Render products in the UI
+    function renderProducts(products) {
+      cardBody.innerHTML = '';
+      if (products.length < 1) {
+        cardBody.innerHTML = '<h3>No product found with this tag/Category</h3>';
+        return;
+      }
+      products.forEach((product) => {
+        const productArticle = document.createElement('article');
+        productArticle.classList.add('itemlist');
+        productArticle.innerHTML = `
+          <div class="row align-items-center">
+            <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
+              <a class="itemside" href="#">
+                <div class="left">
+                  <img
+                    src="./assets/ProductsImages/${product.ProductTitle}/${product.Images[0]}"
+                    class="img-sm img-thumbnail"
+                    alt="Item"
+                  />
+                </div>
+                <div class="info">
+                  <h6 class="mb-0">${product.ProductTitle}</h6>
+                </div>
+              </a>
+            </div>
+            <div class="col-lg-2 col-sm-2 col-4 col-price">
+              <span>${dayjs(product.createdAt).format('MMMM D, YYYY [at] h:mm A')}</span>
+            </div>
+            <div class="col-lg-2 col-sm-2 col-4 col-price">
+              <span>${product.ProductCode}</span>
+            </div>
+            <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
+              <a href="#" class="btn btn-sm font-sm rounded btn-brand edit-product" data-id="${product._id}">
+                <i class="material-icons md-edit"></i> Edit
+              </a>
+              <a href="#" class="btn btn-sm font-sm btn-light rounded delete-product" data-id="${product._id}" data-title="${product.ProductTitle}">
+                <i class="material-icons md-delete_forever"></i> Delete
+              </a>
+            </div>
+          </div>`;
+        cardBody.appendChild(productArticle);
+      });
+    }
+
+    // Event delegation for handling edit and delete actions
+    cardBody.addEventListener('click', (event) => {
+      const target = event.target;
+      const editButton = target.closest('.edit-product');
+      const deleteButton = target.closest('.delete-product');
+
+      if (editButton) {
+        handleEdit(editButton);
+      }
+      if(deleteButton){
+        handleDelete(deleteButton)
+      }
+    });
+
+
+    function handleDelete(button) {
+      const productId = button.getAttribute('data-id');
+      const productTitle = button.getAttribute('data-title');
+      const categorySelector = document.getElementById('get-products-category').value;
+
+      fetch (`http://localhost:8000/delete-product-img/${productTitle}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      fetch(`http://localhost:8000/products/deleteproduct/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({category: categorySelector})
+      })
+      window.location.reload(); 
+    }
+
+    
+        
+    // Open popup for editing a product
+    function handleEdit(button) {
+    fetch("http://localhost:8000/categories/getcategories")
+        .then(response=>response.json())
+        .then(data=>{
+          const categories = data.categories
+          displayCategories(data.categories)
+        })
+        const displayCategories = (categories) => {
+          const displaycategory = document.getElementById('product-category')
+          displaycategory.innerHTML = ''
+        categories.forEach(category => {
+          const option1 = document.createElement('option')
+          option1.innerHTML = `<option>${category.Name}</option>`
+          displaycategory.appendChild(option1)
+        });   
+      }
+
+
+
+  const productId = button.getAttribute('data-id');
+  const categorySelector = document.getElementById('get-products-category').value;
+  console.log(`Edit product with ID: ${productId} and categry ${categorySelector}`);
+  // Display the popup
+  popupContainer.style.display = 'block';
+
+  fetch(`http://localhost:8000/products/${productId}`,{
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response=>response.json()).then(data=>{
+    updateEditDetails(data.products)
+  })
+
+const updateEditDetails = (product) =>{
+  productUpdateId = product._id
+  console.log(product)
+  productName = document.getElementById('product-name')
+  productName.value = product.ProductTitle
+
+  productCode = document.getElementById('product-code')
+  productCode.value = product.ProductCode
+
+  categoryDropdown = document.getElementById('product-category');
+  // Ensure the dropdown is populated before selecting
+  const categoryOptions = Array.from(categoryDropdown.options);
+  const matchingOption = categoryOptions.find(option => option.value === product.Category);
+  if (matchingOption) {
+    categoryDropdown.value = product.Category; // Select the matching category
+    oldCategory = document.getElementById('product-category').value
+  }
+  productDescription = document.getElementById('product-description')
+  productDescription.value = product.ProductDescription
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    for (let i = 0; i < product.Images.length; i++) {
+    updatedImageNames.push(product.Images[i]);
+    oldarray.push(product.Images[i])
+  }
+
+ // Function to change an existing image
+ function changeImage(index) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+
+  fileInput.onchange = function (event) {
+
+    event.preventDefault()
+    const file = event.target.files[0]; // This should give you the selected file
+
+    if (file) {
+      // Log the file immediately to check if it's being selected
+      // console.log('File selected:', file);
+
+      const imageName = file.name; // Get the file name
+      productImages[index] = imageName; // Update the image at this index
+      onImageChanged(imageName, index, file); // Pass the file object to the callback
+      displayImages(productImages); // Re-render images
+    } else {
+      console.log('No file selected');
+    }
+  };
+
+  fileInput.click();
+}
+
+
+// Function to add a new image to an empty slot
+function addImage(index) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+
+  fileInput.onchange = function (event) {
+    event.preventDefault()
+    const file = event.target.files[0]; // Get the selected file
+
+    if (file) {
+      // Log the selected file immediately
+      // console.log('File selected:', file);
+
+      const imageName = file.name; // Get the file name
+      productImages[index] = imageName; // Update the image at this index
+      onImageChanged(imageName, index, file); // Pass the file object to the callback
+      displayImages(productImages); // Re-render images
+    } else {
+      console.log('No file selected');
+    }
+  };
+
+  fileInput.click(); // Trigger the file input dialog
+}
+
+
+// Function to update image when changed
+function onImageChanged(imageName, index, file) {
+
+
+
+
+  console.log('at the beginning of fucntion', updatedImageNames)
+
+
+
+  const previousImage = updatedImageNames[index]
+console.log(imageName)
+  if (file) {
+    // Prepare the form data to send to the backend
+    const formData = new FormData();
+    const folderName = document.getElementById('product-name').value; // Folder name for image storage
+    // console.log("folder name is ->",folderName)
+
+    // Add the selected file to FormData
+    formData.append('folderName', folderName); // The folder where the image should be saved
+    formData.append('previousImage', previousImage); // The name of the previous image to delete
+    formData.append('image', file);
+    // console.log("Form data entries:");
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0]+ ': ' + pair[1]); 
+    // }    // Send the form data to the backend using fetch
+    fetch('http://localhost:8000/productsUpdate/update-delete-images', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())  // Parse the response as JSON
+    .then(data => {
+      if (data.success) {
+        // Update the image name in the array (replace the previous image)
+        updatedImageNames[index] = data.imageName; // Assuming response contains the saved image name
+console.log('after assigning the index with changed image name', updatedImageNames)
+        fetch('http://localhost:8000/productsUpdate/update-imageArray', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ oldarray: oldarray, imagesArray: updatedImageNames, productUpdateId: productUpdateId, categoryDropdown: categoryDropdown.value})
+        })
+
+        console.log(`Image successfully uploaded: ${data.imageName}`);
+        // Optionally, update the UI (e.g., re-render images)
+        displayImages(updatedImageNames);
+      } else {
+        console.error('Failed to upload image:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error uploading image:', error);
+    });
+  } else {
+    console.log('No file selected');
+  }
+}
+
+
+
+// Function to handle image added
+function onImageAdded(imageName, index, file) {
+  console.log(`File to be added is ${file}`);
+  updatedImageNames[index] = imageName;// Update the name of the added image
+  if (file) {
+    // Prepare the form data to send to the backend
+    const formData = new FormData();
+    const productTitle= document.getElementById('product-name').value; // Folder name for image storage
+    // console.log("folder name is ->",folderName)
+
+    // Add the selected file to FormData
+    formData.append('folderName', productTitle); // The folder where the image should be saved
+    formData.append('image', file);
+    console.log("Form data entries:");
+    for (let pair of formData.entries()) {
+      console.log(pair[0]+ ': ' + pair[1]); 
+    }    // Send the form data to the backend using fetch
+    fetch('http://localhost:8000/upload-product', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())  // Parse the response as JSON
+    .then(data => {
+      if (data.success) {
+        // Update the image name in the array (replace the previous image)
+        updatedImageNames[index] = data.imageName; // Assuming response contains the saved image name
+
+        console.log(`Image successfully uploaded: ${data.imageName}`);
+        // Optionally, update the UI (e.g., re-render images)
+        displayImages(updatedImageNames);
+      } else {
+        console.error('Failed to upload image:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error uploading image:', error);
+    });
+  } else {
+    console.log('No file selected');
+  }
+}
+
+// Sample image data (In a real case, this data would come from the server or database)
+let productImages = product.Images; // Example: 2 images are already uploaded
+const imageFolderPath = `./assets/ProductsImages/${product.ProductTitle}`; // Path to your images directory
+
+// Function to display images and corresponding buttons (Change/Add)
+function displayImages(images) {
+  const imagesContainer = document.getElementById('product-images-container');
+  imagesContainer.innerHTML = ''; // Clear existing content
+
+  // Loop through and display existing images with a "Change" button, or a placeholder with "Add" button
+  for (let i = 0; i < 4; i++) {
+    const imageSlot = document.createElement('div');
+    imageSlot.style.display = 'flex';
+    imageSlot.style.alignItems = 'center';
+    imageSlot.style.flexDirection = 'column'; // Stack image and button vertically
+
+    let imageElement;
+    let actionButton;
+    let imageNameElement;
+
+    // If the image exists, show it, else show a placeholder
+    if (images[i]) {
+      imageElement = document.createElement('img');
+      imageElement.src = `${imageFolderPath}/${images[i]}`;
+      imageElement.alt = `Product Image ${i + 1}`;
+      imageElement.style.width = '100px';
+      imageElement.style.height = '100px';
+      imageElement.style.objectFit = 'cover';
+
+      imageNameElement = document.createElement('span');
+      imageNameElement.textContent = images[i]; // Display the name of the image below it
+
+      actionButton = document.createElement('button');
+      actionButton.textContent = 'Change';
+      actionButton.onclick = () => changeImage(i);
+    } else {
+      imageElement = document.createElement('img');
+      imageElement.src = 'https://via.placeholder.com/100x100.png?text=Add+Image';
+      imageElement.alt = 'Add Image';
+      imageElement.style.width = '100px';
+      imageElement.style.height = '100px';
+      imageElement.style.objectFit = 'cover';
+
+      imageNameElement = document.createElement('span');
+      imageNameElement.textContent = 'No image selected'; // Display placeholder text
+
+      actionButton = document.createElement('button');
+      actionButton.textContent = 'Add Image';
+      actionButton.onclick = () => addImage(i);
+    }
+
+    // Append image and buttons to the image slot
+    imageSlot.appendChild(imageElement);
+    imageSlot.appendChild(imageNameElement);
+    imageSlot.appendChild(actionButton);
+    imagesContainer.appendChild(imageSlot);
+  }
+}
+
+displayImages(productImages);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+  // Close popup when clicking outside the modal content
+  window.addEventListener('click', function handleOutsideClick(event) {
+    if (event.target === popupContainer) {
+      popupContainer.style.display = 'none';
+      window.removeEventListener('click', handleOutsideClick); // Remove listener to avoid multiple bindings
+    }
+  });
+}
+// Close popup
+closePopupButton.addEventListener('click', () => {
+  popupContainer.style.display = 'none';
+});
+
+  });
+</script>
+
+
+
+
+
+<script>
+  document.getElementById('logout').addEventListener('click', function () {
+// Remove the token from localStorage
+localStorage.removeItem('token');
+
+// Alert user about successful logout
+alert('You have been logged out successfully!');
+
+// Redirect to login page
+window.location.href = 'page-account-login.html'; // Redirect to login page after logout
+});
+</script>
+      </body>
+</html>

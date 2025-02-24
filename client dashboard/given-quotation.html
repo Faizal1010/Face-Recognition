@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nest Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="" />
+    <meta property="og:type" content="" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="assets/imgs/theme/favicon.svg"
+    />
+    <!-- Template CSS -->
+    <script src="assets/js/vendors/color-modes.js"></script>
+    <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const token = localStorage.getItem('token');
+  
+          if (!token) {
+              alert('Access denied. Please log in.');
+              window.location.href = '../Admin_dashboard/Frontend/page-account-login.html'; // Redirect to login page
+              return;
+          }
+  
+          // Decode the JWT to verify the user's role
+          const decodedToken = decodeJWT(token);
+  
+          if (!decodedToken || decodedToken.role !== 'client') {
+              alert('Unauthorized access. Clients only.');
+              window.location.href = '../Admin_dashboard/Frontend/page-account-login.html'; // Redirect to login page
+          }
+      });
+  
+      // Function to decode the JWT and extract the payload
+      function decodeJWT(token) {
+          try {
+              const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+              return payload;
+          } catch (error) {
+              console.error('Error decoding JWT token:', error);
+              return null;
+          }
+      }
+  </script>
+  </head>
+
+  <body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+      <div class="aside-top">
+          <a href="index.html" class="brand-wrap">
+              <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+          </a>
+          <div>
+              <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+          </div>
+      </div>
+      <nav>
+          <ul class="menu-aside">
+              <li class="menu-item">
+                  <a class="menu-link" href="index.html">
+                      <i class="icon material-icons md-home"></i>
+                      <span class="text">Dashboard</span>
+                  </a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-products-list.html">
+                      <i class="icon material-icons md-shopping_bag"></i>
+                      <span class="text">Products</span>
+                  </a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-orders-detail.html">
+                      <i class="icon material-icons md-shopping_cart"></i>
+                      <span class="text">My Orders</span>
+                  </a>
+              </li>
+              <li class="menu-item active">
+                  <a class="menu-link" href="given-quotation.html">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#878e9a" style="margin-right: 9px;"><path d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM320-500q25 0 42.5-17.5T380-560q0-25-17.5-42.5T320-620q-25 0-42.5 17.5T260-560q0 25 17.5 42.5T320-500Zm360 0q25 0 42.5-17.5T740-560q0-25-17.5-42.5T680-620q-25 0-42.5 17.5T620-560q0 25 17.5 42.5T680-500Zm0-60Zm-360 0Z"/></svg>Quotations</a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="page-transactions-2.html">
+                      <i class="icon material-icons md-monetization_on"></i>
+                      <span class="text">Transactions</span>
+                  </a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="customers.html">
+                      <i class="icon material-icons md-person"></i>
+                      <span class="text">Account</span>
+                  </a>
+              </li>
+              <li class="menu-item">
+                  <a class="menu-link" href="client-notification-list.html">
+                      <i class="icon material-icons md-comment"></i>
+                      <span class="text">Notifications</span>
+                  </a>
+              </li>
+             
+          </ul>
+          <br />
+          <br />
+      </nav>
+  </aside>
+    <main class="main-wrap">
+      <header class="main-header navbar">
+        <div class="col-search">
+          <form class="searchform">
+            <div class="input-group">
+              <input
+                list="search_terms"
+                type="text"
+                class="form-control"
+                placeholder="Search term"
+              />
+              <button class="btn btn-light bg" type="button">
+                <i class="material-icons md-search"></i>
+              </button>
+            </div>
+            <datalist id="search_terms">
+              <option value="Products"></option>
+              <option value="New orders"></option>
+              <option value="Apple iphone"></option>
+              <option value="Ahmed Hassan"></option>
+            </datalist>
+          </form>
+        </div>
+        <div class="col-nav">
+          <button
+            class="btn btn-icon btn-mobile me-auto"
+            data-trigger="#offcanvas_aside"
+          >
+            <i class="material-icons md-apps"></i>
+          </button>
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link btn-icon" href="#">
+                <i class="material-icons md-notifications animation-shake"></i>
+                <span class="badge rounded-pill">3</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link btn-icon darkmode" href="#">
+                <i class="material-icons md-nights_stay"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="requestfullscreen nav-link btn-icon"
+                ><i class="material-icons md-cast"></i
+              ></a>
+            </li>
+            <li class="dropdown nav-item">
+              <a
+                class="dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                id="dropdownLanguage"
+                aria-expanded="false"
+                ><i class="material-icons md-public"></i
+              ></a>
+              <div
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="dropdownLanguage"
+              >
+                <a class="dropdown-item text-brand" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-us.png"
+                    alt="English"
+                  />English</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-fr.png"
+                    alt="Français"
+                  />Français</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-jp.png"
+                    alt="Français"
+                  />日本語</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><img
+                    src="assets/imgs/theme/flag-cn.png"
+                    alt="Français"
+                  />中国人</a
+                >
+              </div>
+            </li>
+            <li class="dropdown nav-item">
+              <a
+                class="dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                id="dropdownAccount"
+                aria-expanded="false"
+              >
+                <img
+                  class="img-xs rounded-circle"
+                  src="assets/imgs/people/avatar-2.png"
+                  alt="User"
+              /></a>
+              <div
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="dropdownAccount"
+              >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-perm_identity"></i>Edit
+                  Profile</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-settings"></i>Account Settings</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-account_balance_wallet"></i
+                  >Wallet</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-receipt"></i>Billing</a
+                >
+                <a class="dropdown-item" href="#"
+                  ><i class="material-icons md-help_outline"></i>Help center</a
+                >
+                <div class="dropdown-divider"></div>
+                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <section class="content-main">
+        <div class="content-header">
+          <div>
+            <h2 class="content-title card-title">Quotation List</h2>
+            <p>All the quotations sent are here.</p>
+          </div>
+
+        </div>
+        <div class="card mb-4">
+          <header class="card-header">
+            <div class="row align-items-center">
+              <div class="col col-check flex-grow-0">
+                <div class="form-check ms-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                </div>
+              </div>
+              <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                <select id="get-products-category" class="form-select">
+                </select>
+              </div>
+              <div class="col-md-4 col-6 d-flex">
+                <input id="TagInput" type="text" placeholder="Search by tag name" value="" class="form-control me-2" />
+                <button onclick="retrieveBYTag()" class="btn btn-primary btn-sm rounded">Search</button>
+              </div>
+              <div class="col-md-2 col-6">
+                <!-- <select class="form-select"> -->
+                    <a href="create-quotation.html" class="btn btn-primary btn-sm rounded">New Quote</a>
+                    <!-- <option>Active</option>
+                  <option>Disabled</option>
+                  <option>Show all</option> -->
+                </select>
+              </div>
+            </div>
+          </header>
+          
+          <div id="card-body" class="card-body">
+            <table style="width: 100%; border-collapse: collapse; background-color: #2a3042; color: #ffffff; margin: 20px auto; font-size: 16px; border-radius: 8px; overflow: hidden;">
+                <thead style="background-color: #1f2430;">
+                  <tr>
+                    <th style="padding: 10px 15px; text-align: left; font-weight: bold;">Quote Code</th>
+                    <th style="padding: 10px 15px; text-align: left; font-weight: bold;">Quote Date</th>
+                    <th style="padding: 10px 15px; text-align: left; font-weight: bold;">Due Date</th>
+                    <th style="padding: 10px 15px; text-align: left; font-weight: bold;">Details</th>
+                    <th style="padding: 10px 15px; text-align: left; font-weight: bold;">Response</th>
+                  </tr>
+                </thead>
+                <tbody id="quoteTableBody">
+                  <tr style="background-color: #2a3042;">
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <div>
+                        <strong>Client 2</strong>
+                      </div>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">2024-05-16</span>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">2024-05-31</span>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #58d68d; color: #ffffff; font-size: 14px; border-radius: 12px;">Details</span>
+                    </td>
+                  </tr>
+                  <!-- <tr style="background-color: #3a4153;">
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <div>
+                        <strong>Client 2</strong>
+                      </div>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">2024-05-15</span>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">2024-05-16</span>
+                    </td>
+                    <td style="padding: 10px 15px; text-align: left;">
+                      <span style="display: inline-block; padding: 5px 10px; background-color: #58d68d; color: #ffffff; font-size: 14px; border-radius: 12px;">Converted</span>
+                    </td>
+                  </tr> -->
+                </tbody>
+              </table>
+          </div>
+        </div>
+        <div class="pagination-area mt-30 mb-50">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+              <li class="page-item active">
+                <a class="page-link" href="#">01</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">02</a></li>
+              <li class="page-item"><a class="page-link" href="#">03</a></li>
+              <li class="page-item">
+                <a class="page-link dot" href="#">...</a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">16</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#"
+                  ><i class="material-icons md-chevron_right"></i
+                ></a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+      <footer class="main-footer font-xs">
+        <div class="row pb-30 pt-15">
+          <div class="col-sm-6">
+            <script>
+              document.write(new Date().getFullYear());
+            </script>
+            &copy; Nest - HTML Ecommerce Template .
+          </div>
+          <div class="col-sm-6">
+            <div class="text-sm-end">All rights reserved</div>
+          </div>
+        </div>
+      </footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div id="quotationModal" 
+      style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000;">
+   <div style="background-color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90%; overflow-y: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+       <h2 style="margin: 0; font-size: 1.5em; color: black;">Quotation Details</h2>
+       <button onclick="closeModal()" style="font-size: 1.5em; cursor: pointer; background: none; border: none;">×</button>
+     </div>
+     <div style="margin-top: 20px;">
+       <div><strong>Client Name:</strong><span id="client-name" > Bucky Barnes </span></div> </span>
+       <div><strong>Client Code:</strong><span  id="client-code" > CBL93D </span></div>
+       <div><strong>Quotation Code:</strong><span  id="quotation-code" > QGV46M </span></div>
+       <div><strong>Quote Date:</strong><span  id="quote-date" > 2024-12-06 </span></div>
+       <div><strong>Due Date:</strong><span  id="due-date" > Not specified </span></div>
+       <div><strong>Notes:</strong><span id="notes" > noti </span></div>
+       <div><strong>Terms:</strong><span id="terms" > termi </span></div>
+     </div>
+     <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+       <h3 style="color: black;">Products:</h3>
+       <div id="quote-product">
+         <div style="margin-bottom: 15px;">
+           <strong>Product 1: Laptop</strong>
+           <div><strong>Details:</strong> i1000</div>
+         </div>
+       </div>
+     </div>
+     <div style="text-align: right; padding-top: 10px;">
+       <button onclick="closeModal()" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+         Close
+       </button>
+     </div>
+   </div>
+ </div>
+ 
+
+
+
+
+
+
+
+
+
+ <div id="response-pdf" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000;">
+  <div style="background-color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90%; overflow-y: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+          <h2 style="margin: 0; font-size: 1.5em; color: black;">Quotation Details</h2>
+          <button id="closeModalx-show" style="font-size: 1.5em; cursor: pointer; background: none; border: none;">×</button>
+      </div>
+      <div style="margin-top: 20px;">
+          <div><strong>Notes:</strong><span id="note-from-admin-to-client"> Notes wil Appear here </span></div>
+      </div>
+      <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+        <a id="pdf-from-admin-to-client">See sent PDF</a>
+      </div>
+      <div style="text-align: right; padding-top: 10px;">
+          <button id="closeModalbutton-show" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+      </div>
+  </div>
+</div>
+    </main>
+
+    
+    <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/vendors/select2.min.js"></script>
+    <script src="assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <!-- Main Script -->
+    <script src="assets/js/main.js" type="text/javascript"></script>
+
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        function displayQuotes(quotes) {
+          const quoteTableBody = document.getElementById('quoteTableBody');
+          quoteTableBody.innerHTML = "";
+          quotes.forEach((quote) => {
+            let dueDate = quote.dueDate ? new Date(quote.dueDate).toLocaleDateString() : 'N/A';
+            const tr = document.createElement('tr');
+            tr.style.backgroundColor = '#2a3042';
+            tr.innerHTML = `
+  <td style="padding: 10px 15px; text-align: left;">
+    <div>
+      <strong>${quote.quoteCode}</strong>
+    </div>
+  </td>
+  <td style="padding: 10px 15px; text-align: left;">
+    <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">
+      ${new Date(quote.createdAt).toLocaleDateString()}
+    </span>
+  </td>
+  <td style="padding: 10px 15px; text-align: left;">
+    <span style="display: inline-block; padding: 5px 10px; background-color: #4a6cf7; color: #ffffff; font-size: 14px; border-radius: 12px;">
+      ${dueDate}
+    </span>
+  </td>
+  <td style="padding: 10px 15px; text-align: left;">
+    <button class="details-button" data-id="${quote._id}" 
+      style="display: inline-block; padding: 5px 10px; background-color: #58d68d; color: #ffffff; font-size: 14px; border-radius: 12px; border: none;">
+      Details
+    </button>
+  </td>
+  <td style="padding: 10px 15px; text-align: left;">
+    ${quote.attended ? 
+      `<button class="show-response-to-client" style="display: inline-block; padding: 5px 10px; background-color: #58d68d; color: #ffffff; font-size: 14px; border-radius: 12px; border: none;" data-id=${quote._id}>
+        Show
+      </button>` :
+      `<button style="display: inline-block; padding: 5px 10px; background-color: #58d68d; color: #ffffff; font-size: 14px; border-radius: 12px; border: none;">
+        Not Responded
+      </button>`
+    }
+  </td>`;
+
+            quoteTableBody.appendChild(tr);
+          });
+    
+
+
+
+
+
+
+
+
+
+
+          document.querySelectorAll('.show-response-to-client').forEach(button=>{
+            button.addEventListener('click', () => {
+            const responseModal = document.getElementById('response-pdf')
+            responseModal.style.display = 'flex'
+            document.getElementById('closeModalx-show').addEventListener('click', () => {
+            responseModal.style.display = 'none'
+          })
+          document.getElementById('closeModalbutton-show').addEventListener('click', () => {
+            responseModal.style.display = 'none'
+          })
+
+          const quoteId = button.closest('button').getAttribute('data-id')
+
+          fetch(`http://localhost:8000/quotes/fetch-by-quoteId/${quoteId}`,{
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(response=>response.json())
+          .then(data=>{
+            console.log(data.data)
+
+            const notes=document.getElementById('note-from-admin-to-client')
+            notes.innerText = ""
+            notes.innerText = data.data.noteFromAdmin
+
+            const pdf = document.getElementById('pdf-from-admin-to-client')
+            pdf.href = `http://localhost:8000/quotations/${data.data._id}/${data.data.responseFile}`
+          })
+          })
+          })
+          // Attach event listener to all "Details" buttons
+          document.querySelectorAll('.details-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+              const id = e.target.getAttribute('data-id'); // Get the data-id
+              console.log('Quote ID:', id); // Log the ID
+              openModal(id); // Pass the ID to the modal
+            });
+          });
+        }
+    
+        function openModal(id) {
+          const modal = document.getElementById('quotationModal');
+          modal.style.display = 'flex'; // Show the modal
+          fetch(`http://localhost:8000/quotes/fetch-by-quoteId/${id}`,{
+            method: 'GET',
+            headers: {
+              'Conent-Type': 'application/json'
+            }
+          })
+          .then(response=>response.json())
+          .then(data=>displayDetails(data.data))
+
+          const displayDetails = (details) => {
+
+    let dueDateForQuote = details.dueDate ? new Date(details.dueDate).toLocaleDateString() : 'N/A';
+
+    const clientName = document.getElementById('client-name');
+    clientName.innerHTML = details.client ? ` ${details.client}` : 'Not specified';
+
+    const clientCode = document.getElementById('client-code');
+    clientCode.innerHTML = details.clientCode ? ` ${details.clientCode}` : 'Not specified';
+
+    const quotationCode = document.getElementById('quotation-code');
+    quotationCode.innerHTML = details.quoteCode ? ` ${details.quoteCode}` : 'Not specified';
+
+    const quoteDate = document.getElementById('quote-date');
+    quoteDate.innerHTML = details.createdAt ? ` ${new Date(details.createdAt).toLocaleDateString()}` : 'Not specified';
+
+    const dueDate = document.getElementById('due-date');
+    dueDate.innerHTML = dueDateForQuote;
+
+    const notes = document.getElementById('notes');
+    notes.innerHTML = details.notes ? ` ${details.notes}` : ' Not specified';
+
+    const terms = document.getElementById('terms');
+    terms.innerHTML = details.terms ? ` ${details.terms}` : ' Not specified';
+
+    const quoteProducts = document.getElementById('quote-product')
+    quoteProducts.innerHTML = ""
+    details.products.forEach((product, index)=>{
+      console.log(product)
+      const div = document.createElement('div')
+      div.style.marginBottom = '15px'
+      div.innerHTML = `<strong>Product ${index + 1}: ${product.ProductTitle}</strong>
+           <div><strong>Details:</strong> ${product.properties}</div>`
+
+           quoteProducts.appendChild(div)
+    })
+};
+
+        }
+    
+        function closeModal() {
+          const modal = document.getElementById('quotationModal');
+          modal.style.display = 'none'; // Hide the modal
+        }
+        window.closeModal = closeModal;    
+        function getJWTToken() {
+          return localStorage.getItem('token');
+        }
+        function decodeJWT(token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload;
+          } catch (error) {
+            console.error('Error decoding JWT token:', error);
+            return null;
+          }
+        }
+        const jwt = getJWTToken();
+        if (jwt) {
+          const client = decodeJWT(jwt);
+          fetch(`http://localhost:8000/quotes/get-quote/${client.clientId}`, {
+            method: 'GET',
+            headers: {
+              'Content-type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => displayQuotes(data.data));
+        } else {
+          console.log("No JWT token found in localStorage.");
+          window.location.href = 'page-account-login.html';
+        }
+      });
+    </script>
+    
+    
+    <script>
+      document.getElementById('logout').addEventListener('click', function () {
+  // Remove the token from localStorage
+  localStorage.removeItem('token');
+  
+  // Alert user about successful logout
+  alert('You have been logged out successfully!');
+  
+  // Redirect to login page
+  window.location.href = '../Admin_dashboard/Frontend/page-account-login.html'; // Redirect to login page after logout
+  });
+  </script>
+      </body>
+</html>
