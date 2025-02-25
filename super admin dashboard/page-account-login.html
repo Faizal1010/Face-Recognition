@@ -138,7 +138,7 @@
                 const decodedToken = decodeJWT(data.token); // Decode the token
                 if (decodedToken) {
                     if (decodedToken.role === 'client') {
-                        window.location.href = '../../Client_dashboard/index.html'; // Redirect to YouTube for client
+                        window.location.href = '../client dashboard/index.html'; // Redirect to YouTube for client
                     } else if (decodedToken.role === 'admin') {
                         window.location.href = 'index.html'; // Redirect to index page for admin
                     }

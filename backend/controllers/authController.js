@@ -37,13 +37,13 @@ exports.login = async (req, res) => {
         if (user) {
             // If found in 'Client', check password and generate token
             console.log('Found user in Client table');
-            if (user.password !== Password) {
+            if (user.Password !== Password) {
                 return res.status(401).json({ success: false, message: 'Invalid password' });
             }
 
             // Generate JWT with client information
             const token = jwt.sign(
-                { id: user.id, email: user.email, clientId: user.customer_id, role: 'client' },
+                { id: user.CustomerId, email: user.Email, role: 'client' },
                 JWT_SECRET,
                 { expiresIn: '3d' }
             );
@@ -59,6 +59,8 @@ exports.login = async (req, res) => {
             if (user) {
                 // If found in 'Admin', check password and generate token
                 console.log('Found user in Admin table');
+                console.log('user.password', user.Password);
+                console.log('Password', Password);
                 if (user.password !== Password) {
                     return res.status(401).json({ success: false, message: 'Invalid password' });
                 }

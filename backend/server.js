@@ -127,6 +127,9 @@ app.get('/admin', (req, res) => {
 
 app.use('/', require('./routes/imageRoutes'));
 app.use('/auth', require('./routes/authRoutes'))
+app.use('/clients', require('./routes/clientRoutes'))
+app.use('/event', require('./routes/eventRoutes'))
+
 
 
 app.listen(3000, () => console.log('Server running on port 3000'));

@@ -308,11 +308,6 @@
   </div>
 
   <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
-    <label for="gstin" style="margin-bottom: 5px;">GSTIN:</label>
-    <input id="gstin" type="text" placeholder="GSTIN" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-  </div>
-
-  <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
     <label for="customer-id" style="margin-bottom: 5px;">Customer Id: <span style="color: red;">*</span>
     </label>
     <div style="display: flex; align-items: center; gap: 5px;">
@@ -355,29 +350,21 @@
     document.getElementById('submitButton').addEventListener('click', () => {
 
 
-        const getRandomLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
+        const getUniqueCode = () => {
+    // Use the current timestamp to ensure uniqueness
+    const timestamp = Date.now();  // Current time in milliseconds
+    const randomPart = Math.floor(Math.random() * 1000);  // Generate a 3-digit random part (0-999)
+
+    // Combine the timestamp and random part, extract the last 4 digits
+    const uniqueCode = (timestamp + randomPart).toString().slice(-4);  // Ensure it's a 4-digit number
+
+    return uniqueCode;
 };
 
-// Generate random number (2 digits)
-const getRandomNumber = () => {
-    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
-};
+// Generate the unique code and store it in `customerId`
+const customerId = getUniqueCode();
+console.log(customerId);
 
-// Generate random final letter (1 letter)
-const getFinalLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
-};
-
-// Combine all parts
-const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
-const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
-const finalLetter = getFinalLetter();  // One random letter for the end
-
-// Store the final product code
-const customerId = 'C' + lettersPart + numberPart + finalLetter;
 
 
 
@@ -394,14 +381,13 @@ const customerId = 'C' + lettersPart + numberPart + finalLetter;
             City: document.getElementById('city').value,
             Address: document.getElementById('address').value,
             Notes: document.getElementById('notes').value,
-            GSTIN: document.getElementById('gstin').value,
             Profile: document.getElementById('profile').files[0]?.name || "", // Use the file name
             CustomerId: customerId
         };
         console.log(clientDetails.CustomerId)
         if (clientDetails.Password === document.getElementById('confirm-password').value) {
             // First fetch: Add client details
-            fetch('http://localhost:8000/clients/add-client', {
+            fetch('http://localhost:3000/clients/add-client', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -419,7 +405,7 @@ const customerId = 'C' + lettersPart + numberPart + finalLetter;
                         formData.append('email', email)
                         formData.append('profile', profileImage);
                         console.log([...formData.entries()]); // Logs all keys and values in the FormData
-                        fetch('http://localhost:8000/clients/upload-profile', {
+                        fetch('http://localhost:3000/clients/upload-profile', {
                             method: 'POST',
                             body: formData // No need for headers with FormData
                         })
