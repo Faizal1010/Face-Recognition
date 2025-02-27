@@ -11,7 +11,7 @@ const app = express();
 const upload = multer({ dest: 'uploads/', limits: { files: 500 } });
 
 app.use(cors({ origin: "*" }));
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, '../website')));
 app.use(express.json());
 
 const db = mysql.createConnection({
@@ -57,20 +57,20 @@ function runPythonScript(scriptPath, args, callback) {
     });
 }
 
-
 app.post('/upload', upload.array('image', 500), (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).send('No files uploaded');
     }
 
-    const { label } = req.body;
-    if (!label) {
-        return res.status(400).send('Label is required');
+    const { client_id, event_code, label } = req.body;  // Get client_id, event_code, and label from body
+    if (!client_id || !event_code || !label) {
+        return res.status(400).send('Client ID, event code, and label are required');
     }
 
     const filePaths = req.files.map(file => path.join(__dirname, file.path));
 
-    runPythonScript('extract_embeddings.py', [...filePaths, label], (err, output) => {
+    // Run the extract_embeddings.py script with the required arguments (image paths, client_id, event_code, label)
+    runPythonScript('extract_embeddings.py', [...filePaths, client_id, event_code, label], (err, output) => {
         if (err) {
             req.files.forEach(file => fs.unlinkSync(path.join(__dirname, file.path)));
             return res.status(500).send('Error processing images');
@@ -91,9 +91,17 @@ app.post('/upload', upload.array('image', 500), (req, res) => {
 app.post('/recognize', upload.single('image'), (req, res) => {
     const filePath = path.join(__dirname, req.file.path);
     const selectedLabels = JSON.parse(req.body.labels || '[]');
+    const { client_id } = req.body; // Get client_id from body
+
     console.log('Selected Labels:', selectedLabels);
-    
-    runPythonScript('compare_faces.py', [filePath, JSON.stringify(selectedLabels)], (err, output) => {
+    console.log('Client ID:', client_id);
+
+    if (!client_id || selectedLabels.length === 0) {
+        return res.status(400).send('Client ID and at least one label are required');
+    }
+
+    // Run the compare_faces.py script with the required arguments (image path, labels, client_id)
+    runPythonScript('compare_faces.py', [filePath, JSON.stringify(selectedLabels), client_id], (err, output) => {
         if (err) return res.status(500).send('Error recognizing image');
         
         const placeholders = output.map(() => '?').join(',');
@@ -116,20 +124,17 @@ app.post('/recognize', upload.single('image'), (req, res) => {
     });
 });
 
-
 app.get('/user', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/findYourself.html'));
+    res.sendFile(path.join(__dirname, '../website/findYourself.html'));
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/admin.html'));
+    res.sendFile(path.join(__dirname, '../website/admin.html'));
 });
 
 app.use('/', require('./routes/imageRoutes'));
-app.use('/auth', require('./routes/authRoutes'))
-app.use('/clients', require('./routes/clientRoutes'))
-app.use('/event', require('./routes/eventRoutes'))
-
-
+app.use('/auth', require('./routes/authRoutes'));
+app.use('/clients', require('./routes/clientRoutes'));
+app.use('/event', require('./routes/eventRoutes'));
 
 app.listen(3000, () => console.log('Server running on port 3000'));

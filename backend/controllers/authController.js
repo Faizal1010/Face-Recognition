@@ -59,8 +59,6 @@ exports.login = async (req, res) => {
             if (user) {
                 // If found in 'Admin', check password and generate token
                 console.log('Found user in Admin table');
-                console.log('user.password', user.Password);
-                console.log('Password', Password);
                 if (user.password !== Password) {
                     return res.status(401).json({ success: false, message: 'Invalid password' });
                 }

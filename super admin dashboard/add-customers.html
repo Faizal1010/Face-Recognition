@@ -349,21 +349,25 @@
         <script>
     document.getElementById('submitButton').addEventListener('click', () => {
 
-
-        const getUniqueCode = () => {
-    // Use the current timestamp to ensure uniqueness
-    const timestamp = Date.now();  // Current time in milliseconds
-    const randomPart = Math.floor(Math.random() * 1000);  // Generate a 3-digit random part (0-999)
-
-    // Combine the timestamp and random part, extract the last 4 digits
-    const uniqueCode = (timestamp + randomPart).toString().slice(-4);  // Ensure it's a 4-digit number
-
-    return uniqueCode;
+        const getRandomLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
 };
+        const getRandomNumber = () => {
+    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
+};
+// Generate random final letter (1 letter)
+const getFinalLetter = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return letters.charAt(Math.floor(Math.random() * letters.length));
+};
+// Combine all parts
+const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
+const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
+const finalLetter = getFinalLetter();  // One random letter for the end
 
-// Generate the unique code and store it in `customerId`
-const customerId = getUniqueCode();
-console.log(customerId);
+// Store the final product code
+const customerId = 'C' + lettersPart + numberPart + finalLetter;
 
 
 

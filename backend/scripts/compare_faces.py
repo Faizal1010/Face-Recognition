@@ -34,7 +34,7 @@ class CustomFaceAnalysis(FaceAnalysis):
 app = CustomFaceAnalysis()
 app.prepare(ctx_id=-1, det_size=(640, 640))
 
-def compare_faces(image_path, label_filter):
+def compare_faces(image_path, label_filter, event_code_filter):
     try:
         # Read the query image
         img = cv2.imread(image_path)
@@ -56,19 +56,39 @@ def compare_faces(image_path, label_filter):
         )
         cursor = conn.cursor()
 
-        # Ensure labels are formatted correctly
+        # Ensure labels are formatted correctly (if provided)
         label_filter = json.loads(label_filter) if isinstance(label_filter, str) else label_filter
         if not isinstance(label_filter, list):
             label_filter = []
 
-        # Fetch stored embeddings only for images with matching labels
-        format_strings = ','.join(['%s'] * len(label_filter))
-        cursor.execute(f"""
-            SELECT imageData.id, imageData.embeddings 
-            FROM imageData 
-            JOIN images ON imageData.image_id = images.id 
-            WHERE images.label IN ({format_strings})
-        """, label_filter)
+        # If no label_filter is provided, we'll set it to an empty list
+        if label_filter is None:
+            label_filter = []
+
+        # Event code filter should always be provided
+        if not event_code_filter:
+            print(json.dumps({"error": "Event code is required."}))
+            return
+
+        # Format label and event_code filter
+        format_label_strings = ','.join(['%s'] * len(label_filter)) if label_filter else ''
+        format_event_strings = ','.join(['%s'] * len(event_code_filter)) if event_code_filter else ''
+
+        query = f"""
+            SELECT imageData.id, imageData.embeddings
+            FROM imageData
+            JOIN images ON imageData.image_id = images.id
+            JOIN events ON images.event_code = events.event_code
+            WHERE images.event_code IN ({format_event_strings}) 
+        """
+        
+        # Add the label filter to the query if provided
+        if label_filter:
+            query += f" AND images.label IN ({format_label_strings})"
+
+        filter_params = label_filter + event_code_filter
+        
+        cursor.execute(query, filter_params)
 
         matched_images = []
 
@@ -94,7 +114,12 @@ def compare_faces(image_path, label_filter):
         print(json.dumps({"error": str(e)}))
 
 if __name__ == "__main__":
-    # Get the image path and labels array from command line arguments
+    # Get the image path, labels array, and event_code from command line arguments
     image_path = sys.argv[1]
     label_filter = sys.argv[2] if len(sys.argv) > 2 else "[]"
-    compare_faces(image_path, label_filter)
+    event_code_filter = sys.argv[3] if len(sys.argv) > 3 else None
+    
+    if not event_code_filter:
+        print(json.dumps({"error": "Event code is required."}))
+    else:
+        compare_faces(image_path, label_filter, [event_code_filter])
