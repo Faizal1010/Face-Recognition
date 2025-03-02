@@ -8,17 +8,36 @@ const db = mysql.createConnection({
   database: 'face_recognition'
 });
 
+
 exports.getImages = (req, res) => {
-  db.query('SELECT id, image FROM images', (err, results) => {
+  let { page, limit } = req.query;
+  const pageNum = parseInt(page) || 1;
+  const pageSize = parseInt(limit) || 10;
+  const offset = (pageNum - 1) * pageSize;
+
+  db.query('SELECT id, image FROM images ORDER BY id ASC LIMIT ? OFFSET ?', [pageSize, offset], (err, results) => {
     if (err) {
       console.error('Error fetching images:', err);
-      return res.status(500).json({ error: 'Error fetching images' }); // Send JSON error response
+      return res.status(500).json({ error: 'Error fetching images' });
     }
+
     const images = results.map(r => ({
       id: r.id,
       data: Buffer.from(r.image).toString('base64')
     }));
-    res.json(images);
+
+    // Get total count for pagination metadata
+    db.query('SELECT COUNT(*) AS total FROM images', (err, countResult) => {
+      if (err) {
+        console.error('Error fetching total count:', err);
+        return res.status(500).json({ error: 'Error fetching total count' });
+      }
+
+      const total = countResult[0].total;
+      const totalPages = Math.ceil(total / pageSize);
+
+      res.json({ images, page: pageNum, totalPages, total });
+    });
   });
 };
 
@@ -108,14 +127,18 @@ exports.deleteSelectedImages = (req, res) => {
 };
 
 exports.getImagesByLabels = (req, res) => {
-  const { labels } = req.body;
+  const { labels, page, limit } = req.body;
   console.log("Selected labels:", labels);
 
   if (!labels || labels.length === 0) {
     return res.status(400).json({ error: "No labels provided" });
   }
 
-  db.query('SELECT id, image FROM images WHERE label IN (?)', [labels], (err, results) => {
+  const pageNum = parseInt(page) || 1;
+  const pageSize = parseInt(limit) || 10;
+  const offset = (pageNum - 1) * pageSize;
+
+  db.query('SELECT id, image FROM images WHERE label IN (?) ORDER BY id ASC LIMIT ? OFFSET ?', [labels, pageSize, offset], (err, results) => {
     if (err) {
       console.error("Error fetching images by labels:", err);
       return res.status(500).json({ error: "Error fetching images" });
@@ -126,6 +149,17 @@ exports.getImagesByLabels = (req, res) => {
       data: Buffer.from(r.image).toString('base64')
     }));
 
-    res.json(images);
+    // Get total count for pagination
+    db.query('SELECT COUNT(*) AS total FROM images WHERE label IN (?)', [labels], (err, countResult) => {
+      if (err) {
+        console.error("Error fetching total count:", err);
+        return res.status(500).json({ error: "Error fetching total count" });
+      }
+
+      const total = countResult[0].total;
+      const totalPages = Math.ceil(total / pageSize);
+
+      res.json({ images, page: pageNum, totalPages, total });
+    });
   });
 };
