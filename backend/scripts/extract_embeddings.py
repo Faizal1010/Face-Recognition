@@ -1,3 +1,11 @@
+import os
+import warnings
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU usage for ONNX Runtime
+os.environ["ORT_DISABLE_CUDA"] = "1"       # Ensure ONNX runs only on CPU
+
+# Suppress the specific warning about CUDAExecutionProvider not being available
+warnings.filterwarnings("ignore", category=UserWarning, message=".*CUDAExecutionProvider.*")
+
 import cv2
 import numpy as np
 import insightface
@@ -5,101 +13,111 @@ from insightface.app import FaceAnalysis
 import mysql.connector
 import sys
 import json
-import os
 import time
 
 # Initialize face analysis
 app = FaceAnalysis()
-os.environ["ORT_DISABLE_CUDA"] = "1"  # Disable CUDA for CPU
 app.prepare(ctx_id=-1, det_size=(640, 640))  # Use CPU explicitly
 
+# Batch size to prevent overload
+BATCH_SIZE = 5
+
 def extract_and_store(image_paths, labels, client_ids, event_codes):
-    # Ensure that image_paths, labels, client_ids, and event_codes have the same length
     if len(image_paths) != len(labels) or len(image_paths) != len(client_ids) or len(image_paths) != len(event_codes):
         print(json.dumps({"status": "error", "message": "Mismatched number of images, labels, client_ids, and event_codes"}))
         return
 
-    conn = mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='zxcvbnm1010@',
-        database='face_recognition'
-    )
-    cursor = conn.cursor()
+    # Connecting to MySQL
+    try:
+        conn = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='zxcvbnm1010@',
+            database='face_recognition'
+        )
+        cursor = conn.cursor()
+    except mysql.connector.Error as err:
+        print(json.dumps({"status": "error", "message": f"MySQL Connection Failed: {err}"}))
+        return
 
-    # Process each image
-    for image_path, label, client_id, event_code in zip(image_paths, labels, client_ids, event_codes):
-        # Add a delay between each image processing
-        time.sleep(0.1)
-        
-        img = cv2.imread(image_path)
-        if img is None:
-            print(json.dumps({"status": "error", "message": f"Failed to load image {image_path}"}))
-            continue
+    results = []
+    progress = {"status": "progress", "processed": 0, "total": len(image_paths)}
 
-        faces = app.get(img)
+    for i in range(0, len(image_paths), BATCH_SIZE):
+        batch_paths = image_paths[i: i + BATCH_SIZE]
+        batch_labels = labels[i: i + BATCH_SIZE]
+        batch_client_ids = client_ids[i: i + BATCH_SIZE]
+        batch_event_codes = event_codes[i: i + BATCH_SIZE]
 
-        if label is None:
-            label = "Unknown"
+        for image_path, label, client_id, event_code in zip(batch_paths, batch_labels, batch_client_ids, batch_event_codes):
+            time.sleep(0.1)  # Avoid overloading system
 
-        with open(image_path, 'rb') as img_file:
-            img_data = img_file.read()
-            # Insert image data into the 'images' table, including client_id and event_code
-            cursor.execute("""
-                INSERT INTO images (image, label, client_id, event_code)
-                VALUES (%s, %s, %s, %s)
-            """, (img_data, label, client_id, event_code))
-            img_id = cursor.lastrowid
+            img = cv2.imread(image_path)
+            if img is None:
+                results.append({"status": "error", "message": f"Failed to load image {image_path}"})
+                continue
 
-        if len(faces) == 0:
-            print(json.dumps({"status": "No face found", "image_id": img_id, "image": image_path}))
-        else:
-            for i, face in enumerate(faces):
-                embeddings = face.normed_embedding
-                cursor.execute(
-                    "INSERT INTO imageData (image_id, embeddings, headers) VALUES (%s, %s, %s)",
-                    (img_id, embeddings.tobytes(), f'Face {i+1}')
-                )
-            print(json.dumps({"status": "success", "id": img_id, "faces_detected": len(faces), "image": image_path}))
+            faces = app.get(img)
 
-        conn.commit()
+            with open(image_path, 'rb') as img_file:
+                img_data = img_file.read()
+                try:
+                    cursor.execute("""
+                        INSERT INTO images (image, label, client_id, event_code)
+                        VALUES (%s, %s, %s, %s)
+                    """, (img_data, label, client_id, event_code))
+                    img_id = cursor.lastrowid
+                except mysql.connector.Error as err:
+                    results.append({"status": "error", "message": f"MySQL Insert Failed: {err}"})
+                    continue
+
+            if len(faces) == 0:
+                results.append({"status": "No face found", "image_id": img_id, "image": image_path})
+            else:
+                face_data = []
+                for idx, face in enumerate(faces):
+                    embeddings = face.normed_embedding
+                    try:
+                        cursor.execute(
+                            "INSERT INTO imageData (image_id, embeddings, headers) VALUES (%s, %s, %s)",
+                            (img_id, embeddings.tobytes(), f'Face {idx+1}')
+                        )
+                        face_data.append(f'Face {idx+1}')
+                    except mysql.connector.Error as err:
+                        results.append({"status": "error", "message": f"MySQL Insert Failed: {err}"})
+                        continue
+                results.append({"status": "success", "id": img_id, "faces_detected": len(faces), "image": image_path, "faces": face_data})
+
+        conn.commit()  # Commit after batch
+
+        # Update progress after processing each batch
+        progress["processed"] += len(batch_paths)
 
     cursor.close()
     conn.close()
 
+    # Combine the progress and results into one output
+    final_output = {
+        "status": "completed",
+        "progress": progress,
+        "results": results
+    }
+
+    # Output final result
+    print(json.dumps(final_output))
+
 if __name__ == "__main__":
-    # Expect the image paths, client_ids, event_codes, and label as command-line arguments
-    image_paths = sys.argv[1:-3]  # All but the last three arguments are image paths
-    client_ids = sys.argv[-3]  # The third-to-last argument is the client_id
-    event_codes = sys.argv[-2]  # The second-to-last argument is the event_code
-    label = sys.argv[-1]  # The last argument is the label
+    json_file_path = sys.argv[1]
 
-    # Ensure that label is not empty
-    if label is None or label == "":
-        print(json.dumps({"status": "error", "message": "Label is required"}))
-    else:
-        extract_and_store(image_paths, [label] * len(image_paths), [client_ids] * len(image_paths), [event_codes] * len(image_paths))
+    try:
+        with open(json_file_path, 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
 
+        file_paths = json_data["filePaths"]
+        client_id = json_data["client_id"]
+        event_code = json_data["event_code"]
+        label = json_data["label"]
 
-
-
-
-
-
-
-# How to Pass the Data to the Script:
-# You need to pass the client_id and event_code as command-line arguments, in addition to the image paths and labels. For example, when running the script from the command line:
-
-# bash
-# Copy
-#                   python your_script.py path_to_image1 path_to_image2 ... client_id1 client_id2 ... event_code1 event_code2 ... label1 label2 ...
-# Example Command:
-
-# bash
-# Copy
-#                    python your_script.py image1.jpg image2.jpg A123 A124 EVT001 EVT002 Label1 Label2
-# Breakdown of Command:
-# image1.jpg, image2.jpg: The paths of the images you want to upload.
-# A123, A124: The client_id values corresponding to each image.
-# EVT001, EVT002: The event_code values corresponding to each image.
-# Label1, Label2: The labels for each image (optional).
+        extract_and_store(file_paths, [label] * len(file_paths), [client_id] * len(file_paths), [event_code] * len(file_paths))
+    except Exception as e:
+        print(json.dumps({"status": "error", "message": f"Failed to read JSON file: {str(e)}"}))

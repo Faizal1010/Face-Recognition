@@ -19,6 +19,7 @@
     <!-- Template CSS -->
     <script src="assets/js/vendors/color-modes.js"></script>
     <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+
     <script>
       document.addEventListener('DOMContentLoaded', () => {
           const token = localStorage.getItem('token');
@@ -242,8 +243,8 @@
       <section class="content-main">
         <div class="content-header">
           <div>
-            <h2 class="content-title card-title">Products grid</h2>
-            <p>Lorem ipsum dolor sit amet.</p>
+            <h2 class="content-title card-title">Images Grid</h2>
+            <p>See all your uploaded images.</p>
           </div>
           <div>
             <a href="#" class="btn btn-light rounded font-md">Export</a>
@@ -251,258 +252,102 @@
             <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
           </div>
         </div>
-        <div class="card mb-4">
-          <header class="card-header">
-            <div class="row gx-3">
-              <div class="col-lg-4 col-md-6 me-auto">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  class="form-control"
-                />
-              </div>
-              <div class="col-lg-2 col-6 col-md-3">
-                <select class="form-select">
-                  <option>All category</option>
-                  <option>Electronics</option>
-                  <option>Clothings</option>
-                  <option>Something else</option>
-                </select>
-              </div>
-              <div class="col-lg-2 col-6 col-md-3">
-                <select class="form-select">
-                  <option>Latest added</option>
-                  <option>Cheap first</option>
-                  <option>Most viewed</option>
-                </select>
-              </div>
+        <div class="">
+          <header class="card-header" style="padding: 20px;">
+            <div id="labelFilters">
+              <label><input type="checkbox" id="allCheckbox" checked/> All</label>
             </div>
           </header>
-          <!-- card-header end// -->
-          <div class="card-body">
-            <div id="grid-card" class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/1.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Haagen-Dazs Caramel Cone Ice</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
+          <style>
+            .gallery {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: space-evenly;
+              gap: 10px;
+              background-color: #2a3042;
+              padding: 10px;
+            }
+          
+            .gallery-item {
+              position: relative;
+              overflow: hidden;
+              border-radius: 8px;
+              cursor: pointer;
+              width: 200px;
+              height: 300px;
+            }
+          
+            .gallery-item img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              transition: transform 0.3s ease-in-out;
+            }
+          
+            .gallery-item:hover img {
+              transform: scale(1.1);
+            }
+          
+            .lightbox {
+              display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.8);
+              justify-content: center;
+              align-items: center;
+              z-index: 999999999;
+            }
+          
+            .lightbox img {
+              max-width: 80%;
+              max-height: 80%;
+              border-radius: 8px;
+            }
+          
+            .close, .prev, .next {
+              position: absolute;
+              top: 50%;
+              transform: translateY(-50%);
+              background: rgba(255, 255, 255, 0.3);
+              color: white;
+              border: none;
+              padding: 10px;
+              cursor: pointer;
+              font-size: 24px;
+              border-radius: 5px;
+            }
+          
+            .close {
+              top: 10px;
+              right: 20px;
+              font-size: 30px;
+            }
+          
+            .prev {
+              left: 20px;
+            }
+          
+            .next {
+              right: 20px;
+            }
+          
+            @media (max-width: 600px) {
+              .gallery {
+                grid-template-columns: repeat(2, 1fr);
+              }
+            }
+          </style>
+          <div>
+              <div class="gallery" id="gallery"></div>
+              <div class="lightbox" id="lightbox">
+                <span class="close" onclick="closeLightbox()">&times;</span>
+                <img id="lightbox-img">
+                <button class="prev" onclick="changeImage(-1)">&#10094;</button>
+                <button class="next" onclick="changeImage(1)">&#10095;</button>
               </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/2.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Seeds of Change Organic Quinoa</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/3.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >All Natural Italian-Style</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/4.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Boomchick apop Sweet & Salty</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/5.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Haagen-Dazs Caramel Cone Ice</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/6.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Haagen-Dazs Caramel Cone Ice</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/7.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Haagen-Dazs Caramel Cone Ice</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/8.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Apple Airpods CB-133</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/9.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Apple Airpods CB-133</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-              <div class="col">
-                <div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="assets/imgs/items/10.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >Apple Airpods CB-133</a
-                    >
-                    <div class="price mb-2">$179.00</div>
-                    <!-- price.// -->
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>
-                <!-- card-product  end// -->
-              </div>
-              <!-- col.// -->
-            </div>
-            <!-- row.// -->
           </div>
           <!-- card-body end// -->
         </div>
@@ -552,7 +397,7 @@
     <script src="assets/js/main.js?v=6.0" type="text/javascript"></script>
 
 
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
   fetch('http://localhost:8000/products/getproducts')
     .then(response => response.json())
@@ -579,7 +424,6 @@ function renderProducts(products) {
                       >${product.ProductName}</a
                     >
                     <div class="price mb-2">₹${product.Price}</div>
-                    <!-- price.// -->
                     <a href="#" class="btn btn-sm font-sm rounded btn-brand">
                       <i class="material-icons md-edit"></i> Edit
                     </a>
@@ -592,8 +436,122 @@ function renderProducts(products) {
     cardBody.appendChild(productArticle);
   });
 }
+    </script> -->
 
-    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  let images = [];
+  let currentIndex = 0;
+  let selectedLabels = [];
+
+  async function loadLabels() {
+    const response = await fetch('http://localhost:3000/get-labels'); 
+    const labels = await response.json();
+    const labelFilters = document.getElementById('labelFilters');
+
+    new Set(labels).forEach(label => {
+      const labelContainer = document.createElement('label');
+      const checkbox = document.createElement('input');
+      
+      checkbox.type = 'checkbox';
+      checkbox.value = label;
+      checkbox.classList.add('labelCheckbox');
+
+      labelContainer.appendChild(checkbox);
+      labelContainer.appendChild(document.createTextNode(` ${label}`));
+      labelFilters.appendChild(labelContainer);
+    });
+
+    document.getElementById('allCheckbox').addEventListener('change', toggleAll);
+    document.querySelectorAll('.labelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
+
+    loadImages();
+  }
+
+  function toggleAll() {
+    selectedLabels = [];
+    document.querySelectorAll('.labelCheckbox').forEach(cb => cb.checked = false);
+    loadImages();
+  }
+
+  function updateSelectedLabels() {
+    selectedLabels = [...document.querySelectorAll('.labelCheckbox:checked')].map(cb => cb.value);
+    document.getElementById('allCheckbox').checked = selectedLabels.length === 0;
+    loadImages();
+  }
+
+  async function loadImages() {
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = "";
+
+    let url = selectedLabels.length > 0 ? 'http://localhost:3000/label-based-fetch' : 'http://localhost:3000/images';
+    const options = selectedLabels.length > 0 ? {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ labels: selectedLabels })
+    } : {};
+
+    const response = await fetch(url, options);
+    const imagesData = await response.json();
+    images = imagesData.map(img => `data:image/jpeg;base64,${img.data}`);
+
+    images.forEach((src, index) => {
+      const div = document.createElement("div");
+      div.className = "gallery-item";
+      div.innerHTML = `<img src="${src}" onclick="openLightbox(${index})">`;
+      gallery.appendChild(div);
+    });
+  }
+
+  function openLightbox(index) {
+    currentIndex = index;
+    document.getElementById("lightbox").style.display = "flex";
+    updateLightbox();
+  }
+
+  function closeLightbox() {
+    document.getElementById("lightbox").style.display = "none";
+  }
+
+  function changeImage(step) {
+    currentIndex = (currentIndex + step + images.length) % images.length;
+    updateLightbox();
+  }
+
+  function updateLightbox() {
+    document.getElementById("lightbox-img").src = images[currentIndex];
+  }
+
+  window.onload = loadLabels;
+  </script>
 
 <script>
   document.getElementById('logout').addEventListener('click', function () {
