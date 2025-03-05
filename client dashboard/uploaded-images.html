@@ -343,7 +343,7 @@
         </div>
         <div class="image-section">
           <header class="card-header" style="padding: 20px;">
-            <div id="imageLabelFilters">
+            <div id="imageLabelFilters" style="display: flex; overflow-x: auto;">
               <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
             </div>
           </header>
@@ -428,17 +428,55 @@
         const labelFilters = document.getElementById('imageLabelFilters');
     
         new Set(labels).forEach(label => {
-          const labelContainer = document.createElement('label');
-          const checkbox = document.createElement('input');
-          
-          checkbox.type = 'checkbox';
-          checkbox.value = label;
-          checkbox.classList.add('imageLabelCheckbox');
-    
-          labelContainer.appendChild(checkbox);
-          labelContainer.appendChild(document.createTextNode(` ${label}`));
-          labelFilters.appendChild(labelContainer);
-        });
+    const labelContainer = document.createElement('label');
+    labelContainer.classList.add('custom-checkbox-label');
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = label;
+    checkbox.classList.add('imageLabelCheckbox');
+
+    labelContainer.appendChild(checkbox);
+    labelContainer.appendChild(document.createTextNode(` ${label}`));
+
+    labelFilters.appendChild(labelContainer);
+});
+
+// CSS for attractive capsule-style buttons
+const style = document.createElement('style');
+style.innerHTML = `
+    .custom-checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        margin: 5px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background-color: #3BB77E;
+        color: white;
+        border: none;
+        transition: 0.3s ease-in-out;
+    }
+    .custom-checkbox-label:hover {
+        opacity: 0.9;
+    }
+    .imageLabelCheckbox {
+        display: none; /* Hide actual checkbox */
+    }
+    .imageLabelCheckbox:checked + label {
+        background-color: #FF5733 !important;
+    }
+    #labelFilters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+`;
+document.head.appendChild(style);
+
 
         document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
         document.querySelectorAll('.imageLabelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
