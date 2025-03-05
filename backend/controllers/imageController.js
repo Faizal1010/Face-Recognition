@@ -15,7 +15,8 @@ exports.getImages = (req, res) => {
   const pageSize = parseInt(limit) || 10;
   const offset = (pageNum - 1) * pageSize;
 
-  db.query('SELECT id, image FROM images ORDER BY id ASC LIMIT ? OFFSET ?', [pageSize, offset], (err, results) => {
+  db.query('SELECT id, image FROM images ORDER BY id ASC LIMIT ? OFFSET ?', 
+    [pageSize, offset], (err, results) => {
     if (err) {
       console.error('Error fetching images:', err);
       return res.status(500).json({ error: 'Error fetching images' });
@@ -36,10 +37,13 @@ exports.getImages = (req, res) => {
       const total = countResult[0].total;
       const totalPages = Math.ceil(total / pageSize);
 
+      console.log(`Total images: ${total}, Total pages: ${totalPages}`); // Debugging
+
       res.json({ images, page: pageNum, totalPages, total });
     });
   });
 };
+
 
 exports.deleteImage = (req, res) => {
   const { id } = req.params;
@@ -138,7 +142,8 @@ exports.getImagesByLabels = (req, res) => {
   const pageSize = parseInt(limit) || 10;
   const offset = (pageNum - 1) * pageSize;
 
-  db.query('SELECT id, image FROM images WHERE label IN (?) ORDER BY id ASC LIMIT ? OFFSET ?', [labels, pageSize, offset], (err, results) => {
+  db.query('SELECT id, image FROM images WHERE FIND_IN_SET(label, ?) ORDER BY id ASC LIMIT ? OFFSET ?', 
+    [labels.join(','), pageSize, offset], (err, results) => {
     if (err) {
       console.error("Error fetching images by labels:", err);
       return res.status(500).json({ error: "Error fetching images" });
@@ -150,7 +155,8 @@ exports.getImagesByLabels = (req, res) => {
     }));
 
     // Get total count for pagination
-    db.query('SELECT COUNT(*) AS total FROM images WHERE label IN (?)', [labels], (err, countResult) => {
+    db.query('SELECT COUNT(*) AS total FROM images WHERE FIND_IN_SET(label, ?)', [labels.join(',')], 
+      (err, countResult) => {
       if (err) {
         console.error("Error fetching total count:", err);
         return res.status(500).json({ error: "Error fetching total count" });
@@ -158,6 +164,8 @@ exports.getImagesByLabels = (req, res) => {
 
       const total = countResult[0].total;
       const totalPages = Math.ceil(total / pageSize);
+      
+      console.log(`Total images: ${total}, Total pages: ${totalPages}`); // Debugging
 
       res.json({ images, page: pageNum, totalPages, total });
     });

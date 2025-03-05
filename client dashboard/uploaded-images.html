@@ -50,6 +50,95 @@
           }
       }
   </script>
+<style>
+  .imageGrid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 10px;
+    background-color: #2a3042;
+    padding: 10px;
+  }
+  
+  .imageGridItem {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 200px;
+    height: 300px;
+  }
+  
+  .imageGridItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .imageGridItem:hover img {
+    transform: scale(1.1);
+  }
+  
+  .imageLightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 999999999;
+  }
+  
+  .imageLightbox img {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 8px;
+  }
+  
+  .imageClose, .imagePrev, .imageNext {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(62, 62, 62, 0.3);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 5px;
+  }
+  
+  .imageClose {
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+  }
+  
+  .imagePrev {
+    left: 20px;
+  }
+  
+  .imageNext {
+    right: 20px;
+  }
+  
+  @media (max-width: 600px) {
+    .imageGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .imagePaginationButton {
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+  position: relative !important;
+}
+
+</style>
   </head>
 
   <body>
@@ -252,109 +341,32 @@
             <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
           </div>
         </div>
-        <div class="">
+        <div class="image-section">
           <header class="card-header" style="padding: 20px;">
-            <div id="labelFilters">
-              <label><input type="checkbox" id="allCheckbox" checked/> All</label>
+            <div id="imageLabelFilters">
+              <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
             </div>
           </header>
-          <style>
-            .gallery {
-              display: flex;
-              flex-wrap: wrap;
-              justify-content: space-evenly;
-              gap: 10px;
-              background-color: #2a3042;
-              padding: 10px;
-            }
-          
-            .gallery-item {
-              position: relative;
-              overflow: hidden;
-              border-radius: 8px;
-              cursor: pointer;
-              width: 200px;
-              height: 300px;
-            }
-          
-            .gallery-item img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              transition: transform 0.3s ease-in-out;
-            }
-          
-            .gallery-item:hover img {
-              transform: scale(1.1);
-            }
-          
-            .lightbox {
-              display: none;
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.8);
-              justify-content: center;
-              align-items: center;
-              z-index: 999999999;
-            }
-          
-            .lightbox img {
-              max-width: 80%;
-              max-height: 80%;
-              border-radius: 8px;
-            }
-          
-            .close, .prev, .next {
-              position: absolute;
-              top: 50%;
-              transform: translateY(-50%);
-              background: rgba(62, 62, 62, 0.3);
-              color: white;
-              border: none;
-              padding: 10px;
-              cursor: pointer;
-              font-size: 24px;
-              border-radius: 5px;
-            }
-          
-            .close {
-              top: 10px;
-              right: 20px;
-              font-size: 30px;
-            }
-          
-            .prev {
-              left: 20px;
-            }
-          
-            .next {
-              right: 20px;
-            }
-          
-            @media (max-width: 600px) {
-              .gallery {
-                grid-template-columns: repeat(2, 1fr);
-              }
-            }
-          </style>
+        
           <div>
-              <div class="gallery" id="gallery"></div>
-              <div class="lightbox" id="lightbox">
-                <span class="close" onclick="closeLightbox()">&times;</span>
-                <img id="lightbox-img">
-                <button class="prev" onclick="changeImage(-1)">&#10094;</button>
-                <button class="next" onclick="changeImage(1)">&#10095;</button>
-              </div>
+            <div class="imageGrid" id="imageContainer"></div>
+            <div class="imageLightbox" id="imageLightbox">
+              <span class="imageClose" onclick="closeImageLightbox()">×</span>
+              <img id="imageLightboxImg">
+              <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
+              <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+            </div>
           </div>
-          <!-- card-body end// -->
         </div>
-        <!-- pagination by chatgpt -->
-        <div id="paginationButtons" style="display: flex; gap: 5px; margin-top: 10px;"></div>
+        <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
       </section>
-      <!-- content-main end// -->
+
+
+
+
+
+
+
       <footer class="main-footer font-xs">
         <div class="row pb-30 pt-15">
           <div class="col-sm-6">
@@ -374,50 +386,9 @@
     <script src="assets/js/vendors/select2.min.js"></script>
     <script src="assets/js/vendors/perfect-scrollbar.js"></script>
     <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
-    <!-- Main Script -->
     <script src="assets/js/main.js?v=6.0" type="text/javascript"></script>
 
 
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', () => {
-  fetch('http://localhost:8000/products/getproducts')
-    .then(response => response.json())
-    .then(data => renderProducts(data))
-    .catch(error => console.error('Error fetching products:', error));
-});
-
-function renderProducts(products) {
-    console.log(products)
-  const cardBody = document.getElementById('grid-card');
-
-  cardBody.innerHTML = '';
-
-  products.forEach(product => {
-    const productArticle = document.createElement('div');
-    productArticle.classList.add('col');
-
-    productArticle.innerHTML = `<div class="card card-product-grid">
-                  <a href="#" class="img-wrap">
-                    <img src="./assets/ProductsImages/${product.ProductName}.jpg" alt="Product" />
-                  </a>
-                  <div class="info-wrap">
-                    <a href="#" class="title text-truncate"
-                      >${product.ProductName}</a
-                    >
-                    <div class="price mb-2">₹${product.Price}</div>
-                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                      <i class="material-icons md-edit"></i> Edit
-                    </a>
-                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                      <i class="material-icons md-delete_forever"></i> Delete
-                    </a>
-                  </div>
-                </div>`;
-
-    cardBody.appendChild(productArticle);
-  });
-}
-    </script> -->
 
 
 
@@ -442,154 +413,164 @@ function renderProducts(products) {
 
 
 
-
-
-
-
-
-
-    <script>
+    <script> 
       let images = [];
       let currentIndex = 0;
       let selectedLabels = [];
       let currentPage = 1;
-      let imagesPerPage = 10;
+      let imagesPerPage = 20;
+      let totalPages = 1; 
     
       async function loadLabels() {
+        console.log("DOM Loaded");
         const response = await fetch('http://localhost:3000/get-labels'); 
         const labels = await response.json();
-        const labelFilters = document.getElementById('labelFilters');
+        const labelFilters = document.getElementById('imageLabelFilters');
     
         new Set(labels).forEach(label => {
           const labelContainer = document.createElement('label');
           const checkbox = document.createElement('input');
-
-          checkbox.backgroundColor= 'black'
           
           checkbox.type = 'checkbox';
           checkbox.value = label;
-          checkbox.classList.add('labelCheckbox');
+          checkbox.classList.add('imageLabelCheckbox');
     
           labelContainer.appendChild(checkbox);
           labelContainer.appendChild(document.createTextNode(` ${label}`));
           labelFilters.appendChild(labelContainer);
         });
-    
-        document.getElementById('allCheckbox').addEventListener('change', toggleAll);
-        document.querySelectorAll('.labelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
+
+        document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
+        document.querySelectorAll('.imageLabelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
     
         loadImages();
       }
     
       function toggleAll() {
         selectedLabels = [];
-        document.querySelectorAll('.labelCheckbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.imageLabelCheckbox').forEach(cb => cb.checked = false);
+        currentPage = 1; 
         loadImages();
       }
     
       function updateSelectedLabels() {
-        selectedLabels = [...document.querySelectorAll('.labelCheckbox:checked')].map(cb => cb.value);
-        document.getElementById('allCheckbox').checked = selectedLabels.length === 0;
+        selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
+        document.getElementById('imageAllCheckbox').checked = selectedLabels.length === 0;
+        currentPage = 1; 
         loadImages();
       }
     
       async function loadImages() {
-    const gallery = document.getElementById("gallery");
-    gallery.innerHTML = "";
-
-    let url = selectedLabels.length > 0 ? 'http://localhost:3000/label-based-fetch' : 'http://localhost:3000/images';
-    const options = selectedLabels.length > 0 ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ labels: selectedLabels })
-    } : {};
-
-    const response = await fetch(url, options);
-    const imagesData = await response.json();
-    images = imagesData.map(img => `data:image/jpeg;base64,${img.data}`);
-
-    // Reset pagination to page 1 when fetching new images
-    currentPage = 1;
-
-    displayImages();
-    createPaginationButtons();
-}
-
-    
-      function displayImages() {
-        const gallery = document.getElementById("gallery");
+        console.log("Loading images for page:", currentPage);
+        const gallery = document.getElementById("imageContainer");
         gallery.innerHTML = "";
-    
-        const start = (currentPage - 1) * imagesPerPage;
-        const end = start + imagesPerPage;
-        const imagesToShow = images.slice(start, end);
-    
-        imagesToShow.forEach((src, index) => {
+
+        let url = selectedLabels.length > 0 
+            ? 'http://localhost:3000/label-based-fetch' 
+            : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}`;
+
+        const options = selectedLabels.length > 0 ? {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ labels: selectedLabels, page: currentPage, limit: imagesPerPage })
+        } : { method: 'GET' };
+
+        const response = await fetch(url, options);
+        const imagesData = await response.json();
+
+        images = imagesData.images.map(img => `data:image/jpeg;base64,${img.data}`);
+        totalPages = imagesData.totalPages; 
+
+        console.log(`Fetched images: ${images.length}, Total pages: ${totalPages}, Current Page: ${currentPage}`);
+
+        displayImages();
+        createPaginationButtons();
+      }
+
+      function displayImages() {
+        const gallery = document.getElementById("imageContainer");
+        gallery.innerHTML = "";
+
+        images.forEach((src, index) => {
           const div = document.createElement("div");
-          div.className = "gallery-item";
-          div.innerHTML = `<img src="${src}" onclick="openLightbox(${start + index})">`;
+          div.className = "imageGridItem";
+          div.innerHTML = `<img src="${src}" onclick="openImageLightbox(${index})">`;
           gallery.appendChild(div);
         });
       }
     
       function createPaginationButtons() {
-        const paginationContainer = document.getElementById("paginationButtons");
+        console.log("Creating pagination buttons for totalPages:", totalPages);
+        const paginationContainer = document.getElementById("imagePagination");
         paginationContainer.innerHTML = "";
-    
-        const totalPages = Math.ceil(images.length / imagesPerPage);
+
+        if (totalPages <= 1) return; 
+
         for (let i = 1; i <= totalPages; i++) {
           const button = document.createElement("button");
-          button.style.backgroundColor = '#3BB77E'
-          button.style.borderRadius = '5px'
-          button.style.border = 'none'
-          button.style.padding = '6px'
-          button.style.height = '30px'
-          button.style.width = '30px'
-          button.style.color = 'white'
+          button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
+          button.style.borderRadius = '5px';
+          button.style.border = 'none';
+          button.style.padding = '6px';
+          button.style.height = '30px';
+          button.style.width = '30px';
+          button.style.color = 'white';
+          button.style.cursor = 'pointer';
           button.innerText = i;
-          button.classList.add("pagination-button");
-          if (i === currentPage) button.classList.add("active");
-          button.addEventListener("click", () => {
-            currentPage = i;
-            displayImages();
-            createPaginationButtons();
+          button.classList.add("imagePaginationButton");
+          
+          console.log(`Adding listener for page ${i}`);
+          button.addEventListener("click", () => { 
+              console.log(`Clicked page ${i}`);
+              changePage(i);
           });
+
           paginationContainer.appendChild(button);
         }
+
+        console.log(`Pagination Buttons Created: ${totalPages}`);
       }
-    
-      function openLightbox(index) {
+
+      function changePage(page) {
+        console.log("Button Clicked: Page", page);  // ✅ Debugging Click Event
+        if (page !== currentPage) { 
+            currentPage = page;
+            console.log(`Page changed to: ${currentPage}`);  // ✅ Debugging Current Page Update
+            loadImages();
+        }
+      }
+
+      function openImageLightbox(index) {
         currentIndex = index;
-        document.getElementById("lightbox").style.display = "flex";
-        updateLightbox();
+        document.getElementById("imageLightbox").style.display = "flex";
+        updateImageLightbox();
       }
     
-      function closeLightbox() {
-        document.getElementById("lightbox").style.display = "none";
+      function closeImageLightbox() {
+        document.getElementById("imageLightbox").style.display = "none";
       }
     
-      function changeImage(step) {
+      function changeImageDisplay(step) {
         currentIndex = (currentIndex + step + images.length) % images.length;
-        updateLightbox();
+        updateImageLightbox();
       }
     
-      function updateLightbox() {
-        document.getElementById("lightbox-img").src = images[currentIndex];
+      function updateImageLightbox() {
+        document.getElementById("imageLightboxImg").src = images[currentIndex];
       }
     
       window.onload = loadLabels;
-    </script>
+</script>
+
+
 
 <script>
   document.getElementById('logout').addEventListener('click', function () {
-// Remove the token from localStorage
 localStorage.removeItem('token');
 
-// Alert user about successful logout
 alert('You have been logged out successfully!');
 
-// Redirect to login page
-window.location.href = 'page-account-login.html'; // Redirect to login page after logout
+window.location.href = 'page-account-login.html';
 });
 </script>
   </body>

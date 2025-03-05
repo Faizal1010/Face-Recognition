@@ -99,14 +99,14 @@
       } : {};
 
       const response = await fetch(url, options);
-      const images = await response.json();
+      const imagesData = await response.json();
       
-      console.log('images from label', images)
+      // console.log('images from label', images)
 
       selectedImages = [];
       toggleBulkActions();
 
-      images.forEach((img) => {
+      imagesData.images.forEach((img) => {
         const imgElement = document.createElement('img');
         imgElement.src = `data:image/jpeg;base64,${img.data}`;
         imgElement.width = 150;
