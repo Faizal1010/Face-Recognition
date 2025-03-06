@@ -342,7 +342,13 @@
           </div>
         </div>
         <div class="image-section">
-          <header class="card-header" style="padding: 20px;">
+          <header class="card-header" style="padding: 20px;display: flex; justify-content: space-between;">
+            <div>
+              <label for="event" style="margin-bottom: 5px;">Event:</label>
+              <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <!-- <option value="" selected>Events</option> -->
+              </select>
+            </div>
             <div id="imageLabelFilters" style="display: flex; overflow-x: auto; align-items: center;">
               <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
             </div>
@@ -408,7 +414,64 @@
 
 
 
+    <script>
+      const token = localStorage.getItem('token');
+      const decodedToken = decodeJWT(token);
+      console.log(decodedToken);
+    
+      function decodeJWT(token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+          return payload;
+        } catch (error) {
+          console.error('Error decoding JWT token:', error);
+          return null;
+        }
+      }
+    
+      fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
+        method: 'GET',
+      })
+      .then(response => response.json())
+      .then(data => displayEvents(data.events))
+      .catch(error => console.error('Error fetching events:', error));
+    
+      function displayEvents(events) {
+        const eventSelect = document.getElementById('event');
+        eventSelect.innerHTML = ''; // Clear any existing options
+    
+        if (!events) {
+          // If no events are found, show a "No Events" option
+          const noEventsOption = document.createElement('option');
+          noEventsOption.value = '';
+          noEventsOption.textContent = 'No Events Available';
+          eventSelect.appendChild(noEventsOption);
+          return;
+        }
+    
+        // Populate the select dropdown with event options
+        events.forEach(event => {
+          const option = document.createElement('option');
+          option.value = event.event_code;
+          option.textContent = event.name;
+          eventSelect.appendChild(option);
+        });
+    
+        // Immediately send the selected event ID after options are populated
+        const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+        loadLabels(selectedOption.value);  // Send the selected event's code to loadLabels
 
+
+
+        eventSelect.addEventListener('change', function() {
+          const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+          console.log('Selected Event ID:', selectedOption.value);
+          console.log('Selected Event Name:', selectedOption.textContent);
+
+          loadLabels(selectedOption.value)
+        });
+      }
+    </script>
 
 
 
@@ -420,33 +483,40 @@
       let currentPage = 1;
       let imagesPerPage = 20;
       let totalPages = 1; 
-  
-      async function loadLabels() {
-          console.log("DOM Loaded");
-          const response = await fetch('http://localhost:3000/get-labels'); 
+    
+      async function loadLabels(eventId) {
+        console.log(eventId)
+          const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
           const labels = await response.json();
+          console.log("labels are ", new Set(labels))
           const labelFilters = document.getElementById('imageLabelFilters');
-  
+          const allCheckboxLabel = document.getElementById('imageAllCheckbox').parentElement;
+          labelFilters.innerHTML = '';
+          labelFilters.appendChild(allCheckboxLabel);
+    
           new Set(labels).forEach(label => {
               const labelContainer = document.createElement('label');
               labelContainer.classList.add('custom-checkbox-label');
-  
+    
               const checkbox = document.createElement('input');
               checkbox.type = 'checkbox';
               checkbox.value = label;
               checkbox.classList.add('imageLabelCheckbox');
-  
+              checkbox.checked = true; // Ensure labels are selected on load
+    
               labelContainer.appendChild(checkbox);
               labelContainer.appendChild(document.createTextNode(` ${label}`));
-  
+    
               labelFilters.appendChild(labelContainer);
-  
+    
+              labelContainer.style.backgroundColor = "#FF5733"; // Set selected color on load
+    
               checkbox.addEventListener('change', function () {
                   labelContainer.style.backgroundColor = this.checked ? '#FF5733' : '#3BB77E';
+                  updateSelectedLabels();
               });
           });
-  
-          // CSS for attractive capsule-style buttons
+    
           const style = document.createElement('style');
           style.innerHTML = `
               .custom-checkbox-label {
@@ -477,61 +547,139 @@
               }
           `;
           document.head.appendChild(style);
-  
+    
+          document.getElementById('imageAllCheckbox').checked = true;
           document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
-          document.querySelectorAll('.imageLabelCheckbox').forEach(cb => cb.addEventListener('change', updateSelectedLabels));
-  
+    
+          selectedLabels = new Set(labels);
+          console.log("Selected Labels:", selectedLabels);
+          
           loadImages();
       }
-  
+    
       function toggleAll() {
-          selectedLabels = [];
-          document.querySelectorAll('.imageLabelCheckbox').forEach(cb => {
-              cb.checked = false;
-              cb.parentElement.style.backgroundColor = '#3BB77E'; // Reset color when "All" is selected
-          });
+          const allCheckbox = document.getElementById("imageAllCheckbox");
+          const checkboxes = document.querySelectorAll(".imageLabelCheckbox");
+          
+          if (allCheckbox.checked) {
+              selectedLabels = Array.from(checkboxes).map(cb => cb.value);
+              checkboxes.forEach(cb => {
+                  cb.checked = true;
+                  cb.parentElement.style.backgroundColor = "#FF5733";
+              });
+          } else {
+              selectedLabels = [];
+              checkboxes.forEach(cb => {
+                  cb.checked = false;
+                  cb.parentElement.style.backgroundColor = "#3BB77E";
+              });
+          }
+    
+          console.log("Selected Labels:", selectedLabels);
           currentPage = 1; 
           loadImages();
       }
-  
+    
       function updateSelectedLabels() {
           selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
           document.getElementById('imageAllCheckbox').checked = selectedLabels.length === 0;
+          console.log("Selected Labels:", selectedLabels);
           currentPage = 1; 
           loadImages();
       }
-  
+    
       async function loadImages() {
-          console.log("Loading images for page:", currentPage);
           const gallery = document.getElementById("imageContainer");
           gallery.innerHTML = "";
-  
-          let url = selectedLabels.length > 0 
-              ? 'http://localhost:3000/label-based-fetch' 
-              : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}`;
-  
-          const options = selectedLabels.length > 0 ? {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ labels: selectedLabels, page: currentPage, limit: imagesPerPage })
-          } : { method: 'GET' };
-  
-          const response = await fetch(url, options);
-          const imagesData = await response.json();
-  
-          images = imagesData.images.map(img => `data:image/jpeg;base64,${img.data}`);
-          totalPages = imagesData.totalPages; 
-  
-          console.log(`Fetched images: ${images.length}, Total pages: ${totalPages}, Current Page: ${currentPage}`);
-  
-          displayImages();
-          createPaginationButtons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          const eventSelect = document.getElementById('event');
+
+const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+let url = selectedLabels.length > 0 
+    ? 'http://localhost:3000/label-based-fetch' 
+    : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}`;
+
+const options = selectedLabels.length > 0 
+    ? {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            labels: selectedLabels,
+            page: currentPage,
+            limit: imagesPerPage,
+            eventId: selectedOption.value  // Send selected event value here
+        })
+    } 
+    : { 
+        method: 'GET' 
+    };
+
+const response = await fetch(url, options);
+const imagesData = await response.json();
+
+images = imagesData.images.map(img => `data:image/jpeg;base64,${img.data}`);
+totalPages = imagesData.totalPages; 
+
+displayImages();
+createPaginationButtons();
+
       }
-  
+    
       function displayImages() {
           const gallery = document.getElementById("imageContainer");
           gallery.innerHTML = "";
-  
+    
           images.forEach((src, index) => {
               const div = document.createElement("div");
               div.className = "imageGridItem";
@@ -539,14 +687,13 @@
               gallery.appendChild(div);
           });
       }
-  
+    
       function createPaginationButtons() {
-          console.log("Creating pagination buttons for totalPages:", totalPages);
           const paginationContainer = document.getElementById("imagePagination");
           paginationContainer.innerHTML = "";
-  
+    
           if (totalPages <= 1) return; 
-  
+    
           for (let i = 1; i <= totalPages; i++) {
               const button = document.createElement("button");
               button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
@@ -559,19 +706,16 @@
               button.style.cursor = 'pointer';
               button.innerText = i;
               button.classList.add("imagePaginationButton");
-  
-              console.log(`Adding listener for page ${i}`);
+    
               button.addEventListener("click", () => { 
                   console.log(`Clicked page ${i}`);
                   changePage(i);
               });
-  
+    
               paginationContainer.appendChild(button);
           }
-  
-          console.log(`Pagination Buttons Created: ${totalPages}`);
-      }
-  
+          }
+    
       function changePage(page) {
           console.log("Button Clicked: Page", page);  
           if (page !== currentPage) { 
@@ -580,28 +724,30 @@
               loadImages();
           }
       }
-  
+    
       function openImageLightbox(index) {
           currentIndex = index;
           document.getElementById("imageLightbox").style.display = "flex";
           updateImageLightbox();
       }
-  
+    
       function closeImageLightbox() {
           document.getElementById("imageLightbox").style.display = "none";
       }
-  
+    
       function changeImageDisplay(step) {
           currentIndex = (currentIndex + step + images.length) % images.length;
           updateImageLightbox();
       }
-  
+    
       function updateImageLightbox() {
           document.getElementById("imageLightboxImg").src = images[currentIndex];
       }
-  
-      window.onload = loadLabels;
-  </script>
+    
+      // window.onload = loadLabels;
+    </script>
+    
+    
   
 
 

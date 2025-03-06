@@ -10,13 +10,16 @@ const db = mysql.createConnection({
 
 
 exports.getImages = (req, res) => {
-  let { page, limit } = req.query;
+  let { page, limit, eventId } = req.query;  // If you're passing eventId in query params
+  console.log("Selected Event ID from getImages:", eventId);
+
   const pageNum = parseInt(page) || 1;
   const pageSize = parseInt(limit) || 10;
   const offset = (pageNum - 1) * pageSize;
 
-  db.query('SELECT id, image FROM images ORDER BY id ASC LIMIT ? OFFSET ?', 
-    [pageSize, offset], (err, results) => {
+  // Modify query to include event_code filter (eventId)
+  const query = 'SELECT id, image FROM images WHERE event_code = ? ORDER BY id ASC LIMIT ? OFFSET ?';
+  db.query(query, [eventId, pageSize, offset], (err, results) => {
     if (err) {
       console.error('Error fetching images:', err);
       return res.status(500).json({ error: 'Error fetching images' });
@@ -28,7 +31,8 @@ exports.getImages = (req, res) => {
     }));
 
     // Get total count for pagination metadata
-    db.query('SELECT COUNT(*) AS total FROM images', (err, countResult) => {
+    const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE event_code = ?';
+    db.query(countQuery, [eventId], (err, countResult) => {
       if (err) {
         console.error('Error fetching total count:', err);
         return res.status(500).json({ error: 'Error fetching total count' });
@@ -37,12 +41,11 @@ exports.getImages = (req, res) => {
       const total = countResult[0].total;
       const totalPages = Math.ceil(total / pageSize);
 
-      console.log(`Total images: ${total}, Total pages: ${totalPages}`); // Debugging
-
       res.json({ images, page: pageNum, totalPages, total });
     });
   });
 };
+
 
 
 exports.deleteImage = (req, res) => {
@@ -72,18 +75,26 @@ exports.deleteImage = (req, res) => {
 };
 
 exports.getLabels = (req, res) => {
-  db.query('SELECT label FROM images', (err, results) => {
+  const eventId = req.params.eventId; // Get eventId from request body
+
+  if (!eventId) {
+    return res.status(400).json({ error: 'eventId is required' }); // Check if eventId is provided
+  }
+
+  // Modify the query to filter by event_code
+  db.query('SELECT label FROM images WHERE event_code = ?', [eventId], (err, results) => {
     if (err) {
       console.error('Error fetching labels:', err);
       return res.status(500).json({ error: 'Error fetching labels' }); // Send JSON error response
     }
-    
+
     // Extract the labels from the results
     const labels = results.map(r => r.label);
-    
+
     res.json(labels); // Send the list of labels as a JSON response
   });
 };
+
 
 exports.updateLabels = (req, res) => {
   const { ids, label } = req.body;
@@ -131,8 +142,8 @@ exports.deleteSelectedImages = (req, res) => {
 };
 
 exports.getImagesByLabels = (req, res) => {
-  const { labels, page, limit } = req.body;
-  console.log("Selected labels:", labels);
+  const { labels, page, limit, eventId } = req.body;  // Extract eventId from the body
+  console.log("Selected Event ID from getImagesByLabels:", eventId);
 
   if (!labels || labels.length === 0) {
     return res.status(400).json({ error: "No labels provided" });
@@ -142,8 +153,9 @@ exports.getImagesByLabels = (req, res) => {
   const pageSize = parseInt(limit) || 10;
   const offset = (pageNum - 1) * pageSize;
 
-  db.query('SELECT id, image FROM images WHERE FIND_IN_SET(label, ?) ORDER BY id ASC LIMIT ? OFFSET ?', 
-    [labels.join(','), pageSize, offset], (err, results) => {
+  // Modify query to include event_code filter (eventId)
+  const query = 'SELECT id, image FROM images WHERE FIND_IN_SET(label, ?) AND event_code = ? ORDER BY id ASC LIMIT ? OFFSET ?';
+  db.query(query, [labels.join(','), eventId, pageSize, offset], (err, results) => {
     if (err) {
       console.error("Error fetching images by labels:", err);
       return res.status(500).json({ error: "Error fetching images" });
@@ -155,8 +167,8 @@ exports.getImagesByLabels = (req, res) => {
     }));
 
     // Get total count for pagination
-    db.query('SELECT COUNT(*) AS total FROM images WHERE FIND_IN_SET(label, ?)', [labels.join(',')], 
-      (err, countResult) => {
+    const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE FIND_IN_SET(label, ?) AND event_code = ?';
+    db.query(countQuery, [labels.join(','), eventId], (err, countResult) => {
       if (err) {
         console.error("Error fetching total count:", err);
         return res.status(500).json({ error: "Error fetching total count" });
@@ -164,10 +176,9 @@ exports.getImagesByLabels = (req, res) => {
 
       const total = countResult[0].total;
       const totalPages = Math.ceil(total / pageSize);
-      
-      console.log(`Total images: ${total}, Total pages: ${totalPages}`); // Debugging
 
       res.json({ images, page: pageNum, totalPages, total });
     });
   });
 };
+

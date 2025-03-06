@@ -64,7 +64,7 @@ const addEvent = async (req, res) => {
 // Get All Events handler (using MySQL)
 const getAllEvents = async (req, res) => {
     try {
-        const query = 'SELECT * FROM events'; // Fetch all events from the 'events' table
+        const query = 'SELECT * FROM events';
 
         db.query(query, (err, results) => {
             if (err) {

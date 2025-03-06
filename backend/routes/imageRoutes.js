@@ -4,7 +4,7 @@ const imageController = require('../controllers/imageController');
 
 router.get('/images', imageController.getImages);
 router.delete('/delete/:id', imageController.deleteImage);
-router.get('/get-labels', imageController.getLabels)
+router.get('/get-labels/:eventId', imageController.getLabels)
 
 
 
