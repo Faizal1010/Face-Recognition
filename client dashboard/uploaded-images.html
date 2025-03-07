@@ -341,6 +341,7 @@
             <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
           </div>
         </div>
+        <div>Do you want to delete the selected labels?<span id="labelsToUpdate"></span></div>
         <div class="image-section">
           <header class="card-header" style="padding: 20px;display: flex; justify-content: space-between;">
             <div>
@@ -586,6 +587,15 @@
           console.log("Selected Labels:", selectedLabels);
           currentPage = 1; 
           loadImages();
+
+
+
+          const x = document.getElementById('labelsToUpdate')
+          x.innerHTML = " "
+          selectedLabels.forEach(element => {
+             x.append(element, " , ")
+             console.log('added')
+          });
       }
     
       async function loadImages() {
@@ -594,61 +604,12 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           const eventSelect = document.getElementById('event');
 
 const selectedOption = eventSelect.options[eventSelect.selectedIndex];
 let url = selectedLabels.length > 0 
     ? 'http://localhost:3000/label-based-fetch' 
-    : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}`;
+    : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}&eventId=${selectedOption.value}`;
 
 const options = selectedLabels.length > 0 
     ? {
