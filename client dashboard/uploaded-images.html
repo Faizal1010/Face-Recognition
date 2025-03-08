@@ -341,7 +341,6 @@
             <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
           </div>
         </div>
-        <div>Do you want to delete the selected labels?<span id="labelsToUpdate"></span></div>
         <div class="image-section">
           <header class="card-header" style="padding: 20px;display: flex; justify-content: space-between;">
             <div>
@@ -349,6 +348,12 @@
               <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
                 <!-- <option value="" selected>Events</option> -->
               </select>
+              <span>
+                <button onclick="action()" class="btn btn-light rounded font-md">Action&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" color="white" fill="none">
+                  <path d="M21 13.0526V13.2264M21 13.2264C21 12.3517 20.3574 11.6051 19.4807 11.4613L18.2727 11.2632V12.1579M21 13.2264V15.4386C21 17.3832 21 18.3555 20.699 19.1296C20.2388 20.3132 19.2915 21.2485 18.0926 21.7029C17.3086 22 16.3238 22 14.3542 22C13.3213 22 12.8048 22 12.3242 21.8957C11.5909 21.7366 10.9091 21.4 10.3402 20.9163C9.96726 20.5992 9.65737 20.1913 9.03761 19.3755L6.30671 15.7805C5.88709 15.2281 5.89916 14.4654 6.33605 13.9262C6.90702 13.2215 7.97161 13.1633 8.61791 13.8014L10 15.2557V6.5C10 5.67157 10.6716 5 11.5 5C12.3284 5 13 5.67157 13 6.5V9.4737M13 9.4737H13.7273C14.7314 9.4737 15.5455 10.2749 15.5455 11.2632M13 9.4737V12.1579M15.5455 11.2632V12.1579M15.5455 11.2632V10.3684H16.4545C17.4587 10.3684 18.2727 11.1696 18.2727 12.1579M18.2727 12.1579V13.0526" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M7 8H6.17647C4.67907 8 3.93037 8 3.46518 7.56066C3 7.12132 3 6.41421 3 5C3 3.58579 3 2.87868 3.46518 2.43934C3.93037 2 4.67907 2 6.17647 2H17.8235C19.3209 2 20.0696 2 20.5348 2.43934C21 2.87868 21 3.58579 21 5C21 6.41421 21 7.12132 20.5348 7.56066C20.0696 8 19.3209 8 17.8235 8H16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg></button>
+              </span>
             </div>
             <div id="imageLabelFilters" style="display: flex; overflow-x: auto; align-items: center;">
               <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
@@ -388,6 +393,32 @@
         </div>
       </footer>
     </main>
+    <div id="overlay" onclick="document.getElementById('overlay').style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
+      <!-- Popup Card -->
+      <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; height: 500px;">
+        <!-- Close button inside the card -->
+        <button onclick="document.getElementById('overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: #333; cursor: pointer; color: white;">x</button>
+        
+        <h2 style="margin-bottom: 20px; text-align: center;">Update</h2>
+    <div style="color: white;">Selected Lables are : <span id="update-label-container"></span></div>
+        <!-- Label with input box behind it -->
+        <p>Change the selected labels name</p>
+        <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+          <input type="text" id="newLabel" placeholder="Enter new Label" style=" background-color: #1e2231;width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; position: relative; z-index: 1; border: none; color: white;">
+          <button onclick="updateLabels()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">
+            Change
+          </button>
+        </div>
+        
+        <h3 style="text-align: center;">OR</h3>
+        <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+          <p>Delete all the images with selected labels:</p>
+          <button onclick="deleteSelectedLabels()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
     <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
     <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
     <script src="assets/js/vendors/select2.min.js"></script>
@@ -414,7 +445,7 @@
 
 
 
-
+<!-- setting up events in dropmenu -->
     <script>
       const token = localStorage.getItem('token');
       const decodedToken = decodeJWT(token);
@@ -476,7 +507,7 @@
 
 
 
-
+<!-- major - handling labels and display of images, pagination and all. -->
     <script> 
       let images = [];
       let currentIndex = 0;
@@ -486,78 +517,99 @@
       let totalPages = 1; 
     
       async function loadLabels(eventId) {
-        console.log(eventId)
-          const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
-          const labels = await response.json();
-          console.log("labels are ", new Set(labels))
-          const labelFilters = document.getElementById('imageLabelFilters');
-          const allCheckboxLabel = document.getElementById('imageAllCheckbox').parentElement;
-          labelFilters.innerHTML = '';
-          labelFilters.appendChild(allCheckboxLabel);
-    
-          new Set(labels).forEach(label => {
-              const labelContainer = document.createElement('label');
-              labelContainer.classList.add('custom-checkbox-label');
-    
-              const checkbox = document.createElement('input');
-              checkbox.type = 'checkbox';
-              checkbox.value = label;
-              checkbox.classList.add('imageLabelCheckbox');
-              checkbox.checked = true; // Ensure labels are selected on load
-    
-              labelContainer.appendChild(checkbox);
-              labelContainer.appendChild(document.createTextNode(` ${label}`));
-    
-              labelFilters.appendChild(labelContainer);
-    
-              labelContainer.style.backgroundColor = "#FF5733"; // Set selected color on load
-    
-              checkbox.addEventListener('change', function () {
-                  labelContainer.style.backgroundColor = this.checked ? '#FF5733' : '#3BB77E';
-                  updateSelectedLabels();
-              });
-          });
-    
-          const style = document.createElement('style');
-          style.innerHTML = `
-              .custom-checkbox-label {
-                  display: inline-flex;
-                  align-items: center;
-                  justify-content: center;
-                  padding: 8px 16px;
-                  margin: 5px;
-                  border-radius: 25px;
-                  font-size: 16px;
-                  font-weight: bold;
-                  cursor: pointer;
-                  background-color: #3BB77E;
-                  color: white;
-                  border: none;
-                  transition: 0.3s ease-in-out;
-              }
-              .custom-checkbox-label:hover {
-                  opacity: 0.9;
-              }
-              .imageLabelCheckbox {
-                  display: none;
-              }
-              #labelFilters {
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 10px;
-              }
-          `;
-          document.head.appendChild(style);
-    
-          document.getElementById('imageAllCheckbox').checked = true;
-          document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
-    
-          selectedLabels = new Set(labels);
-          console.log("Selected Labels:", selectedLabels);
-          
-          loadImages();
-      }
-    
+    console.log(eventId)
+    const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
+    const labels = await response.json();
+    console.log("labels are ", new Set(labels))
+    const labelFilters = document.getElementById('imageLabelFilters');
+    const allCheckboxLabel = document.getElementById('imageAllCheckbox').parentElement;
+    labelFilters.innerHTML = '';
+    labelFilters.appendChild(allCheckboxLabel);
+
+    new Set(labels).forEach(label => {
+        const labelContainer = document.createElement('label');
+        labelContainer.classList.add('custom-checkbox-label');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = label;
+        checkbox.classList.add('imageLabelCheckbox');
+        checkbox.checked = true; // Ensure labels are selected on load
+
+        // Create a small tick element for checked labels
+        const tickElement = document.createElement('span');
+        tickElement.classList.add('tick');
+        tickElement.innerText = '✓'; // You can adjust the tick symbol here
+
+        labelContainer.appendChild(checkbox);
+        labelContainer.appendChild(tickElement);  // Add the tick element
+        labelContainer.appendChild(document.createTextNode(` ${label}`));
+
+        labelFilters.appendChild(labelContainer);
+
+        // Initial background color
+        labelContainer.style.backgroundColor = "#3BB77E"; // Set color on load
+
+        // Only add the tick when the checkbox is checked
+        if (checkbox.checked) {
+            tickElement.style.visibility = 'visible'; // Show tick when checked
+        } else {
+            tickElement.style.visibility = 'hidden'; // Hide tick when unchecked
+        }
+
+        checkbox.addEventListener('change', function () {
+            // Show or hide the tick based on the checkbox state
+            tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+            updateSelectedLabels();
+        });
+    });
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .custom-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #3BB77E;
+            color: white;
+            border: none;
+            transition: 0.3s ease-in-out;
+            position: relative;
+        }
+        .custom-checkbox-label:hover {
+            opacity: 0.9;
+        }
+        .imageLabelCheckbox {
+            display: none;
+        }
+        .tick {
+            font-size: 20px;
+            color: white;
+            visibility: hidden; /* Start with hidden tick */
+        }
+        #labelFilters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    document.getElementById('imageAllCheckbox').checked = true;
+    document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
+
+    selectedLabels = new Set(labels);
+    console.log("Selected Labels:", selectedLabels);
+
+    loadImages();
+}   
+      
       function toggleAll() {
           const allCheckbox = document.getElementById("imageAllCheckbox");
           const checkboxes = document.querySelectorAll(".imageLabelCheckbox");
@@ -587,15 +639,6 @@
           console.log("Selected Labels:", selectedLabels);
           currentPage = 1; 
           loadImages();
-
-
-
-          const x = document.getElementById('labelsToUpdate')
-          x.innerHTML = " "
-          selectedLabels.forEach(element => {
-             x.append(element, " , ")
-             console.log('added')
-          });
       }
     
       async function loadImages() {
@@ -709,7 +752,123 @@ createPaginationButtons();
     </script>
     
     
+
+
+
+
+    <!-- handling popup to change label name or delete it -->
+    <script>
+
+
+
+
+      function action(){
+        document.getElementById('overlay').style.display = 'flex';
+        const x = document.getElementById('update-label-container')
+        x.innerHTML = " "
+        
+        selectedLabels.forEach(label => {
+          let span = document.createElement('span')
+          span.innerHTML = `<span><b><u>${label}</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></span>`
+          x.appendChild(span)
+        });
+      }
+
+
+
+
+
+
+
+
+
+      function updateLabels() {
+  // Get the new label from the input field
+  const newLabel = document.getElementById('newLabel').value;
+
+  // Get the event code from the selected option in the dropdown
+  const eventSelect = document.getElementById('event');
+  const selectedOption = eventSelect.options[eventSelect.selectedIndex];
   
+  // Validate inputs
+  if (!newLabel || !selectedOption.value) {
+    alert('Please provide a new label and select an event.');
+    return; // Stop further execution if validation fails
+  }
+
+  // Create the payload for the request
+  const payload = {
+    label: Array.from(selectedLabels), // Assuming `selectedLabels` is an array of labels
+    newLabel: newLabel,
+    event_code: selectedOption.value
+  };
+
+  // Make the API request
+  fetch('http://localhost:3000/update-label', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => {
+    // Check if the response is successful (status code 200-299)
+    if (!response.ok) {
+      // If not successful, throw an error
+      throw new Error(`Failed to update labels. Status: ${response.status}`);
+    }
+    return response.json(); // Parse the JSON response
+  })
+  .then(data => {
+    // Handle the response data (success message or any returned data)
+    alert('Labels updated successfully!');
+  })
+  .catch(error => {
+    // Handle errors (network issues or bad response)
+    console.error('Error updating labels:', error);
+    alert('There was an error updating the labels. Please try again later.');
+  });
+}
+
+
+function deleteSelectedLabels() {
+  // Get the selected labels from the selectedLabels array
+  const labelArray = Array.from(selectedLabels);  // Assuming selectedLabels is a pre-existing array
+
+  // Get the selected event from the dropdown
+  const eventSelect = document.getElementById('event');
+  const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+
+  const eventCode = selectedOption.value;  // Get the selected event code
+
+  if (!labelArray || labelArray.length === 0 || !eventCode) {
+    alert('Please select at least one label and an event.');
+    return;
+  }
+
+  // Send the request to the backend
+  fetch('http://localhost:3000/delete-images', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ label: labelArray, event_code: eventCode }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.message) {
+      alert(data.message);  // Success message
+    } else if (data.error) {
+      alert(data.error);  // Error message
+    }
+  })
+  .catch(err => {
+    console.error('Error deleting images:', err);
+    alert('An error occurred while deleting the images.');
+  });
+}
+
+    </script>
 
 
 

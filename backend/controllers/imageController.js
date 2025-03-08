@@ -49,30 +49,79 @@ exports.getImages = (req, res) => {
 
 
 exports.deleteImage = (req, res) => {
-  const { id } = req.params;
-  console.log("Deleting ID:", id);
+  const { label, event_code } = req.body;
 
-  // First, delete all references in imageData before deleting from images
-  db.query('DELETE FROM imageData WHERE image_id = ?', [id], (err, result) => {
-    if (err) {
-      console.error("Error deleting image data:", err);
-      return res.status(500).send('Error deleting image data');
-    }
+  console.log(label, " and ", event_code)
 
-    console.log("Deleted from imageData:", result.affectedRows);
+  if (!label || !event_code) {
+    return res.status(400).json({ error: 'Both label and event_code are required' });
+  }
 
-    // Now, delete from images (parent table)
-    db.query('DELETE FROM images WHERE id = ?', [id], (err, result) => {
-      if (err) {
-        console.error("Error deleting image:", err);
-        return res.status(500).send('Error deleting image');
-      }
+  console.log("Deleting images with labels:", label);
+  console.log("For event_code:", event_code);
 
-      console.log("Deleted from images:", result.affectedRows);
-      res.send('Image deleted successfully');
+  // Step 1: Loop through each label in the provided array
+  const deletePromises = label.map((singleLabel) => {
+    return new Promise((resolve, reject) => {
+      // Step 2: Find images that match the current label and event_code
+      const selectQuery = 'SELECT id FROM images WHERE event_code = ? AND label = ?';
+
+      db.query(selectQuery, [event_code, singleLabel], (err, results) => {
+        if (err) {
+          console.error(`Error fetching images for label "${singleLabel}":`, err);
+          return reject(err); // Reject if there's an error fetching images
+        }
+
+        if (results.length === 0) {
+          console.log(`No images found for label "${singleLabel}" and event_code "${event_code}"`);
+          return resolve(); // Resolve if no images are found (continue to next label)
+        }
+
+        // Step 3: For each image, delete references from imageData first, then from images
+        const deletePromisesForLabel = results.map(image => {
+          return new Promise((resolve, reject) => {
+            // First, delete references from imageData table
+            db.query('DELETE FROM imageData WHERE image_id = ?', [image.id], (err, result) => {
+              if (err) {
+                console.error(`Error deleting image data for image id ${image.id}:`, err);
+                return reject(err);
+              }
+
+              console.log(`Deleted from imageData for image id ${image.id}`);
+
+              // Now, delete from images table
+              db.query('DELETE FROM images WHERE id = ?', [image.id], (err, result) => {
+                if (err) {
+                  console.error(`Error deleting image from images table for image id ${image.id}:`, err);
+                  return reject(err);
+                }
+
+                console.log(`Deleted image id ${image.id} from images table`);
+                resolve(result);
+              });
+            });
+          });
+        });
+
+        // Step 4: Wait for all deletions for this label to finish
+        Promise.all(deletePromisesForLabel)
+          .then(() => resolve()) // Resolve when all images for this label have been deleted
+          .catch(reject); // Reject if there's an error deleting any of the images
+      });
     });
   });
+
+  // Step 5: Wait for all labels to be processed and deleted
+  Promise.all(deletePromises)
+    .then(() => {
+      res.json({ message: 'Images deleted successfully' });
+    })
+    .catch((err) => {
+      console.error('Error deleting images:', err);
+      res.status(500).json({ error: 'Error deleting images' });
+    });
 };
+
 
 exports.getLabels = (req, res) => {
   const eventId = req.params.eventId; // Get eventId from request body
@@ -97,23 +146,68 @@ exports.getLabels = (req, res) => {
 
 
 exports.updateLabels = (req, res) => {
-  const { ids, label } = req.body;
-  console.log("ids : ",ids)
-  console.log("label : ",label)
+  const { label, newLabel, event_code } = req.body;
 
-  if (!ids || ids.length === 0) {
-    return res.status(400).json({ error: 'No image IDs provided' });
+  // Validate input
+  if (!label || !newLabel || !event_code) {
+    return res.status(400).json({ error: 'label, newLabel, and event_code are required' });
   }
 
-  db.query('UPDATE images SET label = ? WHERE id IN (?)', [label, ids], (err, result) => {
-    if (err) {
-      console.error('Error updating labels:', err);
-      return res.status(500).json({ error: 'Error updating labels' });
-    }
+  console.log("label:", label);
+  console.log("newLabel:", newLabel);
+  console.log("event_code:", event_code);
 
-    res.json({ message: 'Labels updated successfully', affectedRows: result.affectedRows });
+  // Step 1: Loop through each label in the provided array
+  const updatePromises = label.map((singleLabel) => {
+    return new Promise((resolve, reject) => {
+      // Step 2: Find images that match the current label and event_code
+      const selectQuery = 'SELECT id FROM images WHERE event_code = ? AND label = ?';
+      
+      db.query(selectQuery, [event_code, singleLabel], (err, results) => {
+        if (err) {
+          console.error(`Error fetching images for label "${singleLabel}":`, err);
+          return reject(err); // Reject the promise if there's an error fetching images
+        }
+
+        if (results.length === 0) {
+          console.log(`No images found for label "${singleLabel}" and event_code "${event_code}"`);
+          return resolve(); // Resolve if no images are found (continue to next label)
+        }
+
+        // Step 3: Update each matching image's label to the newLabel
+        const updateQuery = 'UPDATE images SET label = ? WHERE id = ?';
+        
+        // Loop over each image and update its label
+        const updatePromisesForLabel = results.map(image => {
+          return new Promise((resolve, reject) => {
+            db.query(updateQuery, [newLabel, image.id], (err, updateResult) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve(updateResult);
+            });
+          });
+        });
+
+        // Step 4: Wait for all updates for this label to finish
+        Promise.all(updatePromisesForLabel)
+          .then(() => resolve()) // Resolve when all images for this label have been updated
+          .catch(reject); // Reject if there's an error updating any of the images
+      });
+    });
   });
+
+  // Step 5: Wait for all labels to be processed and updated
+  Promise.all(updatePromises)
+    .then(() => {
+      res.json({ message: 'Labels updated successfully' });
+    })
+    .catch((err) => {
+      console.error('Error updating labels:', err);
+      res.status(500).json({ error: 'Error updating labels' });
+    });
 };
+
 
 exports.deleteSelectedImages = (req, res) => {
   console.log("handler hit")

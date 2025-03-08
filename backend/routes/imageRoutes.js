@@ -3,7 +3,7 @@ const router = express.Router();
 const imageController = require('../controllers/imageController');
 
 router.get('/images', imageController.getImages);
-router.delete('/delete/:id', imageController.deleteImage);
+router.delete('/delete-images', imageController.deleteImage);
 router.get('/get-labels/:eventId', imageController.getLabels)
 
 
