@@ -14,4 +14,8 @@ router.post('/remove-multiple', imageController.deleteSelectedImages)
 
 router.post('/label-based-fetch', imageController.getImagesByLabels)
 
+
+router.delete('/id-based-image-delete', imageController.deleteImagesByIds)
+router.post('/id-based-label-change', imageController.updateLabelsById)
+
 module.exports = router;

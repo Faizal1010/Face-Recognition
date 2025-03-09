@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <title>Nest Dashboard</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
@@ -11,301 +12,252 @@
     <meta property="og:url" content="" />
     <meta property="og:image" content="" />
     <!-- Favicon -->
-    <link
-      rel="shortcut icon"
-      type="image/x-icon"
-      href="assets/imgs/theme/favicon.svg"
-    />
+    <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg" />
     <!-- Template CSS -->
     <script src="assets/js/vendors/color-modes.js"></script>
     <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
 
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          const token = localStorage.getItem('token');
-  
-          if (!token) {
-              alert('Access denied. Please log in.');
-              window.location.href = 'page-account-login.html'; // Redirect to login page
-              return;
-          }
-  
-          // Decode the JWT to verify the user's role
-          const decodedToken = decodeJWT(token);
-  
-          if (!decodedToken) {
-              alert('Unauthorized access.');
-              window.location.href = 'page-account-login.html'; // Redirect to login page
-          }
-      });
-  
-      // Function to decode the JWT and extract the payload
-      function decodeJWT(token) {
-          try {
-              const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-              return payload;
-          } catch (error) {
-              console.error('Error decoding JWT token:', error);
-              return null;
-          }
-      }
-  </script>
-<style>
-  .imageGrid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    gap: 10px;
-    background-color: #2a3042;
-    padding: 10px;
-  }
-  
-  .imageGridItem {
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 200px;
-    height: 300px;
-  }
-  
-  .imageGridItem img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .imageGridItem:hover img {
-    transform: scale(1.1);
-  }
-  
-  .imageLightbox {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    justify-content: center;
-    align-items: center;
-    z-index: 999999999;
-  }
-  
-  .imageLightbox img {
-    max-width: 80%;
-    max-height: 80%;
-    border-radius: 8px;
-  }
-  
-  .imageClose, .imagePrev, .imageNext {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(62, 62, 62, 0.3);
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 24px;
-    border-radius: 5px;
-  }
-  
-  .imageClose {
-    top: 10px;
-    right: 20px;
-    font-size: 30px;
-  }
-  
-  .imagePrev {
-    left: 20px;
-  }
-  
-  .imageNext {
-    right: 20px;
-  }
-  
-  @media (max-width: 600px) {
-    .imageGrid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
 
-  .imagePaginationButton {
-  pointer-events: auto !important;
-  z-index: 99999 !important;
-  position: relative !important;
-}
+            if (!token) {
+                alert('Access denied. Please log in.');
+                window.location.href = 'page-account-login.html'; // Redirect to login page
+                return;
+            }
 
-</style>
-  </head>
+            // Decode the JWT to verify the user's role
+            const decodedToken = decodeJWT(token);
 
-  <body>
+            if (!decodedToken) {
+                alert('Unauthorized access.');
+                window.location.href = 'page-account-login.html'; // Redirect to login page
+            }
+        });
+
+        // Function to decode the JWT and extract the payload
+        function decodeJWT(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                return payload;
+            } catch (error) {
+                console.error('Error decoding JWT token:', error);
+                return null;
+            }
+        }
+    </script>
+
+    <style>
+        .imageGrid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            gap: 10px;
+            background-color: #2a3042;
+            padding: 10px;
+        }
+        
+        .imageGridItem {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 200px;
+            height: 220px;
+        }
+        
+        .imageGridItem img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .imageGridItem:hover img {
+            transform: scale(1.1);
+        }
+        
+        .imageLightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999999;
+        }
+        
+        .imageLightbox img {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 8px;
+        }
+        
+        .imageClose,
+        .imagePrev,
+        .imageNext {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(62, 62, 62, 0.3);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 5px;
+        }
+        
+        .imageClose {
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+        }
+        
+        .imagePrev {
+            left: 20px;
+        }
+        
+        .imageNext {
+            right: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .imageGrid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .imageGridItem {
+                width: 180px;
+                height: 170px;
+            }
+        }
+        
+        .imagePaginationButton {
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+            position: relative !important;
+        }
+    </style>
+</head>
+
+<body>
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
-      <div class="aside-top">
-          <a href="index.html" class="brand-wrap">
-              <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
-          </a>
-          <div>
-              <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
-          </div>
-      </div>
-      <nav>
-          <ul class="menu-aside">
-              <li class="menu-item">
-                  <a class="menu-link" href="index.html">
-                      <i class="icon material-icons md-home"></i>
-                      <span class="text">Dashboard</span>
-                  </a>
-              </li>
-              <li class="menu-item has-submenu active">
-                  <a class="menu-link" href="page-products-list.html">
-                      <i class="icon material-icons md-event"></i>
-                      <span class="text">Images and Events</span>
-                  </a>
-                  <div class="submenu">
-                      <a class="active" href="uploaded-images.html">Uploaded Images</a>
-                      <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
-                      <a href="page-categories.html">Create Events</a>
-                  </div>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="add-images.html">
-                      <i class="icon material-icons md-image"></i>
-                      <span class="text">Add Images</span>
-                  </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="page-transactions-2.html">
-                      <i class="icon material-icons md-monetization_on"></i>
-                      <span class="text">Transactions</span>
-                  </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="customers.html">
-                      <i class="icon material-icons md-person"></i>
-                      <span class="text">Account</span>
-                  </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="client-notification-list.html">
-                      <i class="icon material-icons md-comment"></i>
-                      <span class="text">Notifications</span>
-                  </a>
-              </li>
-             
-          </ul>
-          <br />
-          <br />
-      </nav>
-  </aside>
+        <div class="aside-top">
+            <a href="index.html" class="brand-wrap">
+                <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="index.html">
+                        <i class="icon material-icons md-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item has-submenu active">
+                    <a class="menu-link" href="page-products-list.html">
+                        <i class="icon material-icons md-event"></i>
+                        <span class="text">Images and Events</span>
+                    </a>
+                    <div class="submenu">
+                        <a class="active" href="uploaded-images.html">Uploaded Images</a>
+                        <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
+                        <a href="page-categories.html">Create Events</a>
+                    </div>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="add-images.html">
+                        <i class="icon material-icons md-image"></i>
+                        <span class="text">Add Images</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="page-transactions-2.html">
+                        <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text">Transactions</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="customers.html">
+                        <i class="icon material-icons md-person"></i>
+                        <span class="text">Account</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="client-notification-list.html">
+                        <i class="icon material-icons md-comment"></i>
+                        <span class="text">Notifications</span>
+                    </a>
+                </li>
+
+            </ul>
+            <br />
+            <br />
+        </nav>
+    </aside>
     <main class="main-wrap">
-      <header class="main-header navbar">
-        <div class="col-search">
-          <form class="searchform">
-            <div class="input-group">
-              <input
-                list="search_terms"
-                type="text"
-                class="form-control"
-                placeholder="Search term"
-              />
-              <button class="btn btn-light bg" type="button">
+        <header class="main-header navbar">
+            <div class="col-search">
+                <form class="searchform">
+                    <div class="input-group">
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
+                        <button class="btn btn-light bg" type="button">
                 <i class="material-icons md-search"></i>
               </button>
-            </div>
-            <datalist id="search_terms">
+                    </div>
+                    <datalist id="search_terms">
               <option value="Products"></option>
               <option value="New orders"></option>
               <option value="Apple iphone"></option>
               <option value="Ahmed Hassan"></option>
             </datalist>
-          </form>
-        </div>
-        <div class="col-nav">
-          <button
-            class="btn btn-icon btn-mobile me-auto"
-            data-trigger="#offcanvas_aside"
-          >
+                </form>
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside">
             <i class="material-icons md-apps"></i>
           </button>
-          <ul class="nav">
-            <li class="nav-item">
-              <a class="nav-link btn-icon" href="#">
-                <i class="material-icons md-notifications animation-shake"></i>
-                <span class="badge rounded-pill">3</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn-icon darkmode" href="#">
-                <i class="material-icons md-nights_stay"></i>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="requestfullscreen nav-link btn-icon"
-                ><i class="material-icons md-cast"></i
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn-icon" href="#">
+                            <i class="material-icons md-notifications animation-shake"></i>
+                            <span class="badge rounded-pill">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-icon darkmode" href="#">
+                            <i class="material-icons md-nights_stay"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i
               ></a>
-            </li>
-            <li class="dropdown nav-item">
-              <a
-                class="dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                id="dropdownLanguage"
-                aria-expanded="false"
-                ><i class="material-icons md-public"></i
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i
               ></a>
-              <div
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="dropdownLanguage"
-              >
-                <a class="dropdown-item text-brand" href="#"
-                  ><img
-                    src="assets/imgs/theme/flag-us.png"
-                    alt="English"
-                  />English</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="assets/imgs/theme/flag-fr.png"
-                    alt="Français"
-                  />Français</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="assets/imgs/theme/flag-jp.png"
-                    alt="Français"
-                  />日本語</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="assets/imgs/theme/flag-cn.png"
-                    alt="Français"
-                  />中国人</a
-                >
-              </div>
-            </li>
-            <li class="dropdown nav-item">
-              <a
-                class="dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                id="dropdownAccount"
-                aria-expanded="false"
-              >
-                <img
-                  class="img-xs rounded-circle"
-                  src="assets/imgs/people/avatar-2.png"
-                  alt="User"
-              /></a>
-              <div
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="dropdownAccount"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-perm_identity"></i>Edit
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                            <a class="dropdown-item text-brand" href="#"><img src="assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                            <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                            <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                            <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                        </div>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
+                            <img class="img-xs rounded-circle" src="assets/imgs/people/avatar-2.png" alt="User" /></a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit
                   Profile</a
                 >
                 <a class="dropdown-item" href="#"
@@ -336,42 +288,50 @@
             <p>See all your uploaded images.</p>
           </div>
           <div>
-            <a href="#" class="btn btn-light rounded font-md">Export</a>
-            <a href="#" class="btn btn-light rounded font-md">Import</a>
-            <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
-          </div>
-        </div>
-        <div class="image-section">
-          <header class="card-header" style="padding: 20px;display: flex; justify-content: space-between;">
-            <div>
-              <label for="event" style="margin-bottom: 5px;">Event:</label>
-              <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+
+                            <a href="add-images.html" class="btn btn-primary btn-sm rounded">Add images</a>
+                        </div>
+            </div>
+            <div class="image-section">
+                <header class="card-header" style="padding: 20px; display: flex; justify-content: space-between;">
+                    <style>
+                        @media (max-width: 600px) {
+                            .card-header {
+                                justify-content: center;
+                                align-items: center;
+                                flex-direction: column !important;
+                            }
+                        }
+                    </style>
+                    <div>
+                        <label for="event" style="margin-bottom: 5px;">Event:</label>
+                        <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
                 <!-- <option value="" selected>Events</option> -->
               </select>
-              <span>
+                        <span>
                 <button onclick="action()" class="btn btn-light rounded font-md">Action&nbsp;&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" color="white" fill="none">
                   <path d="M21 13.0526V13.2264M21 13.2264C21 12.3517 20.3574 11.6051 19.4807 11.4613L18.2727 11.2632V12.1579M21 13.2264V15.4386C21 17.3832 21 18.3555 20.699 19.1296C20.2388 20.3132 19.2915 21.2485 18.0926 21.7029C17.3086 22 16.3238 22 14.3542 22C13.3213 22 12.8048 22 12.3242 21.8957C11.5909 21.7366 10.9091 21.4 10.3402 20.9163C9.96726 20.5992 9.65737 20.1913 9.03761 19.3755L6.30671 15.7805C5.88709 15.2281 5.89916 14.4654 6.33605 13.9262C6.90702 13.2215 7.97161 13.1633 8.61791 13.8014L10 15.2557V6.5C10 5.67157 10.6716 5 11.5 5C12.3284 5 13 5.67157 13 6.5V9.4737M13 9.4737H13.7273C14.7314 9.4737 15.5455 10.2749 15.5455 11.2632M13 9.4737V12.1579M15.5455 11.2632V12.1579M15.5455 11.2632V10.3684H16.4545C17.4587 10.3684 18.2727 11.1696 18.2727 12.1579M18.2727 12.1579V13.0526" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   <path d="M7 8H6.17647C4.67907 8 3.93037 8 3.46518 7.56066C3 7.12132 3 6.41421 3 5C3 3.58579 3 2.87868 3.46518 2.43934C3.93037 2 4.67907 2 6.17647 2H17.8235C19.3209 2 20.0696 2 20.5348 2.43934C21 2.87868 21 3.58579 21 5C21 6.41421 21 7.12132 20.5348 7.56066C20.0696 8 19.3209 8 17.8235 8H16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg></button>
               </span>
+                    </div>
+                    <div id="imageLabelFilters" style="display: flex; overflow-x: auto; align-items: center;">
+                        <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
+                    </div>
+                </header>
+
+                <div>
+                    <div class="imageGrid" id="imageContainer"></div>
+                    <div class="imageLightbox" id="imageLightbox">
+                        <span class="imageClose" onclick="closeImageLightbox()">×</span>
+                        <img id="imageLightboxImg">
+                        <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
+                        <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+                    </div>
+                </div>
             </div>
-            <div id="imageLabelFilters" style="display: flex; overflow-x: auto; align-items: center;">
-              <label><input type="checkbox" id="imageAllCheckbox" checked/> All</label>
-            </div>
-          </header>
-        
-          <div>
-            <div class="imageGrid" id="imageContainer"></div>
-            <div class="imageLightbox" id="imageLightbox">
-              <span class="imageClose" onclick="closeImageLightbox()">×</span>
-              <img id="imageLightboxImg">
-              <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
-              <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
-            </div>
-          </div>
-        </div>
-        <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
-      </section>
+            <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+            </section>
 
 
 
@@ -379,46 +339,69 @@
 
 
 
-      <footer class="main-footer font-xs">
-        <div class="row pb-30 pt-15">
-          <div class="col-sm-6">
-            <script>
-              document.write(new Date().getFullYear());
-            </script>
-            &copy;  Managed and maintained by <b>DigitallyKaro</b>
-          </div>
-          <div class="col-sm-6">
-            <div class="text-sm-end">All rights reserved</div>
-          </div>
-        </div>
-      </footer>
+            <footer class="main-footer font-xs">
+                <div class="row pb-30 pt-15">
+                    <div class="col-sm-6">
+                        <script>
+                            document.write(new Date().getFullYear());
+                        </script>
+                        &copy; Managed and maintained by <b>DigitallyKaro</b>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end">All rights reserved</div>
+                    </div>
+                </div>
+            </footer>
     </main>
     <div id="overlay" onclick="document.getElementById('overlay').style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
-      <!-- Popup Card -->
-      <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; height: 500px;">
-        <!-- Close button inside the card -->
-        <button onclick="document.getElementById('overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: #333; cursor: pointer; color: white;">x</button>
-        
-        <h2 style="margin-bottom: 20px; text-align: center;">Update</h2>
-    <div style="color: white;">Selected Lables are : <span id="update-label-container"></span></div>
-        <!-- Label with input box behind it -->
-        <p>Change the selected labels name</p>
-        <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
-          <input type="text" id="newLabel" placeholder="Enter new Label" style=" background-color: #1e2231;width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; position: relative; z-index: 1; border: none; color: white;">
-          <button onclick="updateLabels()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">
+        <!-- Popup Card -->
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; height: 500px;">
+            <!-- Close button inside the card -->
+            <button onclick="document.getElementById('overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: #333; cursor: pointer; color: white;">x</button>
+
+            <h2 style="margin-bottom: 20px; text-align: center;">Update</h2>
+            <div style="color: white;">Selected Lables are : <span id="update-label-container"></span></div>
+            <!-- Label with input box behind it -->
+            <p>Change the selected labels name</p>
+            <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="newLabel" placeholder="Enter new Label" style=" background-color: #1e2231;width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; position: relative; z-index: 1; border: none; color: white;">
+                <button onclick="updateLabels()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">
             Change
           </button>
-        </div>
-        
-        <h3 style="text-align: center;">OR</h3>
-        <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
-          <p>Delete all the images with selected labels:</p>
-          <button onclick="deleteSelectedLabels()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">
+            </div>
+
+            <h3 style="text-align: center;">OR</h3>
+            <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+                <p>Delete all the images with selected labels:</p>
+                <button onclick="deleteSelectedLabels()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">
             Delete
           </button>
+            </div>
         </div>
-      </div>
     </div>
+    <!-- Overlay for Delete Selected Images -->
+    <div id="delete-overlay" onclick="document.getElementById('delete-overlay').style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative;">
+            <button onclick="document.getElementById('delete-overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: white; cursor: pointer;">x</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">Delete Selected Images</h2>
+            <p id="delete-message" style="color: white;">Are you sure you want to delete the selected images?</p>
+            <button onclick="deleteSelectedImages()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">Delete</button>
+        </div>
+    </div>
+    <!-- Overlay for Change Labels -->
+    <div id="change-label-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;" onclick="document.getElementById('change-label-overlay').style.display='none'">
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative;">
+            <button onclick="document.getElementById('change-label-overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: white; cursor: pointer;">x</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">Update Labels</h2>
+            <p style="color: white;">Change the label for selected Images</p>
+            <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="newLabelForSelectedImages" placeholder="Enter new Label" style="background-color: #1e2231; width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; position: relative; z-index: 1; border: none; color: white;">
+                <button onclick="changeLabel()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">Change</button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
     <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
     <script src="assets/js/vendors/select2.min.js"></script>
@@ -445,127 +428,131 @@
 
 
 
-<!-- setting up events in dropmenu -->
+    <!-- setting up events in dropmenu -->
     <script>
-      const token = localStorage.getItem('token');
-      const decodedToken = decodeJWT(token);
-      console.log(decodedToken);
-    
-      function decodeJWT(token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-          return payload;
-        } catch (error) {
-          console.error('Error decoding JWT token:', error);
-          return null;
+        const token = localStorage.getItem('token');
+        const decodedToken = decodeJWT(token);
+        console.log(decodedToken);
+
+        function decodeJWT(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                return payload;
+            } catch (error) {
+                console.error('Error decoding JWT token:', error);
+                return null;
+            }
         }
-      }
-    
-      fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
-        method: 'GET',
-      })
-      .then(response => response.json())
-      .then(data => displayEvents(data.events))
-      .catch(error => console.error('Error fetching events:', error));
-    
-      function displayEvents(events) {
-        const eventSelect = document.getElementById('event');
-        eventSelect.innerHTML = ''; // Clear any existing options
-    
-        if (!events) {
-          // If no events are found, show a "No Events" option
-          const noEventsOption = document.createElement('option');
-          noEventsOption.value = '';
-          noEventsOption.textContent = 'No Events Available';
-          eventSelect.appendChild(noEventsOption);
-          return;
+
+        fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => displayEvents(data.events))
+            .catch(error => console.error('Error fetching events:', error));
+
+        function displayEvents(events) {
+            const eventSelect = document.getElementById('event');
+            eventSelect.innerHTML = ''; // Clear any existing options
+
+            if (!events) {
+                // If no events are found, show a "No Events" option
+                const noEventsOption = document.createElement('option');
+                noEventsOption.value = '';
+                noEventsOption.textContent = 'No Events Available';
+                eventSelect.appendChild(noEventsOption);
+                return;
+            }
+
+            // Populate the select dropdown with event options
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.event_code;
+                option.textContent = event.name;
+                eventSelect.appendChild(option);
+            });
+
+            // Immediately send the selected event ID after options are populated
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+            loadLabels(selectedOption.value); // Send the selected event's code to loadLabels
+
+
+
+            eventSelect.addEventListener('change', function() {
+                const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+                console.log('Selected Event ID:', selectedOption.value);
+                console.log('Selected Event Name:', selectedOption.textContent);
+
+                loadLabels(selectedOption.value)
+            });
         }
-    
-        // Populate the select dropdown with event options
-        events.forEach(event => {
-          const option = document.createElement('option');
-          option.value = event.event_code;
-          option.textContent = event.name;
-          eventSelect.appendChild(option);
-        });
-    
-        // Immediately send the selected event ID after options are populated
-        const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-        loadLabels(selectedOption.value);  // Send the selected event's code to loadLabels
-
-
-
-        eventSelect.addEventListener('change', function() {
-          const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-          console.log('Selected Event ID:', selectedOption.value);
-          console.log('Selected Event Name:', selectedOption.textContent);
-
-          loadLabels(selectedOption.value)
-        });
-      }
     </script>
 
 
 
-<!-- major - handling labels and display of images, pagination and all. -->
-    <script> 
-      let images = [];
-      let currentIndex = 0;
-      let selectedLabels = [];
-      let currentPage = 1;
-      let imagesPerPage = 20;
-      let totalPages = 1; 
-    
-      async function loadLabels(eventId) {
-    console.log(eventId)
-    const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
-    const labels = await response.json();
-    console.log("labels are ", new Set(labels))
-    const labelFilters = document.getElementById('imageLabelFilters');
-    const allCheckboxLabel = document.getElementById('imageAllCheckbox').parentElement;
-    labelFilters.innerHTML = '';
-    labelFilters.appendChild(allCheckboxLabel);
+    <!-- major - handling labels and display of images, pagination and all. -->
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let selectedLabels = [];
+        let currentPage = 1;
+        let imagesPerPage = 20;
+        let totalPages = 1;
+        let checkedImages = [];
 
-    new Set(labels).forEach(label => {
-        const labelContainer = document.createElement('label');
-        labelContainer.classList.add('custom-checkbox-label');
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = label;
-        checkbox.classList.add('imageLabelCheckbox');
-        checkbox.checked = true; // Ensure labels are selected on load
+        async function loadLabels(eventId) {
+            console.log(eventId)
+            const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
+            const labels = await response.json();
+            console.log("labels are ", new Set(labels))
+            const labelFilters = document.getElementById('imageLabelFilters');
+            const allCheckboxLabel = document.getElementById('imageAllCheckbox').parentElement;
+            labelFilters.innerHTML = '';
+            labelFilters.appendChild(allCheckboxLabel);
 
-        // Create a small tick element for checked labels
-        const tickElement = document.createElement('span');
-        tickElement.classList.add('tick');
-        tickElement.innerText = '✓'; // You can adjust the tick symbol here
+            new Set(labels).forEach(label => {
+                const labelContainer = document.createElement('label');
+                labelContainer.classList.add('custom-checkbox-label');
+                labelContainer.style.fontSize = '12px'
 
-        labelContainer.appendChild(checkbox);
-        labelContainer.appendChild(tickElement);  // Add the tick element
-        labelContainer.appendChild(document.createTextNode(` ${label}`));
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = label;
+                checkbox.classList.add('imageLabelCheckbox');
+                checkbox.checked = true; // Ensure labels are selected on load
 
-        labelFilters.appendChild(labelContainer);
+                // Create a small tick element for checked labels
+                const tickElement = document.createElement('span');
+                tickElement.classList.add('tick');
+                tickElement.style.fontSize = '12px'
+                tickElement.innerText = '✓';
 
-        // Initial background color
-        labelContainer.style.backgroundColor = "#3BB77E"; // Set color on load
+                labelContainer.appendChild(checkbox);
+                labelContainer.appendChild(tickElement);
+                labelContainer.appendChild(document.createTextNode(` ${label}`));
 
-        // Only add the tick when the checkbox is checked
-        if (checkbox.checked) {
-            tickElement.style.visibility = 'visible'; // Show tick when checked
-        } else {
-            tickElement.style.visibility = 'hidden'; // Hide tick when unchecked
-        }
+                labelFilters.appendChild(labelContainer);
 
-        checkbox.addEventListener('change', function () {
-            // Show or hide the tick based on the checkbox state
-            tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
-            updateSelectedLabels();
-        });
-    });
+                // Initial background color
+                labelContainer.style.backgroundColor = "#3BB77E"; // Set color on load
 
-    const style = document.createElement('style');
-    style.innerHTML = `
+                // Only add the tick when the checkbox is checked
+                if (checkbox.checked) {
+                    tickElement.style.visibility = 'visible'; // Show tick when checked
+                } else {
+                    tickElement.style.visibility = 'hidden'; // Hide tick when unchecked
+                }
+
+                checkbox.addEventListener('change', function() {
+                    // Show or hide the tick based on the checkbox state
+                    tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+                    updateSelectedLabels();
+                });
+            });
+
+            const style = document.createElement('style');
+            style.innerHTML = `
         .custom-checkbox-label {
             display: inline-flex;
             align-items: center;
@@ -599,287 +586,464 @@
             gap: 10px;
         }
     `;
-    document.head.appendChild(style);
+            document.head.appendChild(style);
 
-    document.getElementById('imageAllCheckbox').checked = true;
-    document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
+            document.getElementById('imageAllCheckbox').checked = true;
+            document.getElementById('imageAllCheckbox').addEventListener('change', toggleAll);
 
-    selectedLabels = new Set(labels);
-    console.log("Selected Labels:", selectedLabels);
+            selectedLabels = new Set(labels);
+            console.log("Selected Labels:", selectedLabels);
 
-    loadImages();
-}   
-      
-      function toggleAll() {
-          const allCheckbox = document.getElementById("imageAllCheckbox");
-          const checkboxes = document.querySelectorAll(".imageLabelCheckbox");
-          
-          if (allCheckbox.checked) {
-              selectedLabels = Array.from(checkboxes).map(cb => cb.value);
-              checkboxes.forEach(cb => {
-                  cb.checked = true;
-                  cb.parentElement.style.backgroundColor = "#FF5733";
-              });
-          } else {
-              selectedLabels = [];
-              checkboxes.forEach(cb => {
-                  cb.checked = false;
-                  cb.parentElement.style.backgroundColor = "#3BB77E";
-              });
-          }
-    
-          console.log("Selected Labels:", selectedLabels);
-          currentPage = 1; 
-          loadImages();
-      }
-    
-      function updateSelectedLabels() {
-          selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
-          document.getElementById('imageAllCheckbox').checked = selectedLabels.length === 0;
-          console.log("Selected Labels:", selectedLabels);
-          currentPage = 1; 
-          loadImages();
-      }
-    
-      async function loadImages() {
-          const gallery = document.getElementById("imageContainer");
-          gallery.innerHTML = "";
+            loadImages();
+        }
 
+        function toggleAll() {
+            const allCheckbox = document.getElementById("imageAllCheckbox");
+            const checkboxes = document.querySelectorAll(".imageLabelCheckbox");
+
+            if (allCheckbox.checked) {
+                selectedLabels = Array.from(checkboxes).map(cb => cb.value);
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                });
+            } else {
+                selectedLabels = [];
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.parentElement.style.backgroundColor = "#3BB77E";
+                });
+            }
+
+            console.log("Selected Labels:", selectedLabels);
+            currentPage = 1;
+            loadImages();
+        }
+
+        function updateSelectedLabels() {
+            selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
+            document.getElementById('imageAllCheckbox').checked = selectedLabels.length === 0;
+            console.log("Selected Labels:", selectedLabels);
+            currentPage = 1;
+            loadImages();
+        }
+
+        async function loadImages() {
+            const gallery = document.getElementById("imageContainer");
+            gallery.innerHTML = "";
 
 
-          const eventSelect = document.getElementById('event');
 
-const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-let url = selectedLabels.length > 0 
-    ? 'http://localhost:3000/label-based-fetch' 
-    : `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}&eventId=${selectedOption.value}`;
+            const eventSelect = document.getElementById('event');
 
-const options = selectedLabels.length > 0 
-    ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            labels: selectedLabels,
-            page: currentPage,
-            limit: imagesPerPage,
-            eventId: selectedOption.value  // Send selected event value here
-        })
-    } 
-    : { 
-        method: 'GET' 
-    };
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+            let url = selectedLabels.length > 0 ?
+                'http://localhost:3000/label-based-fetch' :
+                `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}&eventId=${selectedOption.value}`;
 
-const response = await fetch(url, options);
-const imagesData = await response.json();
+            const options = selectedLabels.length > 0 ? {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    labels: selectedLabels,
+                    page: currentPage,
+                    limit: imagesPerPage,
+                    eventId: selectedOption.value // Send selected event value here
+                })
+            } : {
+                method: 'GET'
+            };
+            const response = await fetch(url, options);
+            const imagesData = await response.json();
 
-images = imagesData.images.map(img => `data:image/jpeg;base64,${img.data}`);
-totalPages = imagesData.totalPages; 
+            images = imagesData.images.map(img => {
+                return {
+                    data: `data:image/jpeg;base64,${img.data}`,
+                    id: img.id
+                };
+            });
 
-displayImages();
-createPaginationButtons();
+            totalPages = imagesData.totalPages;
 
-      }
-    
-      function displayImages() {
-          const gallery = document.getElementById("imageContainer");
-          gallery.innerHTML = "";
-    
-          images.forEach((src, index) => {
-              const div = document.createElement("div");
-              div.className = "imageGridItem";
-              div.innerHTML = `<img src="${src}" onclick="openImageLightbox(${index})">`;
-              gallery.appendChild(div);
-          });
-      }
-    
-      function createPaginationButtons() {
-          const paginationContainer = document.getElementById("imagePagination");
-          paginationContainer.innerHTML = "";
-    
-          if (totalPages <= 1) return; 
-    
-          for (let i = 1; i <= totalPages; i++) {
-              const button = document.createElement("button");
-              button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
-              button.style.borderRadius = '5px';
-              button.style.border = 'none';
-              button.style.padding = '6px';
-              button.style.height = '30px';
-              button.style.width = '30px';
-              button.style.color = 'white';
-              button.style.cursor = 'pointer';
-              button.innerText = i;
-              button.classList.add("imagePaginationButton");
-    
-              button.addEventListener("click", () => { 
-                  console.log(`Clicked page ${i}`);
-                  changePage(i);
-              });
-    
-              paginationContainer.appendChild(button);
-          }
-          }
-    
-      function changePage(page) {
-          console.log("Button Clicked: Page", page);  
-          if (page !== currentPage) { 
-              currentPage = page;
-              console.log(`Page changed to: ${currentPage}`);  
-              loadImages();
-          }
-      }
-    
-      function openImageLightbox(index) {
-          currentIndex = index;
-          document.getElementById("imageLightbox").style.display = "flex";
-          updateImageLightbox();
-      }
-    
-      function closeImageLightbox() {
-          document.getElementById("imageLightbox").style.display = "none";
-      }
-    
-      function changeImageDisplay(step) {
-          currentIndex = (currentIndex + step + images.length) % images.length;
-          updateImageLightbox();
-      }
-    
-      function updateImageLightbox() {
-          document.getElementById("imageLightboxImg").src = images[currentIndex];
-      }
-    
-      // window.onload = loadLabels;
+            displayImages();
+            createPaginationButtons();
+
+
+        }
+
+        function displayImages() {
+            const gallery = document.getElementById("imageContainer");
+            gallery.innerHTML = "";
+
+            images.forEach((src, index) => {
+                const div = document.createElement("div");
+                div.className = "imageGridItem";
+                div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
+
+                // Create the checkbox element
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.classList.add("imageCheckbox");
+                checkbox.style.position = "absolute"; // Positioning it in the top-right corner
+                checkbox.style.top = "10px";
+                checkbox.style.right = "10px";
+                checkbox.style.zIndex = "10"; // Make sure it's on top of the image
+
+                // Create the image element
+                const image = document.createElement("img");
+                image.src = src.data; // Assuming src.data contains the base64 image data
+                image.onclick = () => openImageLightbox(index);
+
+                // Append the checkbox and the image to the div
+                div.appendChild(checkbox);
+                div.appendChild(image);
+
+                // Append the div to the gallery
+                gallery.appendChild(div);
+
+                // Event listener for checkbox change
+                checkbox.addEventListener("change", function() {
+                    if (this.checked) {
+                        checkedImages.push(src.id); // Add the image ID to the array
+                    } else {
+                        checkedImages = checkedImages.filter(id => id !== src.id); // Remove the image ID from the array
+                    }
+
+                    console.log("Checked Images IDs:", checkedImages);
+                    toggleBottomSection(checkedImages.length > 0); // Show or hide the bottom section based on selection
+                });
+            });
+
+            // Function to show/hide the bottom section based on image selection
+            function toggleBottomSection(show) {
+                const bottomSection = document.getElementById("bottomSection");
+                if (show) {
+                    bottomSection.style.display = "flex"; // Show the bottom section
+                } else {
+                    bottomSection.style.display = "none"; // Hide the bottom section
+                }
+            }
+
+            // Initialize the bottom section, fixed to the bottom of the screen
+            const bottomSection = document.createElement("div");
+            bottomSection.id = "bottomSection";
+            bottomSection.style.position = "fixed";
+            bottomSection.style.bottom = "0";
+            bottomSection.style.left = "0";
+            bottomSection.style.width = "100%";
+            bottomSection.style.backgroundColor = "#222736";
+            bottomSection.style.color = "white";
+            bottomSection.style.display = "none";
+            bottomSection.style.padding = "10px";
+            bottomSection.style.justifyContent = "center";
+            bottomSection.style.alignItems = "center";
+            bottomSection.style.zIndex = "1000";
+
+            // Add buttons to the bottom section
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Delete Selected";
+            deleteButton.style.marginRight = "20px";
+            deleteButton.style.border = 'none';
+            deleteButton.style.borderRadius = '5px';
+            deleteButton.style.backgroundColor = '#f44336';
+            deleteButton.style.color = 'white';
+            deleteButton.style.padding = '10px'
+            deleteButton.style.textAlign = 'center'
+            deleteButton.onclick = () => document.getElementById('delete-overlay').style.display = 'flex';
+
+            const changeLabelsButton = document.createElement("button");
+            changeLabelsButton.innerText = "Change Labels";
+            changeLabelsButton.style.marginRight = "20px";
+            changeLabelsButton.style.border = 'none';
+            changeLabelsButton.style.borderRadius = '5px';
+            changeLabelsButton.style.backgroundColor = '#3bb77e';
+            changeLabelsButton.style.color = 'white';
+            changeLabelsButton.style.padding = '10px'
+            changeLabelsButton.style.textAlign = 'center'
+            changeLabelsButton.onclick = () => document.getElementById('change-label-overlay').style.display = 'flex';
+
+            // Append buttons to the bottom section
+            bottomSection.appendChild(deleteButton);
+            bottomSection.appendChild(changeLabelsButton);
+
+            // Append the bottom section to the body
+            document.body.appendChild(bottomSection);
+
+        }
+
+        function createPaginationButtons() {
+            const paginationContainer = document.getElementById("imagePagination");
+            paginationContainer.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement("button");
+                button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
+                button.style.borderRadius = '5px';
+                button.style.border = 'none';
+                button.style.padding = '6px';
+                button.style.height = '30px';
+                button.style.width = '30px';
+                button.style.color = 'white';
+                button.style.cursor = 'pointer';
+                button.innerText = i;
+                button.classList.add("imagePaginationButton");
+
+                button.addEventListener("click", () => {
+                    console.log(`Clicked page ${i}`);
+                    changePage(i);
+                });
+
+                paginationContainer.appendChild(button);
+            }
+        }
+
+        function changePage(page) {
+            console.log("Button Clicked: Page", page);
+            if (page !== currentPage) {
+                currentPage = page;
+                console.log(`Page changed to: ${currentPage}`);
+                loadImages();
+            }
+        }
+
+        function openImageLightbox(index) {
+            currentIndex = index;
+            document.getElementById("imageLightbox").style.display = "flex";
+            updateImageLightbox();
+        }
+
+        function closeImageLightbox() {
+            document.getElementById("imageLightbox").style.display = "none";
+        }
+
+        function changeImageDisplay(step) {
+            currentIndex = (currentIndex + step + images.length) % images.length;
+            updateImageLightbox();
+        }
+
+        function updateImageLightbox() {
+            document.getElementById("imageLightboxImg").src = images[currentIndex].data;
+        }
+
+        // window.onload = loadLabels;
     </script>
-    
-    
+
+
 
 
 
 
     <!-- handling popup to change label name or delete it -->
     <script>
+        function action() {
+            document.getElementById('overlay').style.display = 'flex';
+            const x = document.getElementById('update-label-container')
+            x.innerHTML = " "
 
+            selectedLabels.forEach(label => {
+                let span = document.createElement('span')
+                span.innerHTML = `<span><b><u>${label}</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></span>`
+                x.appendChild(span)
+            });
+        }
 
+        // for all selected labels
+        function updateLabels() {
+            // Get the new label from the input field
+            const newLabel = document.getElementById('newLabel').value;
 
+            // Get the event code from the selected option in the dropdown
+            const eventSelect = document.getElementById('event');
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
 
-      function action(){
-        document.getElementById('overlay').style.display = 'flex';
-        const x = document.getElementById('update-label-container')
-        x.innerHTML = " "
-        
-        selectedLabels.forEach(label => {
-          let span = document.createElement('span')
-          span.innerHTML = `<span><b><u>${label}</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></span>`
-          x.appendChild(span)
-        });
-      }
+            // Validate inputs
+            if (!newLabel || !selectedOption.value) {
+                alert('Please provide a new label and select an event.');
+                return; // Stop further execution if validation fails
+            }
 
+            // Create the payload for the request
+            const payload = {
+                label: Array.from(selectedLabels), // Assuming `selectedLabels` is an array of labels
+                newLabel: newLabel,
+                event_code: selectedOption.value
+            };
 
+            // Make the API request
+            fetch('http://localhost:3000/update-label', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    // Check if the response is successful (status code 200-299)
+                    if (!response.ok) {
+                        // If not successful, throw an error
+                        throw new Error(`Failed to update labels. Status: ${response.status}`);
+                    }
+                    return response.json(); // Parse the JSON response
+                })
+                .then(data => {
+                    // Handle the response data (success message or any returned data)
+                    alert('Labels updated successfully!');
+                })
+                .catch(error => {
+                    // Handle errors (network issues or bad response)
+                    console.error('Error updating labels:', error);
+                    alert('There was an error updating the labels. Please try again later.');
+                });
+        }
 
+        // for all selected labels
+        function deleteSelectedLabels() {
+            // Get the selected labels from the selectedLabels array
+            const labelArray = Array.from(selectedLabels); // Assuming selectedLabels is a pre-existing array
 
+            // Get the selected event from the dropdown
+            const eventSelect = document.getElementById('event');
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
 
+            const eventCode = selectedOption.value; // Get the selected event code
 
+            if (!labelArray || labelArray.length === 0 || !eventCode) {
+                alert('Please select at least one label and an event.');
+                return;
+            }
 
+            // Send the request to the backend
+            fetch('http://localhost:3000/delete-images', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        label: labelArray,
+                        event_code: eventCode
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message); // Success message
+                    } else if (data.error) {
+                        alert(data.error); // Error message
+                    }
+                })
+                .catch(err => {
+                    console.error('Error deleting images:', err);
+                    alert('An error occurred while deleting the images.');
+                });
+        }
 
+        // for all selected images
+        async function deleteSelectedImages() {
+            if (checkedImages.length === 0) {
+                alert('No images selected for deletion!');
+                return;
+            }
 
-      function updateLabels() {
-  // Get the new label from the input field
-  const newLabel = document.getElementById('newLabel').value;
+            // Confirm deletion before proceeding
+            const confirmation = confirm('Are you sure you want to delete the selected images?');
+            if (!confirmation) return;
 
-  // Get the event code from the selected option in the dropdown
-  const eventSelect = document.getElementById('event');
-  const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-  
-  // Validate inputs
-  if (!newLabel || !selectedOption.value) {
-    alert('Please provide a new label and select an event.');
-    return; // Stop further execution if validation fails
-  }
+            try {
+                // Send a POST request to delete the images
+                const response = await fetch('http://localhost:3000/id-based-image-delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageIds: checkedImages, // Send the array of image IDs
+                    }),
+                });
 
-  // Create the payload for the request
-  const payload = {
-    label: Array.from(selectedLabels), // Assuming `selectedLabels` is an array of labels
-    newLabel: newLabel,
-    event_code: selectedOption.value
-  };
+                // Check if the response status is OK (200)
+                if (!response.ok) {
+                    throw new Error('Failed to delete images');
+                }
 
-  // Make the API request
-  fetch('http://localhost:3000/update-label', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(response => {
-    // Check if the response is successful (status code 200-299)
-    if (!response.ok) {
-      // If not successful, throw an error
-      throw new Error(`Failed to update labels. Status: ${response.status}`);
-    }
-    return response.json(); // Parse the JSON response
-  })
-  .then(data => {
-    // Handle the response data (success message or any returned data)
-    alert('Labels updated successfully!');
-  })
-  .catch(error => {
-    // Handle errors (network issues or bad response)
-    console.error('Error updating labels:', error);
-    alert('There was an error updating the labels. Please try again later.');
-  });
-}
+                // Parse the JSON response
+                const data = await response.json();
+                if (data.message === 'Images deleted successfully') {
+                    location.reload();
+                    // Optionally, refresh the image list or remove the deleted images from UI
+                } else {
+                    alert('Failed to delete images. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the images. Please try again later.');
+            }
+        }
 
+        // for all selected images
+        async function changeLabel() {
+            const newLabel = document.getElementById('newLabelForSelectedImages').value; // Get the new label value from the input field
 
-function deleteSelectedLabels() {
-  // Get the selected labels from the selectedLabels array
-  const labelArray = Array.from(selectedLabels);  // Assuming selectedLabels is a pre-existing array
+            // Validate that new label is entered and images are selected
+            if (checkedImages.length === 0) {
+                alert('No images selected for label change!');
+                return;
+            }
+            if (newLabel.trim() === '') {
+                alert('Please enter a new label!');
+                return;
+            }
 
-  // Get the selected event from the dropdown
-  const eventSelect = document.getElementById('event');
-  const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+            // Confirm the label change before proceeding
+            const confirmation = confirm('Are you sure you want to change the label for the selected images?');
+            if (!confirmation) return;
 
-  const eventCode = selectedOption.value;  // Get the selected event code
+            try {
+                // Send a POST request to change the label of the selected images
+                const response = await fetch('http://localhost:3000/id-based-label-change', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageIds: checkedImages, // Array of selected image IDs
+                        newLabel: newLabel, // The new label for the selected images
+                    }),
+                });
 
-  if (!labelArray || labelArray.length === 0 || !eventCode) {
-    alert('Please select at least one label and an event.');
-    return;
-  }
+                // Check if the response status is OK (200)
+                if (!response.ok) {
+                    throw new Error('Failed to change label');
+                }
 
-  // Send the request to the backend
-  fetch('http://localhost:3000/delete-images', {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ label: labelArray, event_code: eventCode }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.message) {
-      alert(data.message);  // Success message
-    } else if (data.error) {
-      alert(data.error);  // Error message
-    }
-  })
-  .catch(err => {
-    console.error('Error deleting images:', err);
-    alert('An error occurred while deleting the images.');
-  });
-}
-
+                // Parse the JSON response
+                const data = await response.json();
+                if (data.message === 'Labels updated successfully') {
+                    location.reload()
+                        // Optionally, refresh the label display or update the UI
+                } else {
+                    alert('Failed to update labels. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating the labels. Please try again later.');
+            }
+        }
     </script>
 
 
 
-<script>
-  document.getElementById('logout').addEventListener('click', function () {
-localStorage.removeItem('token');
+    <script>
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('token');
 
-alert('You have been logged out successfully!');
+            alert('You have been logged out successfully!');
 
-window.location.href = 'page-account-login.html';
-});
-</script>
-  </body>
+            window.location.href = 'page-account-login.html';
+        });
+    </script>
+</body>
+
 </html>
