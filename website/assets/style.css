@@ -2354,7 +2354,7 @@ header .main-menus nav ul li a:hover {
   }
 }
 .love-story .love-story .story-list .story.lefts:after {
-  content: '\f004';
+  content: '';
   font-family: fontawesome;
   color: #f33c3c;
   font-size: 18px;

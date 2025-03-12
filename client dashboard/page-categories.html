@@ -283,10 +283,10 @@
                         <td>${event.event_code}</td>
                         <td class="text-end">
                             <div class="dropdown">
-                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm">
+                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm" style="padding: 0.25rem 0.5rem;">
                                     <i class="material-icons md-more_horiz"></i>
                                 </a>
-                                <div class="dropdown-menu">
+                                <div class="dropdown-menu" style="position: fixed; min-width: 0; max-width: 150px; top: 100px; left: 300px; z-index: 1000; transform: translate(0, 0);">
                                     <a class="dropdown-item" href="#">View detail</a>
                                     <a class="dropdown-item" href="#">Edit info</a>
                                     <a class="dropdown-item text-danger category-deleter" href="#" data-id="${event.id}">Delete</a>
