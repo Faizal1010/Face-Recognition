@@ -204,5 +204,29 @@ const getEventsByClientId = async (req, res) => {
     }
 };
 
+const checkEventExists = (req, res) => {
+    const { event_code } = req.params;
 
-module.exports = { addEvent, getAllEvents, deleteEvent, getEventsByClientId }
+    if (!event_code) {
+        return res.status(400).json({ error: 'event_code is required' });
+    }
+
+    const query = 'SELECT COUNT(*) AS count FROM events WHERE event_code = ?';
+
+    db.query(query, [event_code], (err, results) => {
+        if (err) {
+            console.error('Error checking event existence:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        const eventExists = results[0].count > 0;
+        if (!eventExists) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        res.json({ message: 'Event exists', event_code });
+    });
+};
+
+
+module.exports = { addEvent, getAllEvents, deleteEvent, getEventsByClientId, checkEventExists }

@@ -18,4 +18,10 @@ router.post('/label-based-fetch', imageController.getImagesByLabels)
 router.delete('/id-based-image-delete', imageController.deleteImagesByIds)
 router.post('/id-based-label-change', imageController.updateLabelsById)
 
+// for downloading one image
+router.get('/original/:id', imageController.getOriginalImage);
+
+// for downloading all images with selected labels
+router.post('/download-all-selected', imageController.downloadAllSelectedImages);
+
 module.exports = router;

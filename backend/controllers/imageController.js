@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const sharp = require('sharp');
 
 // DB Connection
 const db = mysql.createConnection({
@@ -25,23 +26,34 @@ exports.getImages = (req, res) => {
             return res.status(500).json({ error: 'Error fetching images' });
         }
 
-        const images = results.map(r => ({
-            id: r.id,
-            data: Buffer.from(r.image).toString('base64')
-        }));
+        // Compress images with sharp before converting to base64
+        Promise.all(results.map(r =>
+            sharp(r.image)
+                .jpeg({ quality: 60 }) // Compress to JPEG with 85% quality (adjustable)
+                .toBuffer()
+                .then(compressedBuffer => ({
+                    id: r.id,
+                    data: compressedBuffer.toString('base64')
+                }))
+        ))
+        .then(images => {
+            // Get total count for pagination metadata
+            const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE event_code = ?';
+            db.query(countQuery, [eventId], (err, countResult) => {
+                if (err) {
+                    console.error('Error fetching total count:', err);
+                    return res.status(500).json({ error: 'Error fetching total count' });
+                }
 
-        // Get total count for pagination metadata
-        const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE event_code = ?';
-        db.query(countQuery, [eventId], (err, countResult) => {
-            if (err) {
-                console.error('Error fetching total count:', err);
-                return res.status(500).json({ error: 'Error fetching total count' });
-            }
+                const total = countResult[0].total;
+                const totalPages = Math.ceil(total / pageSize);
 
-            const total = countResult[0].total;
-            const totalPages = Math.ceil(total / pageSize);
-
-            res.json({ images, page: pageNum, totalPages, total });
+                res.json({ images, page: pageNum, totalPages, total });
+            });
+        })
+        .catch(err => {
+            console.error("Error compressing images:", err);
+            res.status(500).json({ error: "Error compressing images" });
         });
     });
 };
@@ -254,23 +266,34 @@ exports.getImagesByLabels = (req, res) => {
             return res.status(500).json({ error: "Error fetching images" });
         }
 
-        const images = results.map(r => ({
-            id: r.id,
-            data: Buffer.from(r.image).toString('base64')
-        }));
+        // Compress images with sharp before converting to base64
+        Promise.all(results.map(r =>
+            sharp(r.image)
+                .jpeg({ quality: 85 }) // Compress to JPEG with 85% quality (adjustable)
+                .toBuffer()
+                .then(compressedBuffer => ({
+                    id: r.id,
+                    data: compressedBuffer.toString('base64')
+                }))
+        ))
+        .then(images => {
+            // Get total count for pagination
+            const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE FIND_IN_SET(label, ?) AND event_code = ?';
+            db.query(countQuery, [labels.join(','), eventId], (err, countResult) => {
+                if (err) {
+                    console.error("Error fetching total count:", err);
+                    return res.status(500).json({ error: "Error fetching total count" });
+                }
 
-        // Get total count for pagination
-        const countQuery = 'SELECT COUNT(*) AS total FROM images WHERE FIND_IN_SET(label, ?) AND event_code = ?';
-        db.query(countQuery, [labels.join(','), eventId], (err, countResult) => {
-            if (err) {
-                console.error("Error fetching total count:", err);
-                return res.status(500).json({ error: "Error fetching total count" });
-            }
+                const total = countResult[0].total;
+                const totalPages = Math.ceil(total / pageSize);
 
-            const total = countResult[0].total;
-            const totalPages = Math.ceil(total / pageSize);
-
-            res.json({ images, page: pageNum, totalPages, total });
+                res.json({ images, page: pageNum, totalPages, total });
+            });
+        })
+        .catch(err => {
+            console.error("Error compressing images:", err);
+            res.status(500).json({ error: "Error compressing images" });
         });
     });
 };
@@ -359,4 +382,56 @@ exports.updateLabelsById = (req, res) => {
             console.error('Error updating labels:', err);
             res.status(500).json({ error: 'Error updating labels' });
         });
+};
+
+exports.getOriginalImage = (req, res) => {
+    console.log('hit')
+    const { id } = req.params; // Image ID from URL parameter
+    console.log("Fetching original image with ID:", id);
+
+    const query = 'SELECT image FROM images WHERE id = ?';
+    db.query(query, [id], (err, results) => {
+        if (err) {
+            console.error("Error fetching original image:", err);
+            return res.status(500).json({ error: "Error fetching original image" });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Image not found" });
+        }
+
+        const imageBuffer = results[0].image;
+        res.set('Content-Type', 'image/jpeg'); // Set the correct MIME type
+        res.set('Content-Disposition', `attachment; filename="image_${id}.jpg"`); // Suggest a filename
+        res.send(imageBuffer); // Send the raw buffer (original quality)
+    });
+};
+
+exports.downloadAllSelectedImages = (req, res) => {
+    const { labels, eventId } = req.body;
+    console.log("Selected Labels and Event ID for download:", labels, eventId);
+
+    if (!labels || labels.length === 0 || !eventId) {
+        return res.status(400).json({ error: "Labels and eventId are required" });
+    }
+
+    // Query to fetch all images matching the selected labels and eventId
+    const query = 'SELECT id, image FROM images WHERE FIND_IN_SET(label, ?) AND event_code = ? ORDER BY id ASC';
+    db.query(query, [labels.join(','), eventId], (err, results) => {
+        if (err) {
+            console.error("Error fetching images for download:", err);
+            return res.status(500).json({ error: "Error fetching images" });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ images: [] });
+        }
+
+        // Prepare images as an array of { id, data } with original buffers converted to base64
+        const images = results.map(r => ({
+            id: r.id,
+            data: Buffer.from(r.image).toString('base64') // Original image, no compression
+        }));
+
+        res.json({ images });
+    });
 };

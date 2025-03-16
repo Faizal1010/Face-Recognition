@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Story</title>
+    <style>
+        /* Full-screen popup */
+        #popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Popup content */
+        #popup-content {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        /* Hide the main content initially */
+        #main-content {
+            display: none;
+        }
+        /* Input styling */
+        #eventCodeInput {
+            padding: 8px;
+            width: 80%;
+            margin: 10px 0;
+        }
+        /* Button styling */
+        #submitBtn {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+        <style>
+            .imageGrid {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .imageGridItem {
+                position: relative;
+                overflow: hidden;
+                border-radius: 8px;
+                cursor: pointer;
+                width: 200px;
+                height: 220px;
+            }
+            
+            .imageGridItem img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .imageGridItem:hover img {
+                transform: scale(1.1);
+            }
+            
+            .imageLightbox {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                justify-content: center;
+                align-items: center;
+                z-index: 999999999;
+            }
+            
+            .imageLightbox img {
+                max-width: 80%;
+                max-height: 80%;
+                border-radius: 8px;
+            }
+            
+            .imageClose,
+            .imagePrev,
+            .imageNext {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(62, 62, 62, 0.3);
+                color: white;
+                border: none;
+                padding: 10px;
+                cursor: pointer;
+                font-size: 24px;
+                border-radius: 5px;
+            }
+            
+            .imageClose {
+                top: 10px;
+                right: 20px;
+                font-size: 30px;
+            }
+            
+            .imagePrev {
+                left: 20px;
+            }
+            
+            .imageNext {
+                right: 20px;
+            }
+            
+            @media (max-width: 600px) {
+                .imageGrid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .imageGridItem {
+                    width: 180px;
+                    height: 170px;
+                }
+                #imageLabelFilters{
+                    width: 100%;
+                }
+            }
+            
+            .imagePaginationButton {
+                pointer-events: auto !important;
+                z-index: 99999 !important;
+                position: relative !important;
+            }
+        </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; text-align: center;">
+
+    <!-- Popup -->
+    <div id="popup">
+        <div id="popup-content">
+            <h2>Enter Event Code</h2>
+            <input type="text" id="eventCodeInput" placeholder="Enter code...">
+            <br>
+            <button id="submitBtn">Submit</button>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden Initially) -->
+    <div id="main-content">
+        <div style="position: relative; width: 100%; height: 100vh; background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;">
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box;">
+                
+                <h1 style="font-size: 2.5rem; margin: 10px 0;">Annyasha & Sudipta Stories</h1>
+                <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
+
+                <a href="#" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
+
+                <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
+
+                <div style="margin-top: 10px;">
+                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">📘</a>
+                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">📷</a>
+                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">▶️</a>
+                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">🟢</a>
+                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">🌐</a>
+                </div>
+            </div>
+        </div>
+
+
+<div style="padding: 10px;">
+<style>
+                @media (max-width: 600px) {
+                #main-container {
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+</style>
+    <div  id="main-container" style="display: flex; justify-content: space-between; align-items: center;">
+        
+        <div id="imageLabelFilters" style="display: flex; align-items: center;"></div>
+    <div id="grandDownloadContainer" style="display: flex; gap: 2px;">
+            <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the images under selected labels">
+                Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                    <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+            <a href="findYourself-main.html" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;">
+                Find Yourself<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                    <path d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84664 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M17.5 17L17.2978 16.1511C17.1307 15.4497 16.5989 14.8925 15.9061 14.6929L13.5 13.9994L13.4997 12.5318C14.3964 11.9266 14.9997 10.7955 14.9997 9.5C14.9997 7.567 13.6565 6 11.9997 6C10.3428 6 8.99966 7.567 8.99966 9.5C8.99966 10.7955 9.60296 11.9266 10.4997 12.5318L10.5 13.9994L8.10885 14.6994C7.43747 14.896 6.91757 15.429 6.73787 16.1051L6.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
+    </div>
+        </div>
+
+
+        <div class="image-section">
+
+    
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div class="imageGrid" id="imageContainer"></div>
+                <div class="imageLightbox" id="imageLightbox">
+                    <span class="imageClose" onclick="closeImageLightbox()">×</span>
+                    <img id="imageLightboxImg">
+                    <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
+                    <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+                </div>
+            </div>
+            <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    let savedEventId = localStorage.getItem("eventId");
+    document.addEventListener("DOMContentLoaded", function () {
+        if (savedEventId) {
+            loadLabels(savedEventId);
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("main-content").style.display = "block";
+        }
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", function () {
+        let eventId = document.getElementById("eventCodeInput").value.trim();
+        if (!eventId) {
+            alert("Please enter a valid event code.");
+            return;
+        }
+
+        fetch(`http://localhost:3000/event/check-event/${eventId}`, { method: "HEAD" })
+            .then(response => {
+                if (response.ok) {
+                    localStorage.setItem("eventId", eventId); // Save event code
+                    loadLabels(eventId);
+                    console.log("Event Code Entered:", eventId);
+                    document.getElementById("popup").style.display = "none";
+                    document.getElementById("main-content").style.display = "block";
+                } else {
+                    alert("Event does not exist or the code is incorrect.");
+                }
+            })
+            .catch(error => {
+                console.error("Error checking event:", error);
+                alert("An error occurred. Please try again later.");
+            });
+    });
+</script>
+
+
+
+    <script>
+        let images = [];
+        let currentPage = 1;
+        let imagesPerPage = 20;
+        let selectedLabels;
+
+        async function loadLabels(eventId) {
+            console.log(eventId);
+            const response = await fetch(`http://localhost:3000/get-labels/${eventId}`);
+            const labels = await response.json();
+            console.log("labels are ", new Set(labels));
+            const labelFilters = document.getElementById('imageLabelFilters');
+            labelFilters.innerHTML = ''; // No need to preserve the "All" checkbox parent
+            // selectedLabels = labels
+
+            new Set(labels).forEach(label => {
+                const labelContainer = document.createElement('label');
+                labelContainer.classList.add('custom-checkbox-label');
+                labelContainer.style.fontSize = '12px';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = label;
+                checkbox.classList.add('imageLabelCheckbox');
+                checkbox.checked = true; // Ensure labels are selected on load
+
+                // Create a small tick element for checked labels
+                const tickElement = document.createElement('span');
+                tickElement.classList.add('tick');
+                tickElement.style.fontSize = '12px';
+                tickElement.innerText = '✓';
+
+                labelContainer.appendChild(checkbox);
+                labelContainer.appendChild(tickElement);
+                labelContainer.appendChild(document.createTextNode(` ${label}`));
+
+                labelFilters.appendChild(labelContainer);
+
+                // Initial background color
+                labelContainer.style.backgroundColor = "#3BB77E"; // Set color on load
+
+                // Only add the tick when the checkbox is checked
+                if (checkbox.checked) {
+                    tickElement.style.visibility = 'visible'; // Show tick when checked
+                } else {
+                    tickElement.style.visibility = 'hidden'; // Hide tick when unchecked
+                }
+
+                checkbox.addEventListener('change', function() {
+                    // Show or hide the tick based on the checkbox state
+                    tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+                    updateSelectedLabels(eventId); // Pass eventId to updateSelectedLabels
+                });
+            });
+
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .custom-checkbox-label {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 8px 16px;
+                    margin: 5px;
+                    border-radius: 25px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    background-color: #3BB77E;
+                    color: white;
+                    border: none;
+                    transition: 0.3s ease-in-out;
+                    position: relative;
+                }
+                .custom-checkbox-label:hover {
+                    opacity: 0.9;
+                }
+                .imageLabelCheckbox {
+                    display: none;
+                }
+                .tick {
+                    font-size: 20px;
+                    color: white;
+                    visibility: hidden; /* Start with hidden tick */
+                }
+                #imageLabelFilters {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize selectedLabels with all labels by default
+            selectedLabels = new Set(labels);
+            console.log("Selected Labels:", selectedLabels);
+
+            loadImages(eventId); // Load images immediately with all labels selected
+        }
+
+        function updateSelectedLabels(eventId) {
+            selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
+            console.log("Selected Labels:", selectedLabels);
+            currentPage = 1;
+            loadImages(savedEventId); // Pass eventId to loadImages
+        }
+                
+        async function loadImages(eventId) {
+                    const gallery = document.getElementById("imageContainer");
+                    gallery.innerHTML = "";
+
+                    let url = selectedLabels.length > 0 ?
+                        'http://localhost:3000/label-based-fetch' :
+                        `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}&eventId=${eventId}`;
+
+                    const options = selectedLabels.length > 0 ? {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            labels: selectedLabels,
+                            page: currentPage,
+                            limit: imagesPerPage,
+                            eventId // Send selected event value here
+                        })
+                    } : {
+                        method: 'GET'
+                    };
+                    const response = await fetch(url, options);
+                    const imagesData = await response.json();
+
+                    images = imagesData.images.map(img => {
+                        return {
+                            data: `data:image/jpeg;base64,${img.data}`,
+                            id: img.id
+                        };
+                    });
+                    totalPages = imagesData.totalPages;
+
+                    displayImages(images);
+                    createPaginationButtons();
+                }
+
+        function displayImages(images) {
+    const gallery = document.getElementById("imageContainer");
+    gallery.innerHTML = "";
+    images.forEach((src, index) => {
+        const div = document.createElement("div");
+        div.className = "imageGridItem";
+        div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
+        div.style.position = "relative"; // Ensure positioning context for the button
+
+        // Create the image element with lazy loading
+        const image = document.createElement("img");
+        image.src = src.data; // Assuming src.data contains the base64 image data
+        image.loading = "lazy"; // Enable lazy loading
+        image.alt = `Image ${src.id}`; // Add alt text for accessibility
+        image.onclick = () => openImageLightbox(index);
+
+        image.addEventListener('dblclick', () => {
+            
+        });
+
+        // Create the download button
+        const downloadButton = document.createElement("button");
+        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`; // Down arrow symbol for download
+        downloadButton.style.position = "absolute";
+        downloadButton.style.top = "10px";
+        downloadButton.style.right = "10px";
+        downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)"; // Match your pagination button style
+        downloadButton.style.border = "none";
+        downloadButton.style.borderRadius = "5px";
+        downloadButton.style.padding = "3px";
+        downloadButton.style.cursor = "pointer";
+        downloadButton.style.opacity = "0"; // Initially hidden
+        downloadButton.style.transition = "opacity 0.2s ease-in-out"; // Smooth transition
+
+        // Add click event to fetch and download the original image
+        downloadButton.onclick = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/original/${src.id}`, {
+                    method: 'GET',
+                });
+                if (!response.ok) throw new Error('Failed to fetch original image');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `image_${src.id}.jpg`; // Default filename
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url); // Clean up
+            } catch (error) {
+                console.error("Error downloading image:", error);
+                alert("Failed to download the image.");
+            }
+        };
+
+        // Show download button on hover
+        div.addEventListener('mouseenter', () => {
+            downloadButton.style.opacity = "1";
+        });
+        div.addEventListener('mouseleave', () => {
+            downloadButton.style.opacity = "0";
+        });
+
+        // Append the image and download button to the div
+        div.appendChild(image);
+        div.appendChild(downloadButton);
+
+        // Append the div to the gallery
+        gallery.appendChild(div);
+    });
+}
+                
+        function createPaginationButtons() {
+            const paginationContainer = document.getElementById("imagePagination");
+            paginationContainer.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            const maxVisibleButtons = 4; // Maximum number of page buttons to show at once (excluding first/last and ellipsis)
+            const ellipsis = "...";
+
+            // Helper function to create a button
+            function createButton(pageNum, isActive = false) {
+                const button = document.createElement("button");
+                button.style.backgroundColor = isActive ? '#FF5733' : '#3BB77E';
+                button.style.borderRadius = '5px';
+                button.style.border = 'none';
+                button.style.padding = '6px';
+                button.style.height = '30px';
+                button.style.width = '30px';
+                button.style.color = 'white';
+                button.style.cursor = 'pointer';
+                button.innerText = pageNum;
+                button.classList.add("imagePaginationButton");
+
+                button.addEventListener("click", () => {
+                    console.log(`Clicked page ${pageNum}`);
+                    changePage(pageNum);
+                });
+
+                return button;
+            }
+
+            // Helper function to create an ellipsis span
+            function createEllipsis() {
+                const span = document.createElement("span");
+                span.innerText = ellipsis;
+                span.style.padding = '6px';
+                span.style.color = 'green';
+                span.style.cursor = 'default';
+                return span;
+            }
+
+            // If total pages are small (e.g., ≤ 7), show all pages
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                return;
+            }
+
+            // Always show the first page
+            paginationContainer.appendChild(createButton(1, currentPage === 1));
+
+            // Logic for dynamic pagination
+            if (currentPage <= 3) {
+                // Show pages 1, 2, 3, 4, ..., last-1, last
+                for (let i = 2; i <= Math.min(4, totalPages - 2); i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                if (totalPages > 5) {
+                    paginationContainer.appendChild(createEllipsis());
+                    paginationContainer.appendChild(createButton(totalPages - 1, currentPage === totalPages - 1));
+                    paginationContainer.appendChild(createButton(totalPages, currentPage === totalPages));
+                }
+            } else if (currentPage >= totalPages - 2) {
+                // Show 1, ..., last-3, last-2, last-1, last
+                if (totalPages > 5) {
+                    paginationContainer.appendChild(createEllipsis());
+                    for (let i = totalPages - 3; i <= totalPages; i++) {
+                        paginationContainer.appendChild(createButton(i, i === currentPage));
+                    }
+                }
+            } else {
+                // Show 1, ..., current-1, current, current+1, ..., last
+                paginationContainer.appendChild(createEllipsis());
+                const startPage = Math.max(2, currentPage - 1);
+                const endPage = Math.min(totalPages - 1, currentPage + 1);
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                if (endPage < totalPages - 1) {
+                    paginationContainer.appendChild(createEllipsis());
+                    paginationContainer.appendChild(createButton(totalPages - 1, currentPage === totalPages - 1));
+                    paginationContainer.appendChild(createButton(totalPages, currentPage === totalPages));
+                }
+            }
+        }
+
+        function changePage(page) {
+            console.log("Button Clicked: Page", page);
+            if (page !== currentPage) {
+                currentPage = page;
+                console.log(`Page changed to: ${currentPage}`);
+                loadImages(savedEventId);
+            }
+        }
+
+        function openImageLightbox(index) {
+            currentIndex = index;
+            document.getElementById("imageLightbox").style.display = "flex";
+            updateImageLightbox();
+        }
+
+        function closeImageLightbox() {
+            document.getElementById("imageLightbox").style.display = "none";
+        }
+
+        function changeImageDisplay(step) {
+            currentIndex = (currentIndex + step + images.length) % images.length;
+            updateImageLightbox();
+        }
+
+        function updateImageLightbox() {
+            document.getElementById("imageLightboxImg").src = images[currentIndex].data;
+        }
+
+        async function downloadAllSelectedImages(eventId) {
+    if (!selectedLabels || selectedLabels.length === 0) {
+        alert("No labels selected to download.");
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/download-all-selected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                labels: Array.from(selectedLabels),
+                eventId
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch images for selected labels');
+
+        const imagesData = await response.json();
+        const images = imagesData.images;
+
+        console.log(`Received ${images.length} images from server`);
+
+        if (images.length === 0) {
+            alert("No images found for the selected labels.");
+            return;
+        }
+
+        // Helper function to download with delay
+        async function downloadImage(img) {
+            const byteCharacters = atob(img.data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `image_${img.id}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Process downloads with a delay between each
+        for (let index = 0; index < images.length; index++) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay between downloads
+            await downloadImage(images[index]);
+        }
+
+        console.log(`Downloaded ${images.length} images for labels:`, selectedLabels);
+    } catch (error) {
+        console.error("Error downloading all images:", error);
+        alert("Failed to download all images. Check the console for details.");
+    }
+}
+
+// Attach the function to the button after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const grandDownloadButton = document.getElementById('grandDownloadButton');
+    grandDownloadButton.addEventListener('click', () => downloadAllSelectedImages(savedEventId));
+});
+
+setTimeout(() => {
+    const labelFilters = document.getElementById('imageLabelFilters');
+    labelFilters.style.overflowX = "auto";
+    labelFilters.style.flexWrap = "nowrap";
+    labelFilters.style.whiteSpace = "nowrap";
+    labelFilters.style.maxWidth = "95%";
+}, 100);
+
+        </script>
+</body>
+</html>
