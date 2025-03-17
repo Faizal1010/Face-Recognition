@@ -14,7 +14,10 @@ const upload = multer({
     limits: { files: 500, fieldSize: 1024 * 1024 * 100 } // Increased limits
 });
 
-app.use(cors({ origin: "*" }));
+app.use(cors({
+    origin: 'http://127.0.0.1:3002', // Specify the exact frontend origin
+    credentials: true, // Allow credentials (cookies, authorization headers)
+}));
 app.use(express.static(path.join(__dirname, '../website')));
 app.use(express.json({ limit: "500gb" }));
 app.use(express.urlencoded({ extended: true, limit: "500gb" }));
@@ -27,47 +30,28 @@ const db = mysql.createConnection({
 });
 
 // Helper function to run Python script safely
-function runPythonScript(scriptPath, jsonFilePath, callback) {
-    const fullPath = path.join(__dirname, 'scripts', scriptPath);
-    console.log(`⚡ Running Python script: ${fullPath} with JSON: ${jsonFilePath}`);
-
-    try {
-        const pythonProcess = spawn('python', [fullPath, jsonFilePath]);
-
-        let output = '';
-        let errorOutput = '';
-
-        pythonProcess.stdout.on('data', (data) => {
-            const rawData = data.toString().trim();
-            console.log(`📜 Python Output: ${rawData}`);
-            output += rawData;
-        });
-
-        pythonProcess.stderr.on('data', (data) => {
-            errorOutput += data.toString();
-            console.error(`❌ Python Error: ${data}`);
-        });
-
-        pythonProcess.on('close', (code) => {
-            console.log(`🔴 Python script exited with code ${code}`);
-
-            if (code !== 0 || errorOutput) {
-                return callback(`Python script failed with code ${code}.\nError: ${errorOutput || 'Unknown error'}`);
-            }
-
-            try {
-                const parsedData = JSON.parse(output);
-                callback(null, parsedData);
-            } catch (e) {
-                console.error(`❌ JSON Parsing Error: ${output}`);
-                callback('Invalid JSON output from Python script.');
-            }
-        });
-
-    } catch (err) {
-        console.error(`❌ Failed to spawn Python script: ${err}`);
-        callback('Python execution failed');
-    }
+function runPythonScript(scriptPath, args, callback) {
+    const pythonProcess = spawn('python', [scriptPath, ...args]);
+  
+    let output = '';
+    let errorOutput = '';
+  
+    pythonProcess.stdout.on('data', (data) => {
+        output += data.toString();
+    });
+  
+    pythonProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+        console.log('Python stderr:', data.toString()); // Log stderr for debugging
+    });
+  
+    pythonProcess.on('close', (code) => {
+        console.log(`Python script exited with code ${code}`);
+        if (code !== 0) {
+            return callback(new Error(`Python script failed with code ${code}.\nError: ${errorOutput}`), output);
+        }
+        callback(null, output);
+    });
 }
 
 // Upload endpoint (processes files in batches)
@@ -104,9 +88,10 @@ app.post('/upload', upload.array('image', 500), async (req, res) => {
         return res.status(500).send('Internal Server Error');
     }
 
-    // Run Python script safely
+    // Run Python script safely with absolute path
+    const scriptPath = path.join(__dirname, 'scripts', 'extract_embeddings.py'); // Use path.join for consistency
     process.nextTick(() => {
-        runPythonScript('extract_embeddings.py', jsonFilePath, (err, output) => {
+        runPythonScript(scriptPath, [jsonFilePath], (err, output) => {
             if (err) {
                 console.error(`❌ Python script error: ${err}`);
                 req.files.forEach(file => fs.unlinkSync(file.path));
@@ -134,51 +119,84 @@ app.post('/upload', upload.array('image', 500), async (req, res) => {
 
 // Recognize endpoint
 app.post('/recognize', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded');
-    }
+    console.log('Processing /recognize request');
+    const jsonFilePath = path.join(__dirname, 'uploads', `recognize_${Date.now()}.json`);
+    const jsonData = {
+        imagePath: req.file.path,
+        labels: req.body.labels || '[]',
+        event_code: req.body.event_code || ''
+    };
 
-    const filePath = path.join(__dirname, req.file.path);
-    const selectedLabels = JSON.parse(req.body.labels || '[]');
-    const { client_id } = req.body;
+    fs.writeFileSync(jsonFilePath, JSON.stringify(jsonData));
+    console.log(`JSON file created: ${jsonFilePath}`);
 
-    if (!client_id || selectedLabels.length === 0) {
-        return res.status(400).send('Client ID and at least one label are required');
-    }
+    const scriptPath = 'E:\\Web Development\\PROJECT\\FaceRecog2\\backend\\scripts\\compare_faces.py';
 
-    console.log(`🖼️ Recognizing image: ${filePath}`);
-
-    process.nextTick(() => {
-        runPythonScript('compare_faces.py', [filePath, JSON.stringify(selectedLabels), client_id], (err, output) => {
-            if (err) {
-                console.error(`❌ Face recognition failed: ${err}`);
-                return res.status(500).send('Error recognizing image');
+    runPythonScript(scriptPath, [jsonFilePath], (err, output) => {
+        if (err) {
+            console.error('Python script error:', err.message);
+            return res.status(500).send(`Error recognizing image: ${err.message}`);
+        }
+        try {
+            const parsedData = JSON.parse(output.trim());
+            console.log('Python output:', parsedData);
+            if (parsedData.error) {
+                return res.status(500).send(parsedData.error);
             }
 
-            if (!output || output.length === 0) {
-                return res.status(404).send('No matching images found');
-            }
+            if (parsedData.status === 'match_found') {
+                const imageDataIds = parsedData.matched_images; // These are imageData.id values
+                console.log('Matched imageData IDs:', imageDataIds);
 
-            const placeholders = output.map(() => '?').join(',');
-            const sql = `SELECT image FROM images WHERE id IN (SELECT image_id FROM imageData WHERE id IN (${placeholders}))`;
+                // First, map imageData.id to imageData.image_id
+                db.query('SELECT image_id FROM imageData WHERE id IN (?)', [imageDataIds], (err, imageIdResults) => {
+                    if (err) {
+                        console.error('Database error (fetching image_id):', err);
+                        return res.status(500).send('Error retrieving image IDs');
+                    }
+                    if (!imageIdResults || imageIdResults.length === 0) {
+                        console.log('No image_id found for imageData IDs:', imageDataIds);
+                        return res.send([]);
+                    }
 
-            db.query(sql, output, (err, results) => {
-                if (err) {
-                    console.error(`❌ Error executing query: ${err}`);
-                    return res.status(500).send('Error fetching images');
-                }
+                    const imageIds = imageIdResults.map(r => r.image_id).filter(id => id !== null);
+                    console.log('Mapped image IDs from imageData:', imageIds);
 
-                if (results.length === 0) {
-                    return res.status(404).send('No images found');
-                }
+                    if (imageIds.length === 0) {
+                        console.log('No valid image IDs after mapping');
+                        return res.send([]);
+                    }
 
-                res.send(results.map(r => r.image.toString('base64')));
-
-                fs.unlink(filePath, (unlinkErr) => {
-                    if (unlinkErr) console.error(`⚠️ Error deleting temp image: ${filePath}`);
+                    // Now fetch images using the mapped image_ids
+                    db.query('SELECT image FROM images WHERE id IN (?)', [imageIds], (err, results) => {
+                        if (err) {
+                            console.error('Database error (fetching images):', err);
+                            return res.status(500).send('Error retrieving matched images');
+                        }
+                        console.log('Database results:', results);
+                        if (!results || results.length === 0) {
+                            console.log('No images found in database for IDs:', imageIds);
+                            return res.send([]);
+                        }
+                        const base64Images = results.map(r => {
+                            if (!r.image) {
+                                console.warn('No image data for result:', r);
+                                return null;
+                            }
+                            return r.image.toString('base64');
+                        }).filter(img => img !== null);
+                        console.log('Base64 images to send:', base64Images);
+                        res.send(base64Images);
+                        console.log('Response sent successfully');
+                    });
                 });
-            });
-        });
+            } else {
+                res.send([]);
+            }
+        } catch (e) {
+            console.error('JSON parsing error:', e.message);
+            res.status(500).send('Error processing Python output');
+        }
     });
 });
 

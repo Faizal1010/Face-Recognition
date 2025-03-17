@@ -10,13 +10,14 @@ import warnings
 import logging
 
 # Suppressing warnings and unnecessary logs
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=UserWarning)  # Suppress all UserWarnings
 os.environ["ORT_DISABLE_CUDA"] = "1"
 os.environ['INSIGHTFACE_LOG_LEVEL'] = 'ERROR'
+os.environ['NO_ALBUMENTATIONS_UPDATE'] = '1'  # Suppress Albumentations version warning
 
 import onnxruntime
 onnxruntime.set_default_logger_severity(3)
-sys.stderr = open(os.devnull, 'w')
+sys.stderr = open(os.devnull, 'w')  # Redirect stderr to null to avoid warnings
 logging.getLogger().disabled = True
 
 class CustomFaceAnalysis(FaceAnalysis):
@@ -38,13 +39,16 @@ def compare_faces(image_path, label_filter, event_code_filter):
     try:
         # Read the query image
         img = cv2.imread(image_path)
-        faces = app.get(img)
-
-        if len(faces) == 0:
-            print(json.dumps([]))  # No face detected in the query image
+        if img is None:
+            print(json.dumps({"error": f"Failed to load image at {image_path}"}))
             return
         
-        # Use the first detected face for comparison (you can modify this if needed)
+        faces = app.get(img)
+        if len(faces) == 0:
+            print(json.dumps({"status": "no_match_found"}))
+            return
+        
+        # Use the first detected face for comparison
         query_embedding = faces[0].normed_embedding
 
         # Connect to the database
@@ -56,21 +60,12 @@ def compare_faces(image_path, label_filter, event_code_filter):
         )
         cursor = conn.cursor()
 
-        # Ensure labels are formatted correctly (if provided)
+        # Ensure labels and event_code are lists
         label_filter = json.loads(label_filter) if isinstance(label_filter, str) else label_filter
         if not isinstance(label_filter, list):
             label_filter = []
+        event_code_filter = [event_code_filter] if event_code_filter else []
 
-        # If no label_filter is provided, we'll set it to an empty list
-        if label_filter is None:
-            label_filter = []
-
-        # Event code filter should always be provided
-        if not event_code_filter:
-            print(json.dumps({"error": "Event code is required."}))
-            return
-
-        # Format label and event_code filter
         format_label_strings = ','.join(['%s'] * len(label_filter)) if label_filter else ''
         format_event_strings = ','.join(['%s'] * len(event_code_filter)) if event_code_filter else ''
 
@@ -81,45 +76,48 @@ def compare_faces(image_path, label_filter, event_code_filter):
             JOIN events ON images.event_code = events.event_code
             WHERE images.event_code IN ({format_event_strings}) 
         """
-        
-        # Add the label filter to the query if provided
         if label_filter:
             query += f" AND images.label IN ({format_label_strings})"
 
-        filter_params = label_filter + event_code_filter
-        
-        cursor.execute(query, filter_params)
+        cursor.execute(query, event_code_filter + label_filter)
+        rows = cursor.fetchall()
 
         matched_images = []
+        for (img_id, stored_embedding) in rows:
+            try:
+                stored_embedding = np.frombuffer(stored_embedding, dtype=np.float32)
+                if stored_embedding.size == 0:
+                    continue  # Skip invalid embeddings
+                similarity = np.dot(query_embedding, stored_embedding)
+                if similarity > 0.4:
+                    matched_images.append(img_id)
+            except Exception as e:
+                print(f"Warning: Error processing embedding for img_id {img_id}: {str(e)}", file=sys.stderr)
 
-        # Compare the query image embedding with the filtered stored embeddings
-        for (img_id, stored_embedding) in cursor.fetchall():
-            stored_embedding = np.frombuffer(stored_embedding, dtype=np.float32)
-            similarity = np.dot(query_embedding, stored_embedding)  # Cosine similarity
-
-            if similarity > 0.4:  # Threshold for a match
-                matched_images.append(img_id)
-
-        # Close the database connection
         cursor.close()
         conn.close()
 
-        # Return the result in JSON format
         if matched_images:
             print(json.dumps({"status": "match_found", "matched_images": matched_images}))
         else:
             print(json.dumps({"status": "no_match_found"}))
 
     except Exception as e:
-        print(json.dumps({"error": str(e)}))
+        print(json.dumps({"error": f"Error recognizing image: {str(e)}"}))  # Output to stdout
+        sys.exit(1)
 
 if __name__ == "__main__":
-    # Get the image path, labels array, and event_code from command line arguments
-    image_path = sys.argv[1]
-    label_filter = sys.argv[2] if len(sys.argv) > 2 else "[]"
-    event_code_filter = sys.argv[3] if len(sys.argv) > 3 else None
-    
-    if not event_code_filter:
-        print(json.dumps({"error": "Event code is required."}))
-    else:
-        compare_faces(image_path, label_filter, [event_code_filter])
+    json_file_path = sys.argv[1]
+    try:
+        with open(json_file_path, 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
+        image_path = json_data["imagePath"]
+        label_filter = json_data["labels"]
+        event_code_filter = json_data["event_code"]
+        if not event_code_filter:
+            print(json.dumps({"error": "Event code is required."}))
+        else:
+            compare_faces(image_path, label_filter, event_code_filter)
+    except Exception as e:
+        print(json.dumps({"error": f"Failed to read JSON file: {str(e)}"}))
+        sys.exit(1)

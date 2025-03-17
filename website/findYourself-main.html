@@ -39,6 +39,10 @@
     button:hover {
       background-color: #45a049;
     }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
     #matchedGallery img {
       width: 150px;
       margin: 10px;
@@ -84,7 +88,9 @@
       .catch(err => console.error('Error accessing camera:', err));
 
     captureButton.addEventListener('click', async () => {
-      processImageFromCamera();
+      captureButton.disabled = true; // Prevent multiple clicks
+      await processImageFromCamera();
+      captureButton.disabled = false;
     });
 
     fileInput.addEventListener('change', async (event) => {
@@ -108,7 +114,10 @@
       video.style.display = 'none';
       canvas.style.display = 'block';
 
-      canvas.toBlob((blob) => sendImageToServer(blob), 'image/jpeg');
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/jpeg');
+      });
+      await sendImageToServer(blob);
     }
 
     async function processUploadedImage(file) {
@@ -120,63 +129,81 @@
     }
 
     async function sendImageToServer(imageBlob) {
-      const selectedLabels = [];
-      const checkboxes = document.querySelectorAll('#labelss input[type="checkbox"]');
-      checkboxes.forEach(checkbox => {
+    const selectedLabels = [];
+    const checkboxes = document.querySelectorAll('#labelss input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
         if (checkbox.checked) {
-          selectedLabels.push(checkbox.value);
+            selectedLabels.push(checkbox.value);
         }
-      });
+    });
 
-      if (selectedLabels.length === 0) {
+    if (selectedLabels.length === 0) {
         checkboxes.forEach(checkbox => selectedLabels.push(checkbox.value));
-      }
-
-      console.log('Selected Labels:', selectedLabels);
-
-      const formData = new FormData();
-      formData.append('image', imageBlob);
-      formData.append('labels', JSON.stringify(selectedLabels));
-      formData.append('event_code', eventCode);
-
-      try {
-        const response = await fetch('http://localhost:3000/recognize', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Server responded with ${response.status}: ${errorText}`);
-        }
-
-        const images = await response.json();
-        console.log(images);
-        gallery.innerHTML = '';
-
-        if (images.length === 0) {
-          gallery.innerHTML = '<p>No matching images found.</p>';
-          return;
-        }
-
-        images.forEach((img) => {
-          const imgElement = document.createElement('img');
-          imgElement.src = `data:image/jpeg;base64,${img}`;
-          gallery.appendChild(imgElement);
-        });
-
-      } catch (err) {
-        console.error('Fetch error:', err);
-        alert(`An error occurred: ${err.message}`);
-      }
     }
 
-    fetch(`http://localhost:3000/get-labels/${eventCode}`, {
+    console.log('Selected Labels:', selectedLabels);
+
+    const formData = new FormData();
+    formData.append('image', imageBlob);
+    formData.append('labels', JSON.stringify(selectedLabels));
+    formData.append('event_code', eventCode);
+
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+        try {
+            console.log(`Sending request to http://localhost:3000/recognize (Attempt ${attempts + 1})`);
+            const response = await fetch('http://localhost:3000/recognize', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+            });
+
+            console.log('Response status:', response.status, 'OK:', response.ok);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server responded with ${response.status}: ${errorText}`);
+            }
+
+            const images = await response.json();
+            console.log('Received images:', images);
+            gallery.innerHTML = '';
+
+            if (!images || images.length === 0) {
+                gallery.innerHTML = '<p>No matching images found.</p>';
+                return;
+            }
+
+            images.forEach((img) => {
+                const imgElement = document.createElement('img');
+                imgElement.src = `data:image/jpeg;base64,${img}`;
+                gallery.appendChild(imgElement);
+            });
+            return; // Success, exit loop
+
+        } catch (err) {
+            console.error('Fetch error:', err.name, err.message, err.stack);
+            attempts++;
+            if (attempts === maxAttempts) {
+                alert(`An error occurred after ${maxAttempts} attempts: ${err.message}`);
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+        }
+    }
+}
+    
+
+
+
+fetch(`http://localhost:3000/get-labels/${eventCode}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     })
     .then(response => response.json())
-    .then(labels => displayLabels(new Set(labels)));
+    .then(labels => displayLabels(new Set(labels)))
+    .catch(err => console.error('Error fetching labels:', err));
 
     function displayLabels(labels) {
       const Ul = document.getElementById('labelss');
@@ -194,6 +221,14 @@
         Ul.appendChild(document.createElement('br'));
       });
     }
+
+    // Prevent page unload during fetch
+    window.addEventListener('beforeunload', (e) => {
+      if (document.querySelector('#captureButton').disabled) {
+        e.preventDefault();
+        e.returnValue = 'A request is in progress. Are you sure you want to leave?';
+      }
+    });
   </script>
 </body>
 </html>
