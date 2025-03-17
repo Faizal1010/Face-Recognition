@@ -79,7 +79,7 @@
                         </div>
                     </li>
                     <li class="menu-item">
-                        <a class="menu-link" href="add-images.html">
+                        <a class="menu-link" id="add-images">
                             <i class="icon material-icons md-image"></i>
                             <span class="text">Add Images</span>
                         </a>
@@ -585,12 +585,15 @@
                 }
                 try {
                     payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
+                    console.log(payload.id, " is this client id")
+                    const addImagesLink = document.getElementById('add-images')
+                    addImagesLink.href = `http://localhost:3000/add-images?clientId=${encodeURIComponent(payload.id)}`;
                     console.log('Decoded JWT Payload:', payload);
                 } catch (error) {
                     console.error('Error decoding JWT token:', error);
                 }
         
-                fetch(`http://localhost:8000/notification/by-client-id/${payload.clientId}`, {
+                fetch(`http://localhost:8000/notification/by-client-id/${payload.id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'

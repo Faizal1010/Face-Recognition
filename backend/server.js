@@ -19,6 +19,7 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies, authorization headers)
 }));
 app.use(express.static(path.join(__dirname, '../website')));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json({ limit: "500gb" }));
 app.use(express.urlencoded({ extended: true, limit: "500gb" }));
 
@@ -212,6 +213,10 @@ app.get('/admin', (req, res) => {
 app.get('/find', (req, res) => {
     res.sendFile(path.join(__dirname, '../website/findYourself-main.html'));
 });
+
+app.get('/add-images', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/add-images.html'))
+})
 
 // API routes
 app.use('/', require('./routes/imageRoutes'));

@@ -15,7 +15,7 @@
         <!-- Template CSS -->
         <script src="assets/js/vendors/color-modes.js"></script>
         <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
-        <script>
+        <!-- <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const token = localStorage.getItem('token');
         
@@ -44,7 +44,7 @@
                     return null;
                 }
             }
-        </script>
+        </script> -->
     </head>
 
     <body>
@@ -197,7 +197,7 @@
                         </div>
                       
                         <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
-                          <label for="client_code" style="margin-bottom: 5px;">Client Code:  <span style="color: red;">*</span>
+                          <label for="client_code" style="margin-bottom: 5px;">Client Code: <span style="color: red;">*</span>
                           </label>
                           <div style="display: flex; align-items: center; gap: 5px;">
                             <input readonly id="client-code" type="text" placeholder="Product Code will be automatically generated" style=" color: white; flex: 1; padding: 10px; border: 1px solid #5a5757; border-radius: 5px; background-color: #5a5757;">
@@ -230,22 +230,15 @@
 
         <!-- script to fetch events made by the client -->
         <script>
-            const token = localStorage.getItem('token');
-            const decodedToken = decodeJWT(token);
-            console.log(decodedToken)
+            let clientId;
+      urlParams = new URLSearchParams(window.location.search);
+      clientId = urlParams.get("clientId");
+      if (clientId) {
+        console.log("client ID from URL is :", clientId);
+      }
+            document.getElementById('client-code').value = clientId
           
-            function decodeJWT(token) {
-              try {
-                const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-                return payload;
-              } catch (error) {
-                console.error('Error decoding JWT token:', error);
-                return null;
-              }
-            }
-            document.getElementById('client-code').value = decodedToken.id
-          
-            fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
+            fetch(`/event/client-events/${clientId}`, {
               method: 'GET',
             })
             .then(response => response.json())
@@ -324,7 +317,7 @@
                     formData.append('client_id', clientCode);
             
                     // Send data to backend
-                    fetch('http://localhost:3000/upload', {
+                    fetch('/upload', {
                         method: 'POST',
                         body: formData
                     })
@@ -346,194 +339,6 @@
             });
             </script>
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Script to ensure that there are >=4 images -->
-<!-- <script>
-    document.getElementById('imageInput').addEventListener('change', function (event) {
-    const files = event.target.files;
-    const errorMessage = document.getElementById('error-message');
-
-    if (files.length > 4) {
-        // Show error message
-        errorMessage.style.display = 'block';
-
-        // Clear the input
-        event.target.value = '';
-    } else {
-        // Hide error message if valid
-        errorMessage.style.display = 'none';
-    }
-});
-</script> -->
-
-<!-- Script to display categories from backend -->
-        <!-- <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                fetch('http://localhost:8000/categories/getcategories')
-                .then(response => response.json())
-                .then(data => {
-                    const categories = data.categories;
-                    renderCategories(categories);
-                });
-            });
-        
-            const renderCategories = (categories) => {
-                const selectForm = document.getElementById('add-product-category');
-                selectForm.innerHTML = '';
-        
-                categories.forEach(category => {
-                    const option = document.createElement('option');
-                    option.textContent = category.Name;
-                    option.value = category.Name;
-                    selectForm.appendChild(option);
-                });
-            }
-        </script> -->
-        
-
-        <!-- <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const sendFile = () => {
-                    const imageInput = document.getElementById('imageInput');
-                    if (!imageInput) {
-                        console.error("File input element with ID 'imageInput' not found.");
-                        return;
-                    }
-        
-                    const files = imageInput.files;
-                    const productTitle = document.getElementById('add-product-title').value; // Get the product title
-        
-                    if (!productTitle) {
-                        alert('Product title is required.');
-                        return;
-                    }
-        
-                    if (files.length > 0) {
-                        const formData = new FormData();
-                        formData.append('productTitle', productTitle); // Include product title in FormData
-        
-                        for (const file of files) {
-                            formData.append('images', file); // Add each file to FormData
-                        }
-        
-                        fetch('http://localhost:8000/upload-product', {
-                            method: 'POST',
-                            body: formData,
-                        })
-                            .then((response) => response.text())
-                            .then((data) => {
-                                alert('Images uploaded successfully!');
-                                console.log(data);
-                            })
-                            .catch((error) => {
-                                console.error('Error:', error);
-                            });
-                    } else {
-                        alert('Please select images to upload.');
-                    }
-                };
-        
-                document.getElementById('add-product-button').addEventListener('click', () => {
-                    const getRandomLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
-};
-
-// Generate random number (2 digits)
-const getRandomNumber = () => {
-    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
-};
-
-// Generate random final letter (1 letter)
-const getFinalLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
-};
-
-// Combine all parts
-const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
-const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
-const finalLetter = getFinalLetter();  // One random letter for the end
-
-// Store the final product code
-const ProductCode = 'P' + lettersPart + numberPart + finalLetter;
-console.log(ProductCode)
-                    const imageInput = document.getElementById('imageInput');
-                    if (!imageInput) {
-                        console.error("File input element with ID 'imageInput' not found.");
-                        return;
-                    }
-        
-                    const fileNames = imageInput.files
-                        ? Array.from(imageInput.files).map((file) => file.name)
-                        : [];
-        
-                    const productObject = {
-                        ProductDescription: document.getElementById('add-product-description').value,
-                        ProductProperties: document.getElementById('properties').value,
-                        ProductTitle: document.getElementById('add-product-title').value,
-                        Category: document.getElementById('add-product-category').value,
-                        ProductCode: ProductCode,
-                        Images: fileNames, // Use the extracted file names here
-                    };
-        
-                    console.log(productObject);
-        
-                    fetch('http://localhost:8000/products/addproducts', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(productObject),
-                    })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.success) {
-                                sendFile();
-                                alert('Product added successfully');
-                            } else {
-                                alert('Some problem occurred while adding');
-                            }
-                        })
-                        .catch((error) => {
-                            console.error('Error:', error);
-                            alert("An error occurred while adding the product");
-                        });
-                });
-            });
-        </script> -->
-        
-
-
-
-
-
-
-
 
 
         <script>
