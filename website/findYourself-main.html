@@ -73,15 +73,21 @@
   </div>
 
   <script>
+    let eventCode;
+    document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    eventCode = urlParams.get("eventId");
+    if (eventCode) {
+        console.log("Event ID from URL:", eventCode);
+    }
+});
+
+
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const captureButton = document.getElementById('captureButton');
     const fileInput = document.getElementById('fileInput');
     const gallery = document.getElementById('matchedGallery');
-
-    // Get event_code from localStorage
-    const eventCode = localStorage.getItem('eventId');
-    console.log('Event Code:', eventCode);
 
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => { video.srcObject = stream; })
@@ -142,7 +148,7 @@
     }
 
     console.log('Selected Labels:', selectedLabels);
-
+    
     const formData = new FormData();
     formData.append('image', imageBlob);
     formData.append('labels', JSON.stringify(selectedLabels));

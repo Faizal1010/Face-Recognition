@@ -15,7 +15,7 @@ const upload = multer({
 });
 
 app.use(cors({
-    origin: 'http://127.0.0.1:3002', // Specify the exact frontend origin
+    origin: 'http://127.0.0.1:3001', // Specify the exact frontend origin
     credentials: true, // Allow credentials (cookies, authorization headers)
 }));
 app.use(express.static(path.join(__dirname, '../website')));
@@ -173,7 +173,7 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                             console.error('Database error (fetching images):', err);
                             return res.status(500).send('Error retrieving matched images');
                         }
-                        console.log('Database results:', results);
+                        // console.log('Database results:', results);
                         if (!results || results.length === 0) {
                             console.log('No images found in database for IDs:', imageIds);
                             return res.send([]);
@@ -185,7 +185,7 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                             }
                             return r.image.toString('base64');
                         }).filter(img => img !== null);
-                        console.log('Base64 images to send:', base64Images);
+                        // console.log('Base64 images to send:', base64Images);
                         res.send(base64Images);
                         console.log('Response sent successfully');
                     });
@@ -207,6 +207,10 @@ app.get('/user', (req, res) => {
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, '../website/admin.html'));
+});
+
+app.get('/find', (req, res) => {
+    res.sendFile(path.join(__dirname, '../website/findYourself-main.html'));
 });
 
 // API routes
