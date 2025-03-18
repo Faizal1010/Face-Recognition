@@ -665,7 +665,8 @@
                     const newMemberContainer = document.getElementById('newMemberContainer')
                     newMemberContainer.innerHTML = ''
     
-                    members.forEach(member => {      
+                    members.forEach(member => {   
+                        console.log(member)
                         const div = document.createElement('div')
                         div.classList = 'd-flex align-items-center justify-content-between mb-4'
                         div.innerHTML = `<div class="d-flex align-items-center">
@@ -680,7 +681,7 @@
                     });
                 }
 
-                fetch('http://localhost:8000/clients/latest-Clients', {
+                fetch('http://localhost:3000/clients/latest-Clients', {
                     method: 'GET',
                     headers: {
                     'Content-Type': 'application/json'
