@@ -29,7 +29,7 @@ exports.getImages = (req, res) => {
         // Compress images with sharp before converting to base64
         Promise.all(results.map(r =>
             sharp(r.image)
-                .jpeg({ quality: 60 }) // Compress to JPEG with 85% quality (adjustable)
+                .jpeg({ quality: 50 }) // Compress to JPEG with 85% quality (adjustable)
                 .toBuffer()
                 .then(compressedBuffer => ({
                     id: r.id,
@@ -269,7 +269,7 @@ exports.getImagesByLabels = (req, res) => {
         // Compress images with sharp before converting to base64
         Promise.all(results.map(r =>
             sharp(r.image)
-                .jpeg({ quality: 85 }) // Compress to JPEG with 85% quality (adjustable)
+                .jpeg({ quality: 50 }) // Compress to JPEG with 85% quality (adjustable)
                 .toBuffer()
                 .then(compressedBuffer => ({
                     id: r.id,

@@ -98,7 +98,6 @@
                 position: absolute;
                 top: 50%;
                 transform: translateY(-50%);
-                background: rgba(62, 62, 62, 0.3);
                 color: white;
                 border: none;
                 padding: 10px;
@@ -106,9 +105,14 @@
                 font-size: 24px;
                 border-radius: 5px;
             }
+
+            .imagePrev,
+            .imageNext {
+                background: rgba(62, 62, 62, 0.3);
+            }
             
             .imageClose {
-                top: 10px;
+                top: 17px;
                 right: 20px;
                 font-size: 30px;
             }
@@ -212,7 +216,9 @@
             <div style="display: flex; justify-content: center; align-items: center;">
                 <div class="imageGrid" id="imageContainer"></div>
                 <div class="imageLightbox" id="imageLightbox">
-                    <span class="imageClose" onclick="closeImageLightbox()">×</span>
+                    <span class="imageClose" onclick="closeImageLightbox()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                        <path d="M18 6L12 12M12 12L6 18M12 12L18 18M12 12L6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg></span>
                     <img id="imageLightboxImg">
                     <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
                     <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
@@ -426,11 +432,36 @@
         div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
         div.style.position = "relative"; // Ensure positioning context for the button
 
+        // Create a loading placeholder
+        const loadingPlaceholder = document.createElement("div");
+        loadingPlaceholder.className = "image-loading-placeholder";
+        loadingPlaceholder.style.width = "100%";
+        loadingPlaceholder.style.height = "100%";
+        loadingPlaceholder.style.backgroundColor = "#e0e0e0"; // Light gray background
+        loadingPlaceholder.style.display = "flex";
+        loadingPlaceholder.style.alignItems = "center";
+        loadingPlaceholder.style.justifyContent = "center";
+        loadingPlaceholder.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <style>.spinner { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); }}</style>
+                <circle class="spinner" cx="12" cy="12" r="10" stroke="#666" stroke-width="4" fill="none"/>
+            </svg>
+        `;
+
+        // Append the loading placeholder initially
+        div.appendChild(loadingPlaceholder);
+
         // Create the image element with lazy loading
         const image = document.createElement("img");
         image.src = src.data; // Assuming src.data contains the base64 image data
         image.loading = "lazy"; // Enable lazy loading
         image.alt = `Image ${src.id}`; // Add alt text for accessibility
+        image.style.display = "none"; // Hide image until loaded
+        image.onload = () => {
+            // Once loaded, hide the placeholder and show the image
+            loadingPlaceholder.style.display = "none";
+            image.style.display = "block";
+        };
         image.onclick = () => openImageLightbox(index);
 
         image.addEventListener('dblclick', () => {
@@ -492,7 +523,7 @@
         gallery.appendChild(div);
     });
 }
-                
+
         function createPaginationButtons() {
             const paginationContainer = document.getElementById("imagePagination");
             paginationContainer.innerHTML = "";
@@ -592,11 +623,13 @@
         function openImageLightbox(index) {
             currentIndex = index;
             document.getElementById("imageLightbox").style.display = "flex";
+            document.body.style.overflow = "hidden";
             updateImageLightbox();
         }
 
         function closeImageLightbox() {
             document.getElementById("imageLightbox").style.display = "none";
+            document.body.style.overflow = "auto";
         }
 
         function changeImageDisplay(step) {
@@ -605,9 +638,55 @@
         }
 
         function updateImageLightbox() {
-            document.getElementById("imageLightboxImg").src = images[currentIndex].data;
-        }
+    const lightboxImg = document.getElementById("imageLightboxImg");
+    lightboxImg.src = images[currentIndex].data;
 
+    // Check if download button already exists to avoid duplicates
+    let downloadButton = document.getElementById("lightboxDownloadButton");
+    if (!downloadButton) {
+        downloadButton = document.createElement("button");
+        downloadButton.id = "lightboxDownloadButton";
+        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`;
+        downloadButton.style.position = "absolute";
+        downloadButton.style.top = "0px";
+        downloadButton.style.right = "60px"; // Position it beside the close button (close is at 10px)
+        downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
+        downloadButton.style.border = "none";
+        downloadButton.style.borderRadius = "5px";
+        downloadButton.style.padding = "3px";
+        downloadButton.style.cursor = "pointer";
+
+        // Add click event to fetch and download the original image
+        downloadButton.onclick = async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/original/${images[currentIndex].id}`, {
+                    method: 'GET',
+                });
+                if (!response.ok) throw new Error('Failed to fetch original image');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `image_${images[currentIndex].id}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error downloading image:", error);
+                alert("Failed to download the image.");
+            }
+        };
+
+        // Append the download button to the lightbox
+        const lightbox = document.getElementById("imageLightbox");
+        lightbox.appendChild(downloadButton);
+    }
+}
+        
         async function downloadAllSelectedImages(eventId) {
     if (!selectedLabels || selectedLabels.length === 0) {
         alert("No labels selected to download.");

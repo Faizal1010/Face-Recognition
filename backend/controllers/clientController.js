@@ -302,7 +302,6 @@ const getLatestClients = async (req, res) => {
         });
     }
 };
-
 const getClientById = async (req, res) => {
     const clientId = req.params.id; // Retrieve client ID from the request parameters
 
@@ -438,4 +437,5 @@ const getClientByCustomerId = async (req, res) => {
         });
     }
 };
+
 module.exports = { addClient, getClient, deleteClient, uploadProfile, getLatestClients, getClientById, getClientByCustomerId};
