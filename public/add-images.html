@@ -15,44 +15,58 @@
         <!-- Template CSS -->
         <script src="assets/js/vendors/color-modes.js"></script>
         <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
-        <!-- <script>
+        <script>
             document.addEventListener('DOMContentLoaded', () => {
-                const token = localStorage.getItem('token');
+                let clientId;
+urlParams = new URLSearchParams(window.location.search);
+clientId = urlParams.get("clientId");
+
+const clientIdPattern = /^C[A-Z]{2}[0-9]{2}[A-Z]$/;
+
+if (!clientId) {
+  alert("No clientId found!");
+  window.location.href = 'http://localhost:3001/client dashboard/index.html';
+} else if (!clientIdPattern.test(clientId)) {
+  alert("Invalid clientId!");
+  window.location.href = 'http://localhost:3001/client dashboard/index.html';
+}
+
+                // const token = localStorage.getItem('token');
         
-                if (!token) {
-                    alert('Access denied. Please log in.');
-                    window.location.href = 'page-account-login.html'; // Redirect to login page
-                    return;
-                }
+                // if (!token) {
+                //     alert('Access denied. Please log in.');
+                //     window.location.href = 'page-account-login.html'; // Redirect to login page
+                //     return;
+                // }
         
-                // Decode the JWT to verify the user's role
-                const decodedToken = decodeJWT(token);
+                // // Decode the JWT to verify the user's role
+                // const decodedToken = decodeJWT(token);
         
-                if (!decodedToken) {
-                    alert('Unauthorized access.');
-                    window.location.href = 'page-account-login.html'; // Redirect to login page
-                }
+                // if (!decodedToken) {
+                //     alert('Unauthorized access.');
+                //     window.location.href = 'page-account-login.html'; // Redirect to login page
+                // }
             });
         
-            // Function to decode the JWT and extract the payload
-            function decodeJWT(token) {
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-                    return payload;
-                } catch (error) {
-                    console.error('Error decoding JWT token:', error);
-                    return null;
-                }
-            }
-        </script> -->
+            // // Function to decode the JWT and extract the payload
+            // function decodeJWT(token) {
+            //     try {
+            //         const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+            //         return payload;
+            //     } catch (error) {
+            //         console.error('Error decoding JWT token:', error);
+            //         return null;
+            //     }
+            // }
+        </script>
     </head>
 
     <body>
         <div class="screen-overlay"></div>
         <aside class="navbar-aside" id="offcanvas_aside">
-            <div class="aside-top">
+            <div class="" style="display: flex; justify-content: space-between; align-items: center;">
                 <a href="index.html" class="brand-wrap">
-                    <img src="assets/imgs/theme/logo.svg" class="logo" alt="Nest Dashboard" />
+                    <img style="width: 250px;" src="assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -61,7 +75,7 @@
             <nav>
                 <ul class="menu-aside">
                     <li class="menu-item">
-                        <a class="menu-link" href="index.html">
+                        <a class="menu-link" href="http://localhost:3001/client dashboard/index.html">
                             <i class="icon material-icons md-home"></i>
                             <span class="text">Dashboard</span>
                         </a>
@@ -353,7 +367,8 @@ document.getElementById('add-images-button').addEventListener('click', function 
         button.innerHTML = originalContent;
         button.disabled = false;
     });
-}); });
+});
+ });
             </script>
             
 
@@ -367,7 +382,7 @@ document.getElementById('add-images-button').addEventListener('click', function 
         alert('You have been logged out successfully!');
         
         // Redirect to login page
-        window.location.href = 'page-account-login.html'; // Redirect to login page after logout
+        window.location.href = 'http://localhost:3001/super admin dashboard/page-account-login.html'; // Redirect to login page after logout
         });
         </script>
     </body>
