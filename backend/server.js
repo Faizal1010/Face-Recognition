@@ -15,7 +15,7 @@ const upload = multer({
 });
 
 app.use(cors({
-    origin: 'http://127.0.0.1:3001', // Specify the exact frontend origin
+    origin: '*', // Specify the exact frontend origin
     credentials: true, // Allow credentials (cookies, authorization headers)
 }));
 app.use(express.static(path.join(__dirname, '../website')));
@@ -136,12 +136,26 @@ app.post('/recognize', upload.single('image'), (req, res) => {
     runPythonScript(scriptPath, [jsonFilePath], (err, output) => {
         if (err) {
             console.error('Python script error:', err.message);
+            // Cleanup before sending response
+            fs.unlink(req.file.path, (unlinkErr) => {
+                if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+            });
+            fs.unlink(jsonFilePath, (unlinkErr) => {
+                if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+            });
             return res.status(500).send(`Error recognizing image: ${err.message}`);
         }
         try {
             const parsedData = JSON.parse(output.trim());
             console.log('Python output:', parsedData);
             if (parsedData.error) {
+                // Cleanup before sending response
+                fs.unlink(req.file.path, (unlinkErr) => {
+                    if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                });
+                fs.unlink(jsonFilePath, (unlinkErr) => {
+                    if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                });
                 return res.status(500).send(parsedData.error);
             }
 
@@ -153,10 +167,24 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                 db.query('SELECT image_id FROM imageData WHERE id IN (?)', [imageDataIds], (err, imageIdResults) => {
                     if (err) {
                         console.error('Database error (fetching image_id):', err);
+                        // Cleanup before sending response
+                        fs.unlink(req.file.path, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                        });
+                        fs.unlink(jsonFilePath, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                        });
                         return res.status(500).send('Error retrieving image IDs');
                     }
                     if (!imageIdResults || imageIdResults.length === 0) {
                         console.log('No image_id found for imageData IDs:', imageDataIds);
+                        // Cleanup before sending response
+                        fs.unlink(req.file.path, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                        });
+                        fs.unlink(jsonFilePath, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                        });
                         return res.send([]);
                     }
 
@@ -165,6 +193,13 @@ app.post('/recognize', upload.single('image'), (req, res) => {
 
                     if (imageIds.length === 0) {
                         console.log('No valid image IDs after mapping');
+                        // Cleanup before sending response
+                        fs.unlink(req.file.path, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                        });
+                        fs.unlink(jsonFilePath, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                        });
                         return res.send([]);
                     }
 
@@ -172,11 +207,25 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                     db.query('SELECT image FROM images WHERE id IN (?)', [imageIds], (err, results) => {
                         if (err) {
                             console.error('Database error (fetching images):', err);
+                            // Cleanup before sending response
+                            fs.unlink(req.file.path, (unlinkErr) => {
+                                if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                            });
+                            fs.unlink(jsonFilePath, (unlinkErr) => {
+                                if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                            });
                             return res.status(500).send('Error retrieving matched images');
                         }
                         // console.log('Database results:', results);
                         if (!results || results.length === 0) {
                             console.log('No images found in database for IDs:', imageIds);
+                            // Cleanup before sending response
+                            fs.unlink(req.file.path, (unlinkErr) => {
+                                if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                            });
+                            fs.unlink(jsonFilePath, (unlinkErr) => {
+                                if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                            });
                             return res.send([]);
                         }
                         const base64Images = results.map(r => {
@@ -187,15 +236,36 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                             return r.image.toString('base64');
                         }).filter(img => img !== null);
                         // console.log('Base64 images to send:', base64Images);
+                        // Cleanup before sending response
+                        fs.unlink(req.file.path, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                        });
+                        fs.unlink(jsonFilePath, (unlinkErr) => {
+                            if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                        });
                         res.send(base64Images);
                         console.log('Response sent successfully');
                     });
                 });
             } else {
+                // Cleanup before sending response
+                fs.unlink(req.file.path, (unlinkErr) => {
+                    if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+                });
+                fs.unlink(jsonFilePath, (unlinkErr) => {
+                    if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+                });
                 res.send([]);
             }
         } catch (e) {
             console.error('JSON parsing error:', e.message);
+            // Cleanup before sending response
+            fs.unlink(req.file.path, (unlinkErr) => {
+                if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
+            });
+            fs.unlink(jsonFilePath, (unlinkErr) => {
+                if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
+            });
             res.status(500).send('Error processing Python output');
         }
     });

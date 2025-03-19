@@ -289,13 +289,12 @@
 </head>
 <body>
   <h1>Find Yourself</h1>
-
   <button id="scanFaceButton">Scan Face</button>
 
   <!-- Modal for Face Scanning -->
   <div id="scanModal" class="modal">
     <div class="modal-content">
-      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <span class="close-btn" onclick="closeModal()">×</span>
       <h2>Scan Your Face</h2>
       <div class="toggle-buttons">
         <button id="captureModeBtn" onclick="toggleMode('capture')">Capture via Camera</button>
@@ -323,10 +322,10 @@
 
   <!-- Lightbox for Image Preview -->
   <div class="imageLightbox" id="imageLightbox">
-    <span class="imageClose" onclick="closeImageLightbox()">&times;</span>
+    <span class="imageClose" onclick="closeImageLightbox()">×</span>
     <img id="imageLightboxImg">
-    <button class="imagePrev" onclick="changeImageDisplay(-1)">&laquo;</button>
-    <button class="imageNext" onclick="changeImageDisplay(1)">&raquo;</button>
+    <button class="imagePrev" onclick="changeImageDisplay(-1)">«</button>
+    <button class="imageNext" onclick="changeImageDisplay(1)">»</button>
   </div>
 
   <script>
@@ -340,6 +339,17 @@
       eventCode = urlParams.get("eventId");
       if (eventCode) {
         console.log("Event ID from URL:", eventCode);
+        // Fetch labels immediately after getting eventCode
+        fetch(`http://localhost:3000/get-labels/${eventCode}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error(`Failed to fetch labels: ${response.status}`);
+          return response.json();
+        })
+        .then(labels => displayLabels(new Set(labels)))
+        .catch(err => console.error('Error fetching labels:', err));
       }
     });
 
@@ -400,15 +410,19 @@
       detectButton.disabled = true;
       closeModal();
       loadingIndicator.style.display = 'block';
+      
       if (currentMode === 'capture') {
         await processImageFromCamera();
       } else {
-        const file = fileInput.files[0];
-        if (file) {
-          await processUploadedImage(file);
-        } else {
+        // Ensure we get the latest file from fileInput
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
           alert('Please upload an image first.');
+          loadingIndicator.style.display = 'none';
+          detectButton.disabled = false;
+          return;
         }
+        await processUploadedImage(file);
       }
       loadingIndicator.style.display = 'none';
       detectButton.disabled = false;
@@ -435,11 +449,8 @@
     }
 
     async function processUploadedImage(file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        sendImageToServer(file);
-      };
+      // Directly send the file as a blob
+      await sendImageToServer(file);
     }
 
     async function sendImageToServer(imageBlob) {
@@ -512,14 +523,6 @@
         }
       }
     }
-
-    fetch(`http://localhost:3000/get-labels/${eventCode}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(labels => displayLabels(new Set(labels)))
-    .catch(err => console.error('Error fetching labels:', err));
 
     function displayLabels(labels) {
       const Ul = document.getElementById('labelss');

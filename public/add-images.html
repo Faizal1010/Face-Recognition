@@ -170,7 +170,7 @@
                             <!-- <div>
                                 <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
                             </div> -->
-                            <button id="add-images-button" class="btn btn-md rounded font-sm hover-up">Publish</button>
+                            <button id="add-images-button" class="btn btn-md rounded font-sm hover-up">Upload</button>
                         </div>
                     </div>
                     <form style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 800px; margin: auto; font-family: Arial, sans-serif;">
@@ -284,59 +284,76 @@
                 const labelInput = document.getElementById('label');
                 const clientCodeInput = document.getElementById('client-code');
             
-                document.getElementById('add-images-button').addEventListener('click', function (event) {
-                    event.preventDefault(); // Prevent default form submission
-            
-                    const files = imageInput.files;
-                    const selectedEvent = eventSelect.value;
-                    const label = labelInput.value.trim();
-                    const clientCode = clientCodeInput.value;
-            
-                    if (!files.length) {
-                        alert('Please select at least one image.');
-                        return;
-                    }
-            
-                    if (!selectedEvent) {
-                        alert('Please select an event.');
-                        return;
-                    }
-            
-                    if (!label) {
-                        alert('Please enter a label.');
-                        return;
-                    }
-            
-                    // Prepare FormData to send to backend
-                    const formData = new FormData();
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('image', files[i]);
-                    }
-                    formData.append('event_code', selectedEvent);
-                    formData.append('label', label);
-                    formData.append('client_id', clientCode);
-            
-                    // Send data to backend
-                    fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Response:', data);
-                        if (data.status === 'success') {
-                            alert('Images uploaded successfully!');
-                            form.reset(); // Reset the form after successful upload
-                        } else {
-                            alert('Error: ' + (data.message || 'Something went wrong.'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Upload error:', error);
-                        alert('Failed to upload. Please try again.');
-                    });
-                });
-            });
+document.getElementById('add-images-button').addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const files = imageInput.files;
+    const selectedEvent = eventSelect.value;
+    const label = labelInput.value.trim();
+    const clientCode = clientCodeInput.value;
+
+    if (!files.length) {
+        alert('Please select at least one image.');
+        return;
+    }
+
+    if (!selectedEvent) {
+        alert('Please select an event.');
+        return;
+    }
+
+    if (!label) {
+        alert('Please enter a label.');
+        return;
+    }
+
+    // Add loading state
+    const button = this;
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
+    button.disabled = true;
+
+    // Add CSS for spinning animation
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+
+    // Prepare FormData to send to backend
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('image', files[i]);
+    }
+    formData.append('event_code', selectedEvent);
+    formData.append('label', label);
+    formData.append('client_id', clientCode);
+
+    // Send data to backend
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const parsedData = JSON.parse(data.data.trim());
+        console.log(parsedData)
+
+        if (parsedData.status === 'completed') {
+            alert('Processing completed successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Something went wrong.'));
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        alert('Failed to upload. Please try again.');
+    })
+    .finally(() => {
+        // Restore button state
+        button.innerHTML = originalContent;
+        button.disabled = false;
+    });
+}); });
             </script>
             
 
