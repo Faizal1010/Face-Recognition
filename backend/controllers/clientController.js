@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
             return cb(new Error('Email not provided'), null);
         }
 
-        const emailFolderPath = path.join(__dirname, '../../super admin dashboard/assets/clientsProfiles', email);
+        const emailFolderPath = path.join(__dirname, '../../public/assets/clientsProfiles', email);
 
         // Create the email folder if it doesn't exist
         fs.mkdirSync(emailFolderPath, { recursive: true });

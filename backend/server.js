@@ -284,14 +284,19 @@ app.get('/find', (req, res) => {
     res.sendFile(path.join(__dirname, '../website/findYourself-main.html'));
 });
 
-app.get('/add-images', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/add-images.html'))
-})
+// app.get('/add-images', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../public/add-images.html'))
+// })
+
+
 
 // API routes
 app.use('/', require('./routes/imageRoutes'));
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/clients', require('./routes/clientRoutes'));
 app.use('/event', require('./routes/eventRoutes'));
+
+app.use('/client-dashboard', require('./routes/clientDashboard'))
+app.use('/super-admin-dashboard', require('./routes/superAdminDashboard'))
 
 app.listen(3000, () => console.log('🚀 Server running on port 3000'));

@@ -11,10 +11,10 @@
         <meta property="og:url" content="" />
         <meta property="og:image" content="" />
         <!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg" />
+        <link rel="shortcut icon" type="image/x-icon" href="http://localhost:3000/assets/imgs/theme/favicon.svg" />
         <!-- Template CSS -->
-        <script src="assets/js/vendors/color-modes.js"></script>
-        <link href="assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+        <script src="http://localhost:3000/assets/js/vendors/color-modes.js"></script>
+        <link href="http://localhost:3000/assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 let clientId;
@@ -25,14 +25,14 @@ const clientIdPattern = /^C[A-Z]{2}[0-9]{2}[A-Z]$/;
 
 if (!clientId) {
   alert("No clientId found!");
-  window.location.href = 'http://localhost:3001/client dashboard/index.html';
+  window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
 } else if (!clientIdPattern.test(clientId)) {
   alert("Invalid clientId!");
-  window.location.href = 'http://localhost:3001/client dashboard/index.html';
+  window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
 }
 
                 // const token = localStorage.getItem('token');
-        
+            
                 // if (!token) {
                 //     alert('Access denied. Please log in.');
                 //     window.location.href = 'page-account-login.html'; // Redirect to login page
@@ -65,8 +65,8 @@ if (!clientId) {
         <div class="screen-overlay"></div>
         <aside class="navbar-aside" id="offcanvas_aside">
             <div class="" style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="index.html" class="brand-wrap">
-                    <img style="width: 250px;" src="assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
+                    <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -75,47 +75,29 @@ if (!clientId) {
             <nav>
                 <ul class="menu-aside">
                     <li class="menu-item">
-                        <a class="menu-link" href="http://localhost:3001/client dashboard/index.html">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard">
                             <i class="icon material-icons md-home"></i>
                             <span class="text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="menu-item has-submenu">
-                        <a class="menu-link" href="page-products-list.html">
-                            <i class="icon material-icons md-event"></i>
-                            <span class="text">Images and Events</span>
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-images">
+                            <i class="icon material-icons md-add_photo_alternate"></i>
+                            <span class="text">Uploaded Images</span>
                         </a>
-                        <div class="submenu">
-                            <a href="uploaded-images.html">Uploaded Images</a>
-                            <!-- <a href="page-products-grid-2.html">Product grid 2</a> -->
-                            <a href="page-categories.html">Create Events</a>
-                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/events">
+                            <i class="icon material-icons md-event"></i>
+                            <span class="text">Events</span>
+                        </a>
                     </li>
                     <li class="menu-item active">
-                        <a class="menu-link" href="add-images.html">
+                        <a class="menu-link" id="add-images">
                             <i class="icon material-icons md-image"></i>
                             <span class="text">Add Images</span>
                         </a>
-                    </li>
-                    <li class="menu-item">
-                        <a class="menu-link" href="page-transactions-2.html">
-                            <i class="icon material-icons md-monetization_on"></i>
-                            <span class="text">Transactions</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a class="menu-link" href="customers.html">
-                            <i class="icon material-icons md-person"></i>
-                            <span class="text">Account</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a class="menu-link" href="client-notification-list.html">
-                            <i class="icon material-icons md-comment"></i>
-                            <span class="text">Notifications</span>
-                        </a>
-                    </li>
-                   
+                    </li>                   
                 </ul>
                 <br />
                 <br />
@@ -155,14 +137,14 @@ if (!clientId) {
                         <li class="dropdown nav-item">
                             <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
-                                <a class="dropdown-item text-brand" href="#"><img src="assets/imgs/theme/flag-us.png" alt="English" />English</a>
-                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
-                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
-                                <a class="dropdown-item" href="#"><img src="assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                                <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
                             </div>
                         </li>
                         <li class="dropdown nav-item">
-                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="assets/imgs/people/avatar-2.png" alt="User" /></a>
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="http://localhost:3000/assets/imgs/people/avatar-2.png" alt="User" /></a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                                 <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
@@ -234,13 +216,13 @@ if (!clientId) {
                 </div>
             </footer>
         </main>
-        <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
-        <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
-        <script src="assets/js/vendors/select2.min.js"></script>
-        <script src="assets/js/vendors/perfect-scrollbar.js"></script>
-        <script src="assets/js/vendors/jquery.fullscreen.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/jquery-3.6.0.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/bootstrap.bundle.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/select2.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/perfect-scrollbar.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/jquery.fullscreen.min.js"></script>
         <!-- Main Script -->
-        <script src="assets/js/main.js?v=6.0" type="text/javascript"></script>
+        <script src="http://localhost:3000/assets/js/main.js?v=6.0" type="text/javascript"></script>
 
         <!-- script to fetch events made by the client -->
         <script>
@@ -382,7 +364,7 @@ document.getElementById('add-images-button').addEventListener('click', function 
         alert('You have been logged out successfully!');
         
         // Redirect to login page
-        window.location.href = 'http://localhost:3001/super admin dashboard/page-account-login.html'; // Redirect to login page after logout
+        window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page after logout
         });
         </script>
     </body>
