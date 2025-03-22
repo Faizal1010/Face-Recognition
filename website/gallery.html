@@ -163,20 +163,34 @@
         <div style="position: relative; width: 100%; height: 100vh; background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;">
             <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box;">
                 
+                <div style="position: absolute; bottom: 30px;">
                 <h1 style="font-size: 2.5rem; margin: 10px 0;">Annyasha & Sudipta Stories</h1>
                 <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
 
                 <a href="#" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
 
                 <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
-
+                
                 <div style="margin-top: 10px;">
-                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">📘</a>
-                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">📷</a>
-                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">▶️</a>
-                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">🟢</a>
-                    <a href="#" style="color: white; font-size: 1.5rem; margin: 0 5px;">🌐</a>
+                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                        <img src="facebook-app-symbol.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                    </a>
+                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                        <img src="instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                    </a>
+                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                        <img src="whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                    </a>
+                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                        <img src="twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                    </a>
+                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                        <img src="youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                    </a>
                 </div>
+            </div>
+                
+                
             </div>
         </div>
 
@@ -434,23 +448,23 @@
         div.style.position = "relative"; // Ensure positioning context for the button
 
         // Create a loading placeholder
-        const loadingPlaceholder = document.createElement("div");
-        loadingPlaceholder.className = "image-loading-placeholder";
-        loadingPlaceholder.style.width = "100%";
-        loadingPlaceholder.style.height = "100%";
-        loadingPlaceholder.style.backgroundColor = "#e0e0e0"; // Light gray background
-        loadingPlaceholder.style.display = "flex";
-        loadingPlaceholder.style.alignItems = "center";
-        loadingPlaceholder.style.justifyContent = "center";
-        loadingPlaceholder.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <style>.spinner { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); }}</style>
-                <circle class="spinner" cx="12" cy="12" r="10" stroke="#666" stroke-width="4" fill="none"/>
-            </svg>
-        `;
+        // const loadingPlaceholder = document.createElement("div");
+        // loadingPlaceholder.className = "image-loading-placeholder";
+        // loadingPlaceholder.style.width = "100%";
+        // loadingPlaceholder.style.height = "100%";
+        // loadingPlaceholder.style.backgroundColor = "#e0e0e0"; // Light gray background
+        // loadingPlaceholder.style.display = "flex";
+        // loadingPlaceholder.style.alignItems = "center";
+        // loadingPlaceholder.style.justifyContent = "center";
+        // loadingPlaceholder.innerHTML = `
+        //     <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        //         <style>.spinner { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); }}</style>
+        //         <circle class="spinner" cx="12" cy="12" r="10" stroke="#666" stroke-width="4" fill="none"/>
+        //     </svg>
+        // `;
 
-        // Append the loading placeholder initially
-        div.appendChild(loadingPlaceholder);
+        // // Append the loading placeholder initially
+        // div.appendChild(loadingPlaceholder);
 
         // Create the image element with lazy loading
         const image = document.createElement("img");
@@ -460,7 +474,7 @@
         image.style.display = "none"; // Hide image until loaded
         image.onload = () => {
             // Once loaded, hide the placeholder and show the image
-            loadingPlaceholder.style.display = "none";
+            // loadingPlaceholder.style.display = "none";
             image.style.display = "block";
         };
         image.onclick = () => openImageLightbox(index);

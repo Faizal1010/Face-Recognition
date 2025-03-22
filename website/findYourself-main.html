@@ -407,26 +407,27 @@
 
     // Detect button handler
     detectButton.addEventListener('click', async () => {
-      detectButton.disabled = true;
-      closeModal();
-      loadingIndicator.style.display = 'block';
-      
-      if (currentMode === 'capture') {
-        await processImageFromCamera();
-      } else {
-        // Ensure we get the latest file from fileInput
-        const file = fileInput.files && fileInput.files[0];
-        if (!file) {
-          alert('Please upload an image first.');
-          loadingIndicator.style.display = 'none';
-          detectButton.disabled = false;
-          return;
-        }
-        await processUploadedImage(file);
-      }
+  detectButton.disabled = true;
+  loadingIndicator.style.display = 'block';
+
+  if (currentMode === 'capture') {
+    await processImageFromCamera();
+    closeModal(); // Close after processing
+  } else {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) {
+      alert('Please upload an image first.');
       loadingIndicator.style.display = 'none';
       detectButton.disabled = false;
-    });
+      return;
+    }
+    await processUploadedImage(file);
+    closeModal(); // Close after processing
+  }
+  
+  loadingIndicator.style.display = 'none';
+  detectButton.disabled = false;
+});
 
     async function processImageFromCamera() {
       const context = canvas.getContext('2d');
