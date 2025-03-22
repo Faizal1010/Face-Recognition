@@ -131,7 +131,7 @@
                             </div>
                         </li>
                         <li class="dropdown nav-item">
-                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="http://localhost:3000/assets/imgs/people/avatar-2.png" alt="User" /></a>
+                            <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User" /></a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                                 <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
@@ -558,8 +558,8 @@
         <script src="http://localhost:3000/assets/js/custom-chart.js" type="text/javascript"></script>
 
         <script>
+            let payload;
             document.addEventListener('DOMContentLoaded', () => {
-                let payload;
                 const token = localStorage.getItem('token');
                 if (!token) {
                     console.warn('No token found for logging.');
@@ -575,45 +575,54 @@
                     console.error('Error decoding JWT token:', error);
                 }
         
-                fetch(`http://localhost:8000/notification/by-client-id/${payload.id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const notificationBox = document.getElementById('notification-box');
-                    notificationBox.innerHTML = "";
+                // fetch(`http://localhost:8000/notification/by-client-id/${payload.id}`, {
+                //     method: 'GET',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     }
+                // })
+                // .then(response => response.json())
+                // .then(data => {
+                //     const notificationBox = document.getElementById('notification-box');
+                //     notificationBox.innerHTML = "";
         
-                    // Sort notifications by createdAt in descending order (newest first)
-                    const sortedNotifications = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                //     // Sort notifications by createdAt in descending order (newest first)
+                //     const sortedNotifications = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
-                    // Get the newest 5 notifications
-                    const latestNotifications = sortedNotifications.slice(0, 5);
+                //     // Get the newest 5 notifications
+                //     const latestNotifications = sortedNotifications.slice(0, 5);
         
-                    // Display the latest notifications
-                    latestNotifications.forEach((notification, index) => {
-                        const div = document.createElement('div');
-                        if ((index + 1) % 2 !== 0) {
-                            div.style.backgroundColor = '#222736';
-                            div.style.borderRadius = '7px';
-                            div.style.padding = '10px';
-                            div.style.marginBottom = '5px';
-                        } else {
-                            div.style.borderRadius = '7px';
-                            div.style.padding = '10px';
-                            div.style.marginBottom = '5px';
-                        }
-                        div.innerText = `${index + 1}. ${notification.Notification}`;
-                        notificationBox.appendChild(div);
-                    });
-                });
+                //     // Display the latest notifications
+                //     latestNotifications.forEach((notification, index) => {
+                //         const div = document.createElement('div');
+                //         if ((index + 1) % 2 !== 0) {
+                //             div.style.backgroundColor = '#222736';
+                //             div.style.borderRadius = '7px';
+                //             div.style.padding = '10px';
+                //             div.style.marginBottom = '5px';
+                //         } else {
+                //             div.style.borderRadius = '7px';
+                //             div.style.padding = '10px';
+                //             div.style.marginBottom = '5px';
+                //         }
+                //         div.innerText = `${index + 1}. ${notification.Notification}`;
+                //         notificationBox.appendChild(div);
+                //     });
+                // });
                 
             });
         </script>
         
-        
+      <script>
+        document.addEventListener('DOMContentLoaded', ()=>{
+            fetch(`http://localhost:3000/clients/code-client/${payload.id}`)
+            .then(response=>response.json())
+            .then(data=>{
+                const profile = document.getElementById('user-profile').querySelector('img')
+                profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`
+            })
+        })
+      </script>  
 
 
         <!-- Logout -->

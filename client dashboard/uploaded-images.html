@@ -236,8 +236,8 @@
                         </div>
                     </li>
                     <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
-                            <img class="img-xs rounded-circle" src="http://localhost:3000/assets/imgs/people/avatar-2.png" alt="User" /></a>
+                        <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
+                            <img class="img-xs rounded-circle" src="" alt="User" /></a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                             <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit
                   Profile</a
@@ -428,6 +428,14 @@
                 return null;
             }
         }
+
+
+        fetch(`http://localhost:3000/clients/code-client/${decodedToken.id}`)
+            .then(response=>response.json())
+            .then(data=>{
+                const profile = document.getElementById('user-profile').querySelector('img')
+                profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`
+            })
 
         fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
                 method: 'GET',
