@@ -173,19 +173,19 @@
                 
                 <div style="margin-top: 10px;">
                     <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="facebook-app-symbol.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        <img src="asset/social-media-icons/facebook.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
                     </a>
                     <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        <img src="asset/social-media-icons/instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
                     </a>
                     <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        <img src="asset/social-media-icons/whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
                     </a>
                     <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        <img src="asset/social-media-icons/twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
                     </a>
                     <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        <img src="asset/social-media-icons/youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
                     </a>
                 </div>
             </div>
@@ -255,14 +255,14 @@
 
 
 <script>
-    let savedEventId = localStorage.getItem("eventId");
+    let savedEventId = localStorage.getItem("eventId"); // Initial value
     document.addEventListener("DOMContentLoaded", function () {
         if (savedEventId) {
-        const findYourselfLink = document.getElementById("findYourselfLink");
-        findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
-        loadLabels(savedEventId);
-        document.getElementById("popup").style.display = "none";
-        document.getElementById("main-content").style.display = "block";
+            const findYourselfLink = document.getElementById("findYourselfLink");
+            findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
+            loadLabels(savedEventId);
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("main-content").style.display = "block";
         }
     });
 
@@ -277,6 +277,7 @@
             .then(response => {
                 if (response.ok) {
                     localStorage.setItem("eventId", eventId); // Save event code
+                    savedEventId = eventId; // Update the global variable
                     loadLabels(eventId);
                     console.log("Event Code Entered:", eventId);
                     document.getElementById("popup").style.display = "none";
