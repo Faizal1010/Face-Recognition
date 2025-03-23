@@ -271,7 +271,7 @@
           </div>
           <div>
 
-                            <a href="add-images.html" class="btn btn-primary btn-sm rounded">Add images</a>
+                            <a id="add-images-button" class="btn btn-primary btn-sm rounded">Add images</a>
                         </div>
             </div>
             <div class="image-section">
@@ -421,7 +421,9 @@
                 const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
                 
                 const addImagesLink = document.getElementById('add-images')
+                const addImagesButtonLink = document.getElementById('add-images-button')
                 addImagesLink.href = `http://localhost:3000/client-dashboard/add-images?clientId=${encodeURIComponent(payload.id)}`;
+                addImagesButtonLink.href = `http://localhost:3000/client-dashboard/add-images?clientId=${encodeURIComponent(payload.id)}`;
                 return payload;
             } catch (error) {
                 console.error('Error decoding JWT token:', error);

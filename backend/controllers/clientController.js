@@ -223,7 +223,7 @@ const deleteClient = async (req, res) => {
         });
 
         // Step 5: Delete the client folder
-        const emailFolderPath = path.join(__dirname, '../../super admin dashboard/assets/clientsProfiles', email);
+        const emailFolderPath = path.join(__dirname, '../../public/assets/clientsProfiles', email);
         try {
             fs.rmSync(emailFolderPath, { recursive: true, force: true });
             console.log(`Successfully deleted the folder for ${email}`);
