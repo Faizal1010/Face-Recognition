@@ -886,6 +886,7 @@
                 .then(data => {
                     // Handle the response data (success message or any returned data)
                     alert('Labels updated successfully!');
+                    window.location.reload()
                 })
                 .catch(error => {
                     // Handle errors (network issues or bad response)
@@ -925,6 +926,7 @@
                 .then(data => {
                     if (data.message) {
                         alert(data.message); // Success message
+                        window.location.reload()
                     } else if (data.error) {
                         alert(data.error); // Error message
                     }
