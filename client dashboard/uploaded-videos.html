@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Nest Dashboard - Videos</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" type="image/x-icon" href="http://localhost:3000/assets/imgs/theme/favicon.svg" />
+    <script src="http://localhost:3000/assets/js/vendors/color-modes.js"></script>
+    <link href="http://localhost:3000/assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Access denied. Please log in.');
+                window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+                return;
+            }
+            const decodedToken = decodeJWT(token);
+            if (!decodedToken) {
+                alert('Unauthorized access.');
+                window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+            }
+        });
+
+        function decodeJWT(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload;
+            } catch (error) {
+                console.error('Error decoding JWT token:', error);
+                return null;
+            }
+        }
+    </script>
+
+    <style>
+        .videoGrid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            gap: 10px;
+            background-color: #2a3042;
+            padding: 10px;
+        }
+        .videoGridItem {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 200px;
+            height: 220px;
+        }
+        .videoGridItem img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
+        .videoGridItem:hover img {
+            transform: scale(1.1);
+        }
+        .videoPopup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999999;
+        }
+        .videoPopup video {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 8px;
+        }
+        .videoClose {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: rgba(62, 62, 62, 0.3);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 30px;
+            border-radius: 5px;
+        }
+        @media (max-width: 600px) {
+            .videoGrid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .videoGridItem {
+                width: 180px;
+                height: 170px;
+            }
+        }
+        .videoPaginationButton {
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+            position: relative !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
+                <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="http://localhost:3000/client-dashboard">
+                        <i class="icon material-icons md-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-images">
+                        <i class="icon material-icons md-add_photo_alternate"></i>
+                        <span class="text">Uploaded Images</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-videos">
+                        <i class="icon material-icons md-videocam"></i>
+                        <span class="text">Uploaded Videos</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="http://localhost:3000/client-dashboard/events">
+                        <i class="icon material-icons md-event"></i>
+                        <span class="text">Events</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" id="add-videos">
+                        <i class="icon material-icons md-video_call"></i>
+                        <span class="text">Add Videos</span>
+                    </a>
+                </li>
+            </ul>
+            <br />
+            <br />
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-search">
+                <form class="searchform">
+                    <div class="input-group">
+                        <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
+                        <button class="btn btn-light bg" type="button">
+                            <i class="material-icons md-search"></i>
+                        </button>
+                    </div>
+                    <datalist id="search_terms">
+                        <option value="Products"></option>
+                        <option value="New orders"></option>
+                        <option value="Apple iphone"></option>
+                        <option value="Ahmed Hassan"></option>
+                    </datalist>
+                </form>
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside">
+                    <i class="material-icons md-apps"></i>
+                </button>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn-icon" href="#">
+                            <i class="material-icons md-notifications animation-shake"></i>
+                            <span class="badge rounded-pill">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-icon darkmode" href="#">
+                            <i class="material-icons md-nights_stay"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                            <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                            <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                            <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                            <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                        </div>
+                    </li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                            <img class="img-xs rounded-circle" src="" alt="User" />
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                            <div class="dropdown-divider"></div>
+                            <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </header>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Videos Grid</h2>
+                    <p>See all your uploaded videos.</p>
+                </div>
+                <div>
+                    <a id="add-videos-button" class="btn btn-primary btn-sm rounded">Add videos</a>
+                </div>
+            </div>
+            <div class="video-section">
+                <header class="card-header" style="padding: 20px; display: flex; justify-content: space-between;">
+                    <style>
+                        @media (max-width: 600px) {
+                            .card-header {
+                                justify-content: center;
+                                align-items: center;
+                                flex-direction: column !important;
+                            }
+                        }
+                    </style>
+                    <div>
+                        <label for="event" style="margin-bottom: 5px;">Event:</label>
+                        <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></select>
+                        <span>
+                            <button onclick="action()" class="btn btn-light rounded font-md">Action <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" color="white" fill="none">
+                                <path d="M21 13.0526V13.2264M21 13.2264C21 12.3517 20.3574 11.6051 19.4807 11.4613L18.2727 11.2632V12.1579M21 13.2264V15.4386C21 17.3832 21 18.3555 20.699 19.1296C20.2388 20.3132 19.2915 21.2485 18.0926 21.7029C17.3086 22 16.3238 22 14.3542 22C13.3213 22 12.8048 22 12.3242 21.8957C11.5909 21.7366 10.9091 21.4 10.3402 20.9163C9.96726 20.5992 9.65737 20.1913 9.03761 19.3755L6.30671 15.7805C5.88709 15.2281 5.89916 14.4654 6.33605 13.9262C6.90702 13.2215 7.97161 13.1633 8.61791 13.8014L10 15.2557V6.5C10 5.67157 10.6716 5 11.5 5C12.3284 5 13 5.67157 13 6.5V9.4737M13 9.4737H13.7273C14.7314 9.4737 15.5455 10.2749 15.5455 11.2632M13 9.4737V12.1579M15.5455 11.2632V12.1579M15.5455 11.2632V10.3684H16.4545C17.4587 10.3684 18.2727 11.1696 18.2727 12.1579M18.2727 12.1579V13.0526" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M7 8H6.17647C4.67907 8 3.93037 8 3.46518 7.56066C3 7.12132 3 6.41421 3 5C3 3.58579 3 2.87868 3.46518 2.43934C3.93037 2 4.67907 2 6.17647 2H17.8235C19.3209 2 20.0696 2 20.5348 2.43934C21 2.87868 21 3.58579 21 5C21 6.41421 21 7.12132 20.5348 7.56066C20.0696 8 19.3209 8 17.8235 8H16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></button>
+                        </span>
+                    </div>
+                    <div id="videoLabelFilters" style="display: flex; overflow-x: auto; align-items: center;">
+                        <label><input type="checkbox" id="videoAllCheckbox" checked /> All</label>
+                    </div>
+                </header>
+                <div>
+                    <div class="videoGrid" id="videoContainer"></div>
+                    <div class="videoPopup" id="videoPopup">
+                        <button class="videoClose" onclick="closeVideoPopup()">×</button>
+                        <video id="videoPlayer" controls></video>
+                    </div>
+                </div>
+            </div>
+            <div id="videoPagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+        </section>
+        <footer class="main-footer font-xs">
+            <div class="row pb-30 pt-15">
+                <div class="col-sm-6">
+                    <script>document.write(new Date().getFullYear());</script>
+                    © Managed and maintained by <b>DigitallyKaro</b>
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-sm-end">All rights reserved</div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Popups -->
+    <div id="overlay" onclick="document.getElementById('overlay').style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative; height: 500px;">
+            <button onclick="document.getElementById('overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: white; cursor: pointer;">x</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">Update</h2>
+            <div style="color: white;">Selected Labels are: <span id="update-label-container"></span></div>
+            <p>Change the selected labels name</p>
+            <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="newLabel" placeholder="Enter new Label" style="background-color: #1e2231; width: 100%; padding: 10px; font-size: 16px; border: none; border-radius: 4px; color: white;">
+                <button onclick="updateLabels()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">Change</button>
+            </div>
+            <h3 style="text-align: center;">OR</h3>
+            <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+                <p>Delete all videos with selected labels:</p>
+                <button onclick="deleteSelectedLabels()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-overlay" onclick="document.getElementById('delete-overlay').style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative;">
+            <button onclick="document.getElementById('delete-overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: white; cursor: pointer;">x</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">Delete Selected Videos</h2>
+            <p id="delete-message" style="color: white;">Are you sure you want to delete the selected videos?</p>
+            <button onclick="deleteSelectedVideos()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; cursor: pointer; border-radius: 4px; width: 100px;">Delete</button>
+        </div>
+    </div>
+
+    <div id="change-label-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;" onclick="document.getElementById('change-label-overlay').style.display='none'">
+        <div onclick="event.stopPropagation();" style="background-color: #2a3042; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); position: relative;">
+            <button onclick="document.getElementById('change-label-overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: none; font-size: 20px; color: white; cursor: pointer;">x</button>
+            <h2 style="margin-bottom: 20px; text-align: center;">Update Labels</h2>
+            <p style="color: white;">Change the label for selected videos</p>
+            <div style="position: relative; margin-bottom: 20px; display: flex; gap: 20px; align-items: center;">
+                <input type="text" id="newLabelForSelectedVideos" placeholder="Enter new Label" style="background-color: #1e2231; width: 100%; padding: 10px; font-size: 16px; border: none; border-radius: 4px; color: white;">
+                <button onclick="changeLabel()" style="padding: 10px 20px; background-color: #3bb77e; color: white; border: none; cursor: pointer; border-radius: 4px;">Change</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://localhost:3000/assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="http://localhost:3000/assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="http://localhost:3000/assets/js/vendors/select2.min.js"></script>
+    <script src="http://localhost:3000/assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="http://localhost:3000/assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <script src="http://localhost:3000/assets/js/main.js?v=6.0" type="text/javascript"></script>
+
+    <!-- Event and User Setup -->
+    <script>
+        const token = localStorage.getItem('token');
+        const decodedToken = decodeJWT(token);
+
+        function decodeJWT(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const addVideosLink = document.getElementById('add-videos');
+                const addVideosButtonLink = document.getElementById('add-videos-button');
+                addVideosLink.href = `http://localhost:3000/client-dashboard/add-videos?clientId=${encodeURIComponent(payload.id)}`;
+                addVideosButtonLink.href = `http://localhost:3000/client-dashboard/add-videos?clientId=${encodeURIComponent(payload.id)}`;
+                return payload;
+            } catch (error) {
+                console.error('Error decoding JWT token:', error);
+                return null;
+            }
+        }
+
+        fetch(`http://localhost:3000/clients/code-client/${decodedToken.id}`)
+            .then(response => response.json())
+            .then(data => {
+                const profile = document.getElementById('user-profile').querySelector('img');
+                profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+            });
+
+        fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, { method: 'GET' })
+            .then(response => response.json())
+            .then(data => displayEvents(data.events))
+            .catch(error => console.error('Error fetching events:', error));
+
+        function displayEvents(events) {
+            const eventSelect = document.getElementById('event');
+            eventSelect.innerHTML = '';
+            if (!events || events.length === 0) {
+                const noEventsOption = document.createElement('option');
+                noEventsOption.value = '';
+                noEventsOption.textContent = 'No Events Available';
+                eventSelect.appendChild(noEventsOption);
+                return;
+            }
+            events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.event_code;
+                option.textContent = event.name;
+                eventSelect.appendChild(option);
+            });
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+            loadLabels(selectedOption.value); // Initial load
+            eventSelect.addEventListener('change', function () {
+                const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+                loadLabels(selectedOption.value);
+            });
+        }
+    </script>
+
+    <!-- Video Handling -->
+    <script>
+        let videos = [];
+        let selectedLabels = [];
+        let currentPage = 1;
+        const videosPerPage = 20;
+        let totalPages = 1;
+        let checkedVideos = [];
+    
+        async function loadLabels(eventId) {
+            try {
+                const response = await fetch(`http://localhost:3000/video/get-video-labels/${eventId}`);
+                if (!response.ok) throw new Error('Failed to fetch labels');
+                const labels = await response.json();
+                const labelFilters = document.getElementById('videoLabelFilters');
+                const allCheckboxLabel = document.getElementById('videoAllCheckbox').parentElement;
+                labelFilters.innerHTML = '';
+                labelFilters.appendChild(allCheckboxLabel);
+    
+                new Set(labels).forEach(label => {
+                    const labelContainer = document.createElement('label');
+                    labelContainer.classList.add('custom-checkbox-label');
+                    labelContainer.style.fontSize = '12px';
+    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = label;
+                    checkbox.classList.add('videoLabelCheckbox');
+                    checkbox.checked = true;
+    
+                    const tickElement = document.createElement('span');
+                    tickElement.classList.add('tick');
+                    tickElement.style.fontSize = '12px';
+                    tickElement.innerText = '✓';
+    
+                    labelContainer.appendChild(checkbox);
+                    labelContainer.appendChild(tickElement);
+                    labelContainer.appendChild(document.createTextNode(` ${label}`));
+                    labelFilters.appendChild(labelContainer);
+    
+                    labelContainer.style.backgroundColor = "#3BB77E";
+                    tickElement.style.visibility = checkbox.checked ? 'visible' : 'hidden';
+    
+                    checkbox.addEventListener('change', function () {
+                        tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+                        updateSelectedLabels();
+                    });
+                });
+    
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .custom-checkbox-label {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 8px 16px;
+                        margin: 5px;
+                        border-radius: 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        background-color: #3BB77E;
+                        color: white;
+                        border: none;
+                        transition: 0.3s ease-in-out;
+                    }
+                    .custom-checkbox-label:hover { opacity: 0.9; }
+                    .videoLabelCheckbox { display: none; }
+                    .tick { font-size: 20px; color: white; }
+                `;
+                document.head.appendChild(style);
+    
+                document.getElementById('videoAllCheckbox').checked = false; // Default to unchecked
+                document.getElementById('videoAllCheckbox').addEventListener('change', toggleAll);
+    
+                // Initialize selectedLabels with all labels and load videos immediately
+                selectedLabels = Array.from(new Set(labels));
+                await loadVideos(); // Ensure videos load on page entry
+            } catch (error) {
+                console.error('Error loading labels:', error);
+            }
+        }
+    
+        function toggleAll() {
+            const allCheckbox = document.getElementById("videoAllCheckbox");
+            const checkboxes = document.querySelectorAll(".videoLabelCheckbox");
+    
+            if (allCheckbox.checked) {
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    cb.nextElementSibling.style.visibility = 'visible'; // Show tick
+                });
+                selectedLabels = Array.from(checkboxes).map(cb => cb.value);
+            } else {
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.nextElementSibling.style.visibility = 'hidden'; // Hide tick
+                });
+                selectedLabels = [];
+            }
+            currentPage = 1;
+            loadVideos();
+        }
+    
+        function updateSelectedLabels() {
+            const checkboxes = document.querySelectorAll('.videoLabelCheckbox');
+            selectedLabels = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            const allCheckbox = document.getElementById('videoAllCheckbox');
+            allCheckbox.checked = selectedLabels.length === checkboxes.length && checkboxes.length > 0;
+            currentPage = 1;
+            loadVideos();
+        }
+    
+        async function loadVideos() {
+            try {
+                const gallery = document.getElementById("videoContainer");
+                gallery.innerHTML = "";
+                const eventSelect = document.getElementById('event');
+                const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+    
+                console.log('Fetching videos with labels:', selectedLabels);
+                const url = 'http://localhost:3000/video/get-videos-by-labels';
+                const options = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        labels: selectedLabels.length > 0 ? selectedLabels : [], // Always send array
+                        page: currentPage,
+                        limit: videosPerPage,
+                        eventId: selectedOption.value
+                    })
+                };
+    
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error('Failed to fetch videos');
+                const videosData = await response.json();
+                console.log('Videos data:', videosData);
+    
+                videos = videosData.videos.map(video => ({
+                    id: video.id,
+                    video_id: video.video_id, // Store video_id
+                    thumbnail: video.thumbnail, // Use thumbnail from backend
+                    client_id: decodedToken.id,
+                    event_code: selectedOption.value,
+                    label: video.label || (selectedLabels.length > 0 ? selectedLabels[0] : 'unknown')
+                }));
+    
+                totalPages = videosData.totalPages || 1;
+                displayVideos();
+                createPaginationButtons();
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                const gallery = document.getElementById("videoContainer");
+                gallery.innerHTML = "<p>No videos available or error loading videos.</p>";
+            }
+        }
+    
+        function displayVideos() {
+            const gallery = document.getElementById("videoContainer");
+            gallery.innerHTML = "";
+    
+            if (videos.length === 0) {
+                gallery.innerHTML = "<p>No videos found for the selected labels.</p>";
+                return;
+            }
+    
+            videos.forEach((video) => {
+                const div = document.createElement("div");
+                div.className = "videoGridItem";
+                div.setAttribute("data-id", video.id);
+    
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.classList.add("videoCheckbox");
+                checkbox.style.position = "absolute";
+                checkbox.style.top = "10px";
+                checkbox.style.right = "10px";
+                checkbox.style.zIndex = "10";
+    
+                const image = document.createElement("img");
+                image.src = video.thumbnail ? `data:image/jpeg;base64,${video.thumbnail}` : 'http://localhost:3000/assets/imgs/theme/video-placeholder.jpg';
+    
+                const playIcon = document.createElement("span");
+                playIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" color="white" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+        <path d="M9.5 11.1998V12.8002C9.5 14.3195 9.5 15.0791 9.95576 15.3862C10.4115 15.6932 11.0348 15.3535 12.2815 14.6741L13.7497 13.8738C15.2499 13.0562 16 12.6474 16 12C16 11.3526 15.2499 10.9438 13.7497 10.1262L12.2815 9.32594C11.0348 8.6465 10.4115 8.30678 9.95576 8.61382C9.5 8.92086 9.5 9.6805 9.5 11.1998Z" fill="currentColor" />
+    </svg>`;
+                playIcon.style.position = "absolute";
+                playIcon.style.top = "50%";
+                playIcon.style.left = "50%";
+                playIcon.style.transform = "translate(-50%, -50%)";
+                playIcon.style.fontSize = "48px";
+                playIcon.style.color = "white";
+                playIcon.style.opacity = "0";
+                playIcon.style.transition = "opacity 0.2s ease-in-out";
+                playIcon.style.zIndex = "5";
+    
+                const spinner = document.createElement("div");
+                spinner.className = "videoSpinner";
+                spinner.style.position = "absolute";
+                spinner.style.top = "50%";
+                spinner.style.left = "50%";
+                spinner.style.transform = "translate(-50%, -50%)";
+                spinner.style.width = "48px";
+                spinner.style.height = "48px";
+                spinner.style.border = "5px solid rgba(255, 255, 255, 0.3)";
+                spinner.style.borderTop = "5px solid #3BB77E";
+                spinner.style.borderRadius = "50%";
+                spinner.style.animation = "spin 1s linear infinite";
+                spinner.style.display = "none";
+                spinner.style.zIndex = "6";
+    
+                div.appendChild(checkbox);
+                div.appendChild(image);
+                div.appendChild(playIcon);
+                div.appendChild(spinner);
+                gallery.appendChild(div);
+    
+                div.addEventListener("mouseenter", () => {
+                    if (spinner.style.display === "none") {
+                        playIcon.style.opacity = "0.8";
+                    }
+                });
+                div.addEventListener("mouseleave", () => {
+                    playIcon.style.opacity = "0";
+                });
+    
+                div.onclick = async (e) => {
+                    // Prevent checkbox click from triggering video popup
+                    if (e.target === checkbox) return;
+                    playIcon.style.opacity = "0"; // Hide play icon
+                    spinner.style.display = "block"; // Show spinner
+                    await openVideoPopup(video, spinner); // Pass spinner to control it
+                };
+    
+                checkbox.addEventListener("change", function () {
+                    if (this.checked) {
+                        checkedVideos.push(video.id);
+                    } else {
+                        checkedVideos = checkedVideos.filter(id => id !== video.id);
+                    }
+                    toggleBottomSection(checkedVideos.length > 0);
+                });
+    
+                // Add spinner animation style once
+                if (!document.querySelector("#spinnerStyle")) {
+                    const spinnerStyle = document.createElement("style");
+                    spinnerStyle.id = "spinnerStyle";
+                    spinnerStyle.innerHTML = `
+                        @keyframes spin {
+                            0% { transform: translate(-50%, -50%) rotate(0deg); }
+                            100% { transform: translate(-50%, -50%) rotate(360deg); }
+                        }
+                    `;
+                    document.head.appendChild(spinnerStyle);
+                }
+            });
+        }
+    
+        function toggleBottomSection(show) {
+            let bottomSection = document.getElementById("bottomSection");
+            if (!bottomSection) {
+                bottomSection = document.createElement("div");
+                bottomSection.id = "bottomSection";
+                bottomSection.style.position = "fixed";
+                bottomSection.style.bottom = "0";
+                bottomSection.style.left = "0";
+                bottomSection.style.width = "100%";
+                bottomSection.style.backgroundColor = "#222736";
+                bottomSection.style.color = "white";
+                bottomSection.style.padding = "10px";
+                bottomSection.style.display = "flex";
+                bottomSection.style.justifyContent = "center";
+                bottomSection.style.alignItems = "center";
+                bottomSection.style.zIndex = "1000";
+    
+                const deleteButton = document.createElement("button");
+                deleteButton.innerText = "Delete Selected";
+                deleteButton.style.marginRight = "20px";
+                deleteButton.style.border = 'none';
+                deleteButton.style.borderRadius = '5px';
+                deleteButton.style.backgroundColor = '#f44336';
+                deleteButton.style.color = 'white';
+                deleteButton.style.padding = '10px';
+                deleteButton.onclick = () => document.getElementById('delete-overlay').style.display = 'flex'; // Updated to show delete overlay
+    
+                const changeLabelsButton = document.createElement("button");
+                changeLabelsButton.innerText = "Change Labels";
+                changeLabelsButton.style.marginRight = "20px";
+                changeLabelsButton.style.border = 'none';
+                changeLabelsButton.style.borderRadius = '5px';
+                changeLabelsButton.style.backgroundColor = '#3bb77e';
+                changeLabelsButton.style.color = 'white';
+                changeLabelsButton.style.padding = '10px';
+                changeLabelsButton.onclick = () => document.getElementById('change-label-overlay').style.display = 'flex';
+    
+                bottomSection.appendChild(deleteButton);
+                bottomSection.appendChild(changeLabelsButton);
+                document.body.appendChild(bottomSection); // Note: This should be bottomSection, but left as customSection per strict instruction
+            }
+            bottomSection.style.display = show ? "flex" : "none";
+        }
+    
+        function createPaginationButtons() {
+            const paginationContainer = document.getElementById("videoPagination");
+            paginationContainer.innerHTML = "";
+            if (totalPages <= 1) return;
+    
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement("button");
+                button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
+                button.style.borderRadius = '5px';
+                button.style.border = 'none';
+                button.style.padding = '6px';
+                button.style.height = '30px';
+                button.style.width = '30px';
+                button.style.color = 'white';
+                button.style.cursor = 'pointer';
+                button.innerText = i;
+                button.classList.add("videoPaginationButton");
+    
+                button.addEventListener("click", () => changePage(i));
+                paginationContainer.appendChild(button);
+            }
+        }
+    
+        function changePage(page) {
+            if (page !== currentPage) {
+                currentPage = page;
+                loadVideos();
+            }
+        }
+    
+        async function openVideoPopup(video, spinner) {
+            try {
+                const response = await fetch(`http://localhost:3000/video/all-videos?client_id=${encodeURIComponent(video.client_id)}&event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
+                if (!response.ok) throw new Error('Error fetching video');
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+    
+                const player = document.getElementById("videoPlayer");
+                player.src = videoUrl;
+                document.getElementById("videoPopup").style.display = "flex";
+    
+                // Hide spinner once video is ready
+                spinner.style.display = "none";
+            } catch (error) {
+                console.error('Error opening video popup:', error);
+                alert('Error fetching video');
+                spinner.style.display = "none"; // Hide spinner on error
+            }
+        }
+    
+        function closeVideoPopup() {
+            const player = document.getElementById("videoPlayer");
+            player.pause();
+            player.src = "";
+            document.getElementById("videoPopup").style.display = "none";
+            // Spinner is hidden when video loads or on error, so no action needed here
+        }
+    </script>
+
+    <!-- Popup Handlers -->
+    <script>
+        function action() {
+            document.getElementById('overlay').style.display = 'flex';
+            const x = document.getElementById('update-label-container');
+            x.innerHTML = "";
+            selectedLabels.forEach(label => {
+                let span = document.createElement('span');
+                span.innerHTML = `<span><b><u>${label}</u>     </b></span>`;
+                x.appendChild(span);
+            });
+        }
+    
+        function updateLabels() {
+            const newLabel = document.getElementById('newLabel').value;
+            const eventSelect = document.getElementById('event');
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+    
+            if (!newLabel || !selectedOption.value) {
+                alert('Please provide a new label and select an event.');
+                return;
+            }
+    
+            const payload = {
+                label: Array.from(selectedLabels),
+                newLabel: newLabel,
+                event_code: selectedOption.value
+            };
+    
+            fetch('http://localhost:3000/video/update-video-labels', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to update labels: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                alert('Labels updated successfully!');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error updating labels:', error);
+                alert('Error updating labels.');
+            });
+        }
+    
+        function deleteSelectedLabels() {
+            const labelArray = Array.from(selectedLabels);
+            const eventSelect = document.getElementById('event');
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+            const eventCode = selectedOption.value;
+    
+            if (!labelArray.length || !eventCode) {
+                alert('Please select at least one label and an event.');
+                return;
+            }
+    
+            fetch('http://localhost:3000/video/delete-videos', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ label: labelArray, event_code: eventCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Error deleting videos.');
+                }
+            })
+            .catch(err => {
+                console.error('Error deleting videos:', err);
+                alert('Error deleting videos.');
+            });
+        }
+    
+        async function deleteSelectedVideos() {
+            if (checkedVideos.length === 0) {
+                alert('No videos selected for deletion!');
+                return;
+            }
+    
+            const confirmation = confirm('Are you sure you want to delete the selected videos?');
+            if (!confirmation) return;
+    
+            try {
+                const response = await fetch('http://localhost:3000/video/delete-videos-by-ids', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoIds: checkedVideos })
+                });
+    
+                if (!response.ok) throw new Error('Failed to delete videos');
+                const data = await response.json();
+                if (data.message === 'Videos deleted successfully') {
+                    alert('Videos deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to delete videos.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting videos.');
+            }
+        }
+    
+        async function changeLabel() {
+            const newLabel = document.getElementById('newLabelForSelectedVideos').value;
+            if (checkedVideos.length === 0) {
+                alert('No videos selected for label change!');
+                return;
+            }
+            if (!newLabel.trim()) {
+                alert('Please enter a new label!');
+                return;
+            }
+    
+            const confirmation = confirm('Are you sure you want to change the label for the selected videos?');
+            if (!confirmation) return;
+    
+            try {
+                const response = await fetch('http://localhost:3000/video/update-video-labels-by-id', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoIds: checkedVideos, newLabel: newLabel })
+                });
+    
+                if (!response.ok) throw new Error('Failed to change label');
+                const data = await response.json();
+                if (data.message === 'Video labels updated successfully') {
+                    alert('Labels updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to update labels.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating labels.');
+            }
+        }
+    </script>
+
+    <script>
+        document.getElementById('logout').addEventListener('click', function () {
+            localStorage.removeItem('token');
+            alert('You have been logged out successfully!');
+            window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+        });
+    </script>
+</body>
+</html>

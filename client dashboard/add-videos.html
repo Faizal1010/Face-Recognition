@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Nest Dashboard</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:image" content="" />
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="http://localhost:3000/assets/imgs/theme/favicon.svg" />
+        <!-- Template CSS -->
+        <script src="http://localhost:3000/assets/js/vendors/color-modes.js"></script>
+        <link href="http://localhost:3000/assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                let clientId;
+urlParams = new URLSearchParams(window.location.search);
+clientId = urlParams.get("clientId");
+
+const clientIdPattern = /^C[A-Z]{2}[0-9]{2}[A-Z]$/;
+
+if (!clientId) {
+  alert("No clientId found!");
+  window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+} else if (!clientIdPattern.test(clientId)) {
+  alert("Invalid clientId!");
+  window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+}
+
+                // const token = localStorage.getItem('token');
+            
+                // if (!token) {
+                //     alert('Access denied. Please log in.');
+                //     window.location.href = 'page-account-login.html'; // Redirect to login page
+                //     return;
+                // }
+        
+                // // Decode the JWT to verify the user's role
+                // const decodedToken = decodeJWT(token);
+        
+                // if (!decodedToken) {
+                //     alert('Unauthorized access.');
+                //     window.location.href = 'page-account-login.html'; // Redirect to login page
+                // }
+            });
+        
+            // // Function to decode the JWT and extract the payload
+            // function decodeJWT(token) {
+            //     try {
+            //         const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+            //         return payload;
+            //     } catch (error) {
+            //         console.error('Error decoding JWT token:', error);
+            //         return null;
+            //     }
+            // }
+        </script>
+    </head>
+
+    <body>
+        <div class="screen-overlay"></div>
+        <aside class="navbar-aside" id="offcanvas_aside">
+            <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
+                    <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                </a>
+                <div>
+                    <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+                </div>
+            </div>
+            <nav>
+                <ul class="menu-aside">
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard">
+                            <i class="icon material-icons md-home"></i>
+                            <span class="text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-images">
+                            <i class="icon material-icons md-add_photo_alternate"></i>
+                            <span class="text">Uploaded Images</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/events">
+                            <i class="icon material-icons md-event"></i>
+                            <span class="text">Events</span>
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a class="menu-link" id="add-images">
+                            <i class="icon material-icons md-image"></i>
+                            <span class="text">Add Images</span>
+                        </a>
+                    </li>                   
+                </ul>
+                <br />
+                <br />
+            </nav>
+        </aside>
+        <main class="main-wrap">
+            <header class="main-header navbar">
+                <div class="col-search">
+                    <form class="searchform">
+                        <div class="input-group">
+                            <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
+                            <button class="btn btn-light bg" type="button"><i class="material-icons md-search"></i></button>
+                        </div>
+                        <datalist id="search_terms">
+                            <option value="Products"></option>
+                            <option value="New orders"></option>
+                            <option value="Apple iphone"></option>
+                            <option value="Ahmed Hassan"></option>
+                        </datalist>
+                    </form>
+                </div>
+                <div class="col-nav">
+                    <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon" href="#">
+                                <i class="material-icons md-notifications animation-shake"></i>
+                                <span class="badge rounded-pill">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                                <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
+                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
+                            </div>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User" /></a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                                <div class="dropdown-divider"></div>
+                                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </header>
+            <section class="content-main">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="content-header">
+                            <h2 class="content-title">Add New Images</h2>
+                            <!-- <div>
+                                <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
+                            </div> -->
+                            <button id="add-videos-button" class="btn btn-md rounded font-sm hover-up">Upload</button>
+                        </div>
+                    </div>
+                    <form style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 800px; margin: auto; font-family: Arial, sans-serif;">
+                                               <!-- Image -->
+                                               <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                                                <label style="margin-bottom: 5px;">Image:</label>
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                  <input required type="file" id="videoInput" accept="video/*" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; " multiple>
+                                                  <!-- <p id="error-message" style="color: red; display: none;">You can only select up to 4 images!</p> -->
+                                                  <!-- <span style="font-size: 12px; color: gray;">Allowed file types: png, jpg, jpeg.</span> -->
+                                                </div>
+                                              </div>
+
+
+                                               <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                                                <label style="margin-bottom: 5px;">Thumbnail:</label>
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                  <input required type="file" id="thumbnailInput" accept="image/*" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; " multiple>
+                                                  <!-- <p id="error-message" style="color: red; display: none;">You can only select up to 4 images!</p> -->
+                                                  <!-- <span style="font-size: 12px; color: gray;">Allowed file types: png, jpg, jpeg.</span> -->
+                                                </div>
+                                              </div>
+
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                            <label for="event" style="margin-bottom: 5px;">Event: <span style="color: red;">*</span></label>
+                            <select id="event" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                              <!-- <option value="" selected>Events</option> -->
+                            </select>
+                          </div>
+                          
+                          
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="label" style="margin-bottom: 5px;">Label : <span style="color: red;">*</span></label>
+                          <input required id="label" type="text" placeholder="Name" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        </div>
+                      
+                        <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+                          <label for="client_code" style="margin-bottom: 5px;">Client Code: <span style="color: red;">*</span>
+                          </label>
+                          <div style="display: flex; align-items: center; gap: 5px;">
+                            <input readonly id="client-code" type="text" placeholder="Product Code will be automatically generated" style=" color: white; flex: 1; padding: 10px; border: 1px solid #5a5757; border-radius: 5px; background-color: #5a5757;">
+                          </div>
+                        </div>
+                      </form>
+                </div>
+            </section>
+            <footer class="main-footer font-xs">
+                <div class="row pb-30 pt-15">
+                    <div class="col-sm-6">
+                        <script>
+                            document.write(new Date().getFullYear());
+                        </script>
+                        &copy; Nest - HTML Ecommerce Template .
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end">All rights reserved.</div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+        <script src="http://localhost:3000/assets/js/vendors/jquery-3.6.0.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/bootstrap.bundle.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/select2.min.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/perfect-scrollbar.js"></script>
+        <script src="http://localhost:3000/assets/js/vendors/jquery.fullscreen.min.js"></script>
+        <!-- Main Script -->
+        <script src="http://localhost:3000/assets/js/main.js?v=6.0" type="text/javascript"></script>
+
+        <!-- script to fetch events made by the client -->
+        <script>
+            let clientId;
+            urlParams = new URLSearchParams(window.location.search);
+            clientId = urlParams.get("clientId");
+            if (clientId) {
+                console.log("client ID from URL is :", clientId);
+            }
+            document.getElementById('client-code').value = clientId
+                
+            fetch(`/event/client-events/${clientId}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => displayEvents(data.events))
+            .catch(error => console.error('Error fetching events:', error));
+                
+            function displayEvents(events) {
+                const eventSelect = document.getElementById('event');
+                eventSelect.innerHTML = ''; // Clear any existing options
+        
+                if(!events){
+                    // If no events are found, show a "No Events" option
+                    const noEventsOption = document.createElement('option');
+                    noEventsOption.value = '';
+                    noEventsOption.textContent = 'No Events Available';
+                    eventSelect.appendChild(noEventsOption);
+                    return
+                }
+                
+                // Populate the select dropdown with event options
+                events.forEach(event => {
+                    console.log(event)
+                    const option = document.createElement('option');
+                    option.value = event.event_code; // assuming the event has an 'id' field
+                    option.textContent = event.name; // assuming the event has a 'name' field
+                    eventSelect.appendChild(option);
+                });
+                
+                // Add event listener to log selected option
+                eventSelect.addEventListener('change', function() {
+                    const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+                    console.log('Selected Event ID:', selectedOption.value);
+                    console.log('Selected Event Name:', selectedOption.textContent);
+                });
+            }
+        </script>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.querySelector('form');
+                const videoInput = document.getElementById('videoInput');
+                const eventSelect = document.getElementById('event');
+                const labelInput = document.getElementById('label');
+                const clientCodeInput = document.getElementById('client-code');
+                const thumbnailInput = document.getElementById('thumbnailInput'); // Add this input in your HTML
+        
+                document.getElementById('add-videos-button').addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent default form submission
+        
+                    const files = videoInput.files;
+                    const thumbnail = thumbnailInput.files[0];
+                    const selectedEvent = eventSelect.value;
+                    const label = labelInput.value.trim();
+                    const clientCode = clientCodeInput.value;
+        
+                    if (!files.length) {
+                        alert('Please select at least one video.');
+                        return;
+                    }
+        
+                    if (!thumbnail) {
+                        alert('Please select a thumbnail image.');
+                        return;
+                    }
+        
+                    if (!selectedEvent) {
+                        alert('Please select an event.');
+                        return;
+                    }
+        
+                    if (!label) {
+                        alert('Please enter a label.');
+                        return;
+                    }
+        
+                    // Add loading state
+                    const button = this;
+                    const originalContent = button.innerHTML;
+                    button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
+                    button.disabled = true;
+        
+                    // Add CSS for spinning animation
+                    const style = document.createElement('style');
+                    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                    document.head.appendChild(style);
+        
+                    // Prepare FormData to send to backend
+                    const formData = new FormData();
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('video', files[i]);
+                    }
+                    formData.append('thumbnail', thumbnail);
+                    formData.append('event_code', selectedEvent);
+                    formData.append('label', label);
+                    formData.append('client_id', clientCode);
+        
+                    // Log FormData contents
+                    console.log('FormData contents:');
+                    for (const [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
+        
+                    // Send data to backend
+                    fetch('/video/add-videos', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const parsedData = JSON.parse(data.data.trim());
+                        console.log(parsedData)
+        
+                        if (parsedData.status === 'completed') {
+                            alert('Processing completed successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.message || 'Something went wrong.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        alert('Failed to upload. Please try again.');
+                    })
+                    .finally(() => {
+                        // Restore button state
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                    });
+                });
+            });
+        </script>
+            
+
+            <!-- <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const token = localStorage.getItem('token');
+                    const decodedToken = decodeJWTTokenAgain(token); // Decode locally
+                    if (!decodedToken || !decodedToken.id) {
+                        console.error('Invalid or missing token/ID');
+                        return;
+                    }
+                    console.log(decodedToken);
+                    fetch(`http://localhost:3000/clients/code-client/${decodedToken.id}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const profile = document.getElementById('user-profile').querySelector('img');
+                            profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+                        })
+                        .catch(error => console.error('Error fetching client profile:', error));
+                });
+            
+                const decodeJWTTokenAgain = (token) => {
+                    try {
+                        return JSON.parse(atob(token.split('.')[1]));
+                    } catch (error) {
+                        console.error('Error decoding JWT token:', error);
+                        return null;
+                    }
+                };
+            </script> -->
+            
+        <script>
+            document.getElementById('logout').addEventListener('click', function () {
+        // Remove the token from localStorage
+        localStorage.removeItem('token');
+        
+        // Alert user about successful logout
+        alert('You have been logged out successfully!');
+        
+        // Redirect to login page
+        window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page after logout
+        });
+        </script>
+    </body>
+</html>

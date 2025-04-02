@@ -292,6 +292,7 @@ app.get('/find', (req, res) => {
 
 // API routes
 app.use('/', require('./routes/imageRoutes'));
+app.use('/video', require('./routes/videoRoutes'));
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/clients', require('./routes/clientRoutes'));
 app.use('/event', require('./routes/eventRoutes'));
