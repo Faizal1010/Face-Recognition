@@ -15,4 +15,5 @@ router.post('/get-videos-by-labels', videoController.getVideosByLabels);
 router.delete('/delete-videos-by-ids', videoController.deleteVideosByIds);
 router.put('/update-video-labels-by-id', videoController.updateVideoLabelsById);
 
+router.get('/all-videos-no-client', videoController.getVideosNoClient);
 module.exports = router;

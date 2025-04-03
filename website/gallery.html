@@ -208,6 +208,13 @@
         
         <div id="imageLabelFilters" style="display: flex; align-items: center;"></div>
     <div id="grandDownloadContainer" style="display: flex; gap: 2px;">
+            <a id="videoPageLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;" title="Download all the images under selected labels">
+                Videos<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#ffffff" fill="none">
+                    <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <circle cx="11.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+            </a>
             <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the images under selected labels">
                 Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
                     <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -260,6 +267,9 @@
         if (savedEventId) {
             const findYourselfLink = document.getElementById("findYourselfLink");
             findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
+
+            const videoPageLink = document.getElementById("videoPageLink");
+            videoPageLink.href = `http://localhost:3000/video?eventId=${encodeURIComponent(savedEventId)}`;
             loadLabels(savedEventId);
             document.getElementById("popup").style.display = "none";
             document.getElementById("main-content").style.display = "block";

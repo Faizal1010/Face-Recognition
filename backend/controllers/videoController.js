@@ -483,15 +483,38 @@ exports.updateVideoLabelsById = (req, res) => {
 
     console.log("Updating all chunks for videos with IDs:", videoIds, "to new label:", newLabel);
 
-    const updateQuery = 'UPDATE videos SET label = ? WHERE id IN (?)';
-    db.query(updateQuery, [newLabel, videoIds], (err, result) => {
+    // First get all video IDs that share the same original video (assuming chunks share a common identifier)
+    // I'm assuming your table has some way to group chunks of the same video, like a video_id or event_code
+    // I'll use video_id as the column that groups chunks of the same video
+    const placeholders = videoIds.map(() => '?').join(',');
+    const selectQuery = `SELECT DISTINCT video_id FROM videos WHERE id IN (${placeholders})`;
+    
+    db.query(selectQuery, videoIds, (err, results) => {
         if (err) {
-            console.error('Error updating labels for video chunks:', err);
-            return res.status(500).json({ error: 'Error updating video labels' });
+            console.error('Error fetching video IDs:', err);
+            return res.status(500).json({ error: 'Error fetching video IDs' });
         }
 
-        console.log(`Updated ${result.affectedRows} chunks to label "${newLabel}" for video IDs:`, videoIds);
-        res.json({ message: 'Video labels updated successfully', affectedRows: result.affectedRows });
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No videos found for provided IDs' });
+        }
+
+        // Extract all unique video_ids that group the chunks
+        const videoGroupIds = results.map(row => row.video_id);
+        const updatePlaceholders = videoGroupIds.map(() => '?').join(',');
+        
+        // Update all chunks that belong to these videos
+        const updateQuery = `UPDATE videos SET label = ? WHERE video_id IN (${updatePlaceholders})`;
+        
+        db.query(updateQuery, [newLabel, ...videoGroupIds], (err, result) => {
+            if (err) {
+                console.error('Error updating labels for video chunks:', err);
+                return res.status(500).json({ error: 'Error updating video labels' });
+            }
+
+            console.log(`Updated ${result.affectedRows} chunks to label "${newLabel}" for video IDs:`, videoIds);
+            res.json({ message: 'Video labels updated successfully', affectedRows: result.affectedRows });
+        });
     });
 };
 
@@ -543,5 +566,86 @@ exports.downloadAllSelectedVideos = (req, res) => {
         }));
 
         res.json({ videos });
+    });
+};
+
+
+// fetching all videos without client id (same as getVideos handler just without client_id)
+exports.getVideosNoClient = (req, res) => {
+    console.log('hit');
+    const { event_code, label, video_id } = req.query; // Removed client_id
+
+    if (!event_code || !label) {
+        return res.status(400).json({ error: 'event_code and label are required' });
+    }
+
+    let query = 'SELECT chunk, chunk_index, total_chunks, thumbnail FROM videos WHERE event_code = ? AND label = ?';
+    let params = [event_code, label];
+    
+    if (video_id) {
+        query += ' AND video_id = ?'; // Filter by video_id if provided
+        params.push(video_id);
+    }
+    
+    query += ' ORDER BY chunk_index ASC';
+
+    db.query(query, params, (err, results) => {
+        if (err) {
+            console.error('Error retrieving video chunks:', err);
+            return res.status(500).json({ error: 'Error retrieving video' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Video not found' });
+        }
+
+        const totalChunks = results[0].total_chunks;
+        if (results.length !== totalChunks) {
+            console.error(`Incomplete video: expected ${totalChunks} chunks, found ${results.length}`);
+            return res.status(500).json({ error: 'Incomplete video data' });
+        }
+
+        // Prepare response with thumbnail as base64 (only from the first chunk where it exists)
+        const videoData = {
+            id: results[0].id, // Assuming you have an ID field; adjust if needed
+            event_code,
+            label,
+            thumbnail: results[0].thumbnail ? Buffer.from(results[0].thumbnail).toString('base64') : null
+        };
+
+        // If the request is for JSON data (e.g., for display), return it
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            return res.json({
+                videos: [videoData],
+                page: 1,
+                totalPages: 1,
+                total: results.length
+            });
+        }
+
+        // Otherwise, stream the video (original behavior)
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', `attachment; filename="${event_code}-${label}.mp4"`);
+
+        let currentChunk = 0;
+        const streamChunk = () => {
+            if (currentChunk >= results.length) {
+                res.end();
+                return;
+            }
+
+            const chunkBuffer = results[currentChunk].chunk;
+            res.write(chunkBuffer, (err) => {
+                if (err) {
+                    console.error('Error streaming chunk:', err);
+                    res.status(500).end();
+                    return;
+                }
+                currentChunk++;
+                streamChunk();
+            });
+        };
+
+        streamChunk();
     });
 };

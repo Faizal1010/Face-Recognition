@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Story</title>
+    <style>
+        /* Full-screen popup */
+        #popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Popup content */
+        #popup-content {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        /* Hide the main content initially */
+        #main-content {
+            display: block;
+        }
+        /* Input styling */
+        #eventCodeInput {
+            padding: 8px;
+            width: 80%;
+            margin: 10px 0;
+        }
+        /* Button styling */
+        #submitBtn {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        /* Video Grid Styling (from first file, adapted for videos) */
+        .videoGrid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+        }
+        .videoGridItem {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 200px;
+            height: 220px;
+        }
+        .videoGridItem img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
+        .videoGridItem:hover img {
+            transform: scale(1.1);
+        }
+        .videoPopup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999999;
+        }
+        .videoPopup video {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 8px;
+        }
+        .videoClose,
+        .videoPrev,
+        .videoNext {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 5px;
+        }
+        .videoPrev,
+        .videoNext {
+            background: rgba(62, 62, 62, 0.3);
+        }
+        .videoClose {
+            top: 17px;
+            right: 20px;
+            font-size: 30px;
+        }
+        .videoPrev {
+            left: 20px;
+        }
+        .videoNext {
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            .videoGrid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .videoGridItem {
+                width: 180px;
+                height: 170px;
+            }
+            #videoLabelFilters {
+                width: 100%;
+            }
+        }
+        .videoPaginationButton {
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+            position: relative !important;
+        }
+        /* Spinner and Play Icon Styling from Second File */
+        .videoSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #3BB77E;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            z-index: 6;
+        }
+        /* Small Spinner for Download Button */
+        .downloadSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #3BB77E;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            z-index: 6;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; text-align: center;">
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <div style="position: relative; width: 100%; height: 100vh; background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;">
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box;">
+                <div style="position: absolute; bottom: 30px;">
+                    <h1 style="font-size: 2.5rem; margin: 10px 0;">Annyasha & Sudipta Stories</h1>
+                    <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
+                    <a href="#" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
+                    <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
+                    <div style="margin-top: 10px;">
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/facebook.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 10px;">
+            <style>
+                @media (max-width: 600px) {
+                    #main-container {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                }
+            </style>
+            <div id="main-container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div id="videoLabelFilters" style="display: flex; align-items: center;"></div>
+                <div id="grandDownloadContainer" style="display: flex; gap: 2px;">
+                    <a href="videos.html" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;" title="View all videos">
+                        Videos<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#ffffff" fill="none">
+                            <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <circle cx="11.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                    </a>
+                    <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the videos under selected labels">
+                        Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <a id="findYourselfLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;">
+                        Find Yourself<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                            <path d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84664 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M17.5 17L17.2978 16.1511C17.1307 15.4497 16.5989 14.8925 15.9061 14.6929L13.5 13.9994L13.4997 12.5318C14.3964 11.9266 14.9997 10.7955 14.9997 9.5C14.9997 7.567 13.6565 6 11.9997 6C10.3428 6 8.99966 7.567 8.99966 9.5C8.99966 10.7955 9.60296 11.9266 10.4997 12.5318L10.5 13.9994L8.10885 14.6994C7.43747 14.896 6.91757 15.429 6.73787 16.1051L6.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="video-section">
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <div class="videoGrid" id="videoContainer"></div>
+                    <div class="videoPopup" id="videoPopup">
+                        <span class="videoClose" onclick="closeVideoPopup()">×</span>
+                        <video id="videoPlayer" controls></video>
+                        <button class="videoPrev" onclick="changeVideoDisplay(-1)">❮</button>
+                        <button class="videoNext" onclick="changeVideoDisplay(1)">❯</button>
+                    </div>
+                </div>
+                <div id="videoPagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let savedEventId = localStorage.getItem("eventId") || "defaultEventId"; // Fallback event ID
+        let videos = [];
+        let currentPage = 1;
+        const videosPerPage = 20;
+        let totalPages = 1;
+        let currentIndex = 0;
+        let selectedLabels = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const findYourselfLink = document.getElementById("findYourselfLink");
+            findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
+            loadLabels(savedEventId);
+        });
+
+        async function loadLabels(eventId) {
+            try {
+                const response = await fetch(`http://localhost:3000/video/get-video-labels/${eventId}`);
+                if (!response.ok) throw new Error('Failed to fetch labels');
+                const labels = await response.json();
+                const labelFilters = document.getElementById('videoLabelFilters');
+                labelFilters.innerHTML = '';
+
+                new Set(labels).forEach(label => {
+                    const labelContainer = document.createElement('label');
+                    labelContainer.classList.add('custom-checkbox-label');
+                    labelContainer.style.fontSize = '12px';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = label;
+                    checkbox.classList.add('videoLabelCheckbox');
+                    checkbox.checked = true;
+
+                    const tickElement = document.createElement('span');
+                    tickElement.classList.add('tick');
+                    tickElement.style.fontSize = '12px';
+                    tickElement.innerText = '✓';
+
+                    labelContainer.appendChild(checkbox);
+                    labelContainer.appendChild(tickElement);
+                    labelContainer.appendChild(document.createTextNode(` ${label}`));
+                    labelFilters.appendChild(labelContainer);
+
+                    labelContainer.style.backgroundColor = "#3BB77E";
+                    tickElement.style.visibility = checkbox.checked ? 'visible' : 'hidden';
+
+                    checkbox.addEventListener('change', function () {
+                        tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+                        updateSelectedLabels();
+                    });
+                });
+
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .custom-checkbox-label {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 8px 16px;
+                        margin: 5px;
+                        border-radius: 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        background-color: #3BB77E;
+                        color: white;
+                        border: none;
+                        transition: 0.3s ease-in-out;
+                    }
+                    .custom-checkbox-label:hover { opacity: 0.9; }
+                    .videoLabelCheckbox { display: none; }
+                    .tick { font-size: 20px; color: white; }
+                    #videoLabelFilters { display: flex; flex-wrap: wrap; gap: 10px; }
+                `;
+                document.head.appendChild(style);
+
+                selectedLabels = Array.from(new Set(labels));
+                await loadVideos(); // Load videos immediately
+            } catch (error) {
+                console.error('Error loading labels:', error);
+            }
+        }
+
+        function updateSelectedLabels() {
+            const checkboxes = document.querySelectorAll('.videoLabelCheckbox');
+            selectedLabels = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            currentPage = 1;
+            loadVideos();
+        }
+
+        async function loadVideos() {
+            try {
+                const gallery = document.getElementById("videoContainer");
+                gallery.innerHTML = "";
+
+                console.log('Fetching videos with labels:', selectedLabels);
+                const url = 'http://localhost:3000/video/get-videos-by-labels';
+                const options = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        labels: selectedLabels.length > 0 ? selectedLabels : [],
+                        page: currentPage,
+                        limit: videosPerPage,
+                        eventId: savedEventId
+                    })
+                };
+
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error('Failed to fetch videos');
+                const videosData = await response.json();
+                console.log('Videos data:', videosData);
+
+                videos = videosData.videos.map(video => ({
+                    id: video.id,
+                    video_id: video.video_id,
+                    thumbnail: video.thumbnail ? `data:image/jpeg;base64,${video.thumbnail}` : 'http://localhost:3000/assets/imgs/theme/video-placeholder.jpg',
+                    event_code: savedEventId,
+                    label: video.label || (selectedLabels.length > 0 ? selectedLabels[0] : 'unknown')
+                }));
+
+                totalPages = videosData.totalPages || 1;
+                displayVideos();
+                createPaginationButtons();
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                const gallery = document.getElementById("videoContainer");
+                gallery.innerHTML = "<p>No videos available or error loading videos.</p>";
+            }
+        }
+
+        function displayVideos() {
+            const gallery = document.getElementById("videoContainer");
+            gallery.innerHTML = "";
+
+            if (videos.length === 0) {
+                gallery.innerHTML = "<p>No videos found for the selected labels.</p>";
+                return;
+            }
+
+            videos.forEach((video, index) => {
+                const div = document.createElement("div");
+                div.className = "videoGridItem";
+                div.setAttribute("data-id", video.id);
+
+                const image = document.createElement("img");
+                image.src = video.thumbnail;
+
+                const downloadButton = document.createElement("button");
+                downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                    <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>`;
+                downloadButton.style.position = "absolute";
+                downloadButton.style.top = "10px";
+                downloadButton.style.right = "10px";
+                downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
+                downloadButton.style.border = "none";
+                downloadButton.style.borderRadius = "5px";
+                downloadButton.style.padding = "3px";
+                downloadButton.style.cursor = "pointer";
+                downloadButton.style.opacity = "0";
+                downloadButton.style.transition = "opacity 0.2s ease-in-out";
+
+                // Play Icon from Second File
+                const playIcon = document.createElement("span");
+                playIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" color="white" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M9.5 11.1998V12.8002C9.5 14.3195 9.5 15.0791 9.95576 15.3862C10.4115 15.6932 11.0348 15.3535 12.2815 14.6741L13.7497 13.8738C15.2499 13.0562 16 12.6474 16 12C16 11.3526 15.2499 10.9438 13.7497 10.1262L12.2815 9.32594C11.0348 8.6465 10.4115 8.30678 9.95576 8.61382C9.5 8.92086 9.5 9.6805 9.5 11.1998Z" fill="currentColor" />
+                </svg>`;
+                playIcon.style.position = "absolute";
+                playIcon.style.top = "50%";
+                playIcon.style.left = "50%";
+                playIcon.style.transform = "translate(-50%, -50%)";
+                playIcon.style.fontSize = "48px";
+                playIcon.style.color = "white";
+                playIcon.style.opacity = "0";
+                playIcon.style.transition = "opacity 0.2s ease-in-out";
+                playIcon.style.zIndex = "5";
+
+                // Spinner from Second File
+                const spinner = document.createElement("div");
+                spinner.className = "videoSpinner";
+                spinner.style.display = "none";
+
+                // Download Spinner
+                const downloadSpinner = document.createElement("div");
+                downloadSpinner.className = "downloadSpinner";
+                downloadSpinner.style.display = "none";
+
+                downloadButton.onclick = async (e) => {
+                    e.stopPropagation();
+                    downloadButton.style.opacity = "0"; // Hide download icon
+                    downloadSpinner.style.display = "block"; // Show download spinner
+                    try {
+                        const response = await fetch(`http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
+                        if (!response.ok) throw new Error('Failed to fetch video');
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `video_${video.id}.mp4`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                        console.error("Error downloading video:", error);
+                        alert("Failed to download the video.");
+                    } finally {
+                        downloadSpinner.style.display = "none"; // Hide spinner after download starts or fails
+                        downloadButton.style.opacity = "1"; // Show download icon again
+                    }
+                };
+
+                div.appendChild(image);
+                div.appendChild(downloadButton);
+                div.appendChild(playIcon);
+                div.appendChild(spinner);
+                div.appendChild(downloadSpinner);
+                gallery.appendChild(div);
+
+                div.addEventListener('mouseenter', () => {
+                    if (spinner.style.display === "none" && downloadSpinner.style.display === "none") {
+                        downloadButton.style.opacity = "1";
+                        playIcon.style.opacity = "0.8";
+                    }
+                });
+                div.addEventListener('mouseleave', () => {
+                    if (downloadSpinner.style.display === "none") {
+                        downloadButton.style.opacity = "0";
+                    }
+                    playIcon.style.opacity = "0";
+                });
+
+                div.onclick = async () => {
+                    playIcon.style.opacity = "0"; // Hide play icon
+                    spinner.style.display = "block"; // Show spinner
+                    await openVideoPopup(index, spinner); // Pass spinner to hide it later
+                };
+            });
+        }
+
+        function createPaginationButtons() {
+            const paginationContainer = document.getElementById("videoPagination");
+            paginationContainer.innerHTML = "";
+
+            if (totalPages <= 1) return;
+
+            const maxVisibleButtons = 4;
+            const ellipsis = "...";
+
+            function createButton(pageNum, isActive = false) {
+                const button = document.createElement("button");
+                button.style.backgroundColor = isActive ? '#FF5733' : '#3BB77E';
+                button.style.borderRadius = '5px';
+                button.style.border = 'none';
+                button.style.padding = '6px';
+                button.style.height = '30px';
+                button.style.width = '30px';
+                button.style.color = 'white';
+                button.style.cursor = 'pointer';
+                button.innerText = pageNum;
+                button.classList.add("videoPaginationButton");
+
+                button.addEventListener("click", () => changePage(pageNum));
+                return button;
+            }
+
+            function createEllipsis() {
+                const span = document.createElement("span");
+                span.innerText = ellipsis;
+                span.style.padding = '6px';
+                span.style.color = 'green';
+                span.style.cursor = 'default';
+                return span;
+            }
+
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                return;
+            }
+
+            paginationContainer.appendChild(createButton(1, currentPage === 1));
+
+            if (currentPage <= 3) {
+                for (let i = 2; i <= Math.min(4, totalPages - 2); i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                if (totalPages > 5) {
+                    paginationContainer.appendChild(createEllipsis());
+                    paginationContainer.appendChild(createButton(totalPages - 1, currentPage === totalPages - 1));
+                    paginationContainer.appendChild(createButton(totalPages, currentPage === totalPages));
+                }
+            } else if (currentPage >= totalPages - 2) {
+                if (totalPages > 5) {
+                    paginationContainer.appendChild(createEllipsis());
+                    for (let i = totalPages - 3; i <= totalPages; i++) {
+                        paginationContainer.appendChild(createButton(i, i === currentPage));
+                    }
+                }
+            } else {
+                paginationContainer.appendChild(createEllipsis());
+                const startPage = Math.max(2, currentPage - 1);
+                const endPage = Math.min(totalPages - 1, currentPage + 1);
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationContainer.appendChild(createButton(i, i === currentPage));
+                }
+                if (endPage < totalPages - 1) {
+                    paginationContainer.appendChild(createEllipsis());
+                    paginationContainer.appendChild(createButton(totalPages - 1, currentPage === totalPages - 1));
+                    paginationContainer.appendChild(createButton(totalPages, currentPage === totalPages));
+                }
+            }
+        }
+
+        function changePage(page) {
+            if (page !== currentPage) {
+                currentPage = page;
+                loadVideos();
+            }
+        }
+
+        async function openVideoPopup(index, spinner) {
+            currentIndex = index;
+            const video = videos[currentIndex];
+            try {
+                const response = await fetch(`http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
+                if (!response.ok) throw new Error('Error fetching video');
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(videoBlob);
+
+                const player = document.getElementById("videoPlayer");
+                player.src = videoUrl;
+                document.getElementById("videoPopup").style.display = "flex";
+                spinner.style.display = "none"; // Hide spinner when video is ready
+
+                let downloadButton = document.getElementById("videoDownloadButton");
+                if (!downloadButton) {
+                    downloadButton = document.createElement("button");
+                    downloadButton.id = "videoDownloadButton";
+                    downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                        <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>`;
+                    downloadButton.style.position = "absolute";
+                    downloadButton.style.top = "0px";
+                    downloadButton.style.right = "60px";
+                    downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
+                    downloadButton.style.border = "none";
+                    downloadButton.style.borderRadius = "5px";
+                    downloadButton.style.padding = "3px";
+                    downloadButton.style.cursor = "pointer";
+
+                    downloadButton.onclick = async () => {
+                        try {
+                            const response = await fetch(`http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
+                            if (!response.ok) throw new Error('Failed to fetch video');
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = `video_${video.id}.mp4`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                        } catch (error) {
+                            console.error("Error downloading video:", error);
+                            alert("Failed to download the video.");
+                        }
+                    };
+
+                    document.getElementById("videoPopup").appendChild(downloadButton);
+                }
+            } catch (error) {
+                console.error('Error opening video popup:', error);
+                alert('Error fetching video');
+                spinner.style.display = "none"; // Hide spinner on error
+                document.getElementById("videoPopup").style.display = "none"; // Hide popup on error
+            }
+        }
+
+        function closeVideoPopup() {
+            const player = document.getElementById("videoPlayer");
+            player.pause();
+            player.src = "";
+            document.getElementById("videoPopup").style.display = "none";
+        }
+
+        function changeVideoDisplay(step) {
+            currentIndex = (currentIndex + step + videos.length) % videos.length;
+            const videoGridItem = document.querySelector(`.videoGridItem[data-id="${videos[currentIndex].id}"]`);
+            const spinner = videoGridItem.querySelector(".videoSpinner");
+            const playIcon = videoGridItem.querySelector("span");
+            playIcon.style.opacity = "0"; // Hide play icon
+            spinner.style.display = "block"; // Show spinner
+            openVideoPopup(currentIndex, spinner);
+        }
+
+        async function downloadAllSelectedVideos() {
+            if (!selectedLabels || selectedLabels.length === 0) {
+                alert("No labels selected to download.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/video/get-videos-by-labels', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        labels: selectedLabels,
+                        page: 1,
+                        limit: 1000, // Large limit to get all videos
+                        eventId: savedEventId
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch videos');
+                const videosData = await response.json();
+                const allVideos = videosData.videos;
+
+                if (allVideos.length === 0) {
+                    alert("No videos found for the selected labels.");
+                    return;
+                }
+
+                for (let video of allVideos) {
+                    const response = await fetch(`http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
+                    if (!response.ok) throw new Error('Failed to fetch video');
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `video_${video.id}.mp4`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Delay between downloads
+                }
+
+                console.log(`Downloaded ${allVideos.length} videos for labels:`, selectedLabels);
+            } catch (error) {
+                console.error("Error downloading all videos:", error);
+                alert("Failed to download all videos.");
+            }
+        }
+        document.getElementById('grandDownloadButton').addEventListener('click', downloadAllSelectedVideos);
+    </script>
+</body>
+</html>

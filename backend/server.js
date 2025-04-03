@@ -271,24 +271,15 @@ app.post('/recognize', upload.single('image'), (req, res) => {
     });
 });
 
-// Serve frontend pages
-app.get('/user', (req, res) => {
-    res.sendFile(path.join(__dirname, '../website/findYourself.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, '../website/admin.html'));
-});
-
+// for findYourself page
 app.get('/find', (req, res) => {
     res.sendFile(path.join(__dirname, '../website/findYourself-main.html'));
 });
 
-// app.get('/add-images', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../public/add-images.html'))
-// })
-
-
+// for videos page
+app.get('/video', (req, res) => {
+    res.sendFile(path.join(__dirname, '../website/videos.html'));
+});
 
 // API routes
 app.use('/', require('./routes/imageRoutes'));

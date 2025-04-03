@@ -82,8 +82,14 @@ if (!clientId) {
                     </li>
                     <li class="menu-item">
                         <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-images">
-                            <i class="icon material-icons md-add_photo_alternate"></i>
+                            <i class="icon material-icons md-image"></i>
                             <span class="text">Uploaded Images</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/uploaded-videos">
+                            <i class="icon material-icons md-videocam"></i>
+                            <span class="text">Uploaded Videos</span>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -92,10 +98,16 @@ if (!clientId) {
                             <span class="text">Events</span>
                         </a>
                     </li>
-                    <li class="menu-item active">
+                    <li class="menu-item">
                         <a class="menu-link" id="add-images">
-                            <i class="icon material-icons md-image"></i>
+                            <i class="icon material-icons md-add_photo_alternate"></i>
                             <span class="text">Add Images</span>
+                        </a>
+                    </li>                   
+                    <li class="menu-item active">
+                        <a class="menu-link" id="add-videos">
+                            <i class="icon material-icons md-video_call"></i>
+                            <span class="text">Add Videos</span>
                         </a>
                     </li>                   
                 </ul>
@@ -379,7 +391,7 @@ if (!clientId) {
         </script>
             
 
-            <!-- <script>
+            <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const token = localStorage.getItem('token');
                     const decodedToken = decodeJWTTokenAgain(token); // Decode locally
@@ -393,6 +405,9 @@ if (!clientId) {
                         .then(data => {
                             const profile = document.getElementById('user-profile').querySelector('img');
                             profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+
+                            const addImagesLink = document.getElementById('add-images')
+                            addImagesLink.href = `http://localhost:3000/client-dashboard/add-images?clientId=${encodeURIComponent(decodedToken.id)}`;
                         })
                         .catch(error => console.error('Error fetching client profile:', error));
                 });
@@ -405,7 +420,7 @@ if (!clientId) {
                         return null;
                     }
                 };
-            </script> -->
+            </script>
             
         <script>
             document.getElementById('logout').addEventListener('click', function () {
