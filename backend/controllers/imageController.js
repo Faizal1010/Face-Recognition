@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 const sharp = require('sharp');
+const archiver = require('archiver');
 
 // DB Connection
 const db = mysql.createConnection({
@@ -423,15 +424,49 @@ exports.downloadAllSelectedImages = (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.status(200).json({ images: [] });
+            return res.status(200).json({ message: "No images found for the selected labels" });
         }
 
-        // Prepare images as an array of { id, data } with original buffers converted to base64
-        const images = results.map(r => ({
-            id: r.id,
-            data: Buffer.from(r.image).toString('base64') // Original image, no compression
-        }));
+        // Set up the response headers for a ZIP file download
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="event_${eventId}_images.zip"`);
 
-        res.json({ images });
+        // Create a new ZIP archive
+        const archive = archiver('zip', {
+            zlib: { level: 9 } // Maximum compression level
+        });
+
+        // Pipe the archive data to the response
+        archive.pipe(res);
+
+        // Process each image and add it to the ZIP
+        Promise.all(results.map(async (r) => {
+            // Optionally compress the image with sharp (remove if you want original quality)
+            const compressedBuffer = await sharp(r.image)
+                .jpeg({ quality: 80 }) // Adjust quality as needed (80% is a good balance)
+                .toBuffer();
+
+            // Add the image to the ZIP with a unique filename
+            archive.append(compressedBuffer, { name: `image_${r.id}.jpg` });
+        }))
+        .then(() => {
+            // Finalize the archive once all images are added
+            archive.finalize();
+        })
+        .catch(err => {
+            console.error("Error processing images for ZIP:", err);
+            // If an error occurs after piping, we can't change the response, so log it
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Error creating ZIP file" });
+            }
+        });
+
+        // Handle archive errors
+        archive.on('error', (err) => {
+            console.error("Archive error:", err);
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Error creating ZIP file" });
+            }
+        });
     });
 };

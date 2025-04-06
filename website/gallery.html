@@ -17,24 +17,20 @@
             justify-content: center;
             align-items: center;
         }
-        /* Popup content */
         #popup-content {
             background: white;
             padding: 20px;
             text-align: center;
             border-radius: 10px;
         }
-        /* Hide the main content initially */
         #main-content {
             display: none;
         }
-        /* Input styling */
         #eventCodeInput {
             padding: 8px;
             width: 80%;
             margin: 10px 0;
         }
-        /* Button styling */
         #submitBtn {
             padding: 8px 15px;
             background: #007bff;
@@ -144,6 +140,27 @@
             z-index: 99999 !important;
             position: relative !important;
         }
+
+        /* Spinner styles adapted from video file */
+        .imageSpinner, .downloadSpinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3BB77E;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 10;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; text-align: center;">
@@ -212,7 +229,8 @@
                         </svg>
                     </a>
                     <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the images under selected labels">
-                        Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                        <span id="downloadText">Download</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
                             <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
@@ -244,7 +262,7 @@
     </div>
 
     <script>
-        let savedEventId = localStorage.getItem("eventId"); // Initial value
+        let savedEventId = localStorage.getItem("eventId");
         document.addEventListener("DOMContentLoaded", function () {
             if (savedEventId) {
                 const findYourselfLink = document.getElementById("findYourselfLink");
@@ -268,8 +286,8 @@
             fetch(`http://localhost:3000/event/check-event/${eventId}`, { method: "HEAD" })
                 .then(response => {
                     if (response.ok) {
-                        localStorage.setItem("eventId", eventId); // Save event code
-                        savedEventId = eventId; // Update the global variable
+                        localStorage.setItem("eventId", eventId);
+                        savedEventId = eventId;
                         loadLabels(eventId);
                         console.log("Event Code Entered:", eventId);
                         document.getElementById("popup").style.display = "none";
@@ -297,7 +315,7 @@
             const labels = await response.json();
             console.log("labels are ", new Set(labels));
             const labelFilters = document.getElementById('imageLabelFilters');
-            labelFilters.innerHTML = ''; // No need to preserve the "All" checkbox parent
+            labelFilters.innerHTML = '';
 
             new Set(labels).forEach(label => {
                 const labelContainer = document.createElement('label');
@@ -308,9 +326,8 @@
                 checkbox.type = 'checkbox';
                 checkbox.value = label;
                 checkbox.classList.add('imageLabelCheckbox');
-                checkbox.checked = true; // Ensure labels are selected on load
+                checkbox.checked = true;
 
-                // Create a small tick element for checked labels
                 const tickElement = document.createElement('span');
                 tickElement.classList.add('tick');
                 tickElement.style.fontSize = '12px';
@@ -322,20 +339,16 @@
 
                 labelFilters.appendChild(labelContainer);
 
-                // Initial background color
-                labelContainer.style.backgroundColor = "#3BB77E"; // Set color on load
-
-                // Only add the tick when the checkbox is checked
+                labelContainer.style.backgroundColor = "#3BB77E";
                 if (checkbox.checked) {
-                    tickElement.style.visibility = 'visible'; // Show tick when checked
+                    tickElement.style.visibility = 'visible';
                 } else {
-                    tickElement.style.visibility = 'hidden'; // Hide tick when unchecked
+                    tickElement.style.visibility = 'hidden';
                 }
 
                 checkbox.addEventListener('change', function() {
-                    // Show or hide the tick based on the checkbox state
                     tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
-                    updateSelectedLabels(eventId); // Pass eventId to updateSelectedLabels
+                    updateSelectedLabels(eventId);
                 });
             });
 
@@ -366,7 +379,7 @@
                 .tick {
                     font-size: 20px;
                     color: white;
-                    visibility: hidden; /* Start with hidden tick */
+                    visibility: hidden;
                 }
                 #imageLabelFilters {
                     display: flex;
@@ -376,33 +389,30 @@
             `;
             document.head.appendChild(style);
 
-            // Initialize selectedLabels with all labels by default
-            selectedLabels = new Set(labels);
-            console.log("Selected Labels:", selectedLabels);
+            selectedLabels = Array.from(new Set(labels));
+            console.log("Selected Labels (initial):", selectedLabels);
 
-            loadImages(eventId); // Load images immediately with all labels selected
+            loadImages(eventId);
         }
 
         function updateSelectedLabels(eventId) {
             selectedLabels = [...document.querySelectorAll('.imageLabelCheckbox:checked')].map(cb => cb.value);
-            console.log("Selected Labels:", selectedLabels);
+            console.log("Selected Labels (updated):", selectedLabels);
             currentPage = 1;
-            loadImages(savedEventId); // Pass eventId to loadImages
+            loadImages(savedEventId);
         }
                 
         async function loadImages(eventId) {
             const gallery = document.getElementById("imageContainer");
             gallery.innerHTML = "";
 
-            // If no labels are selected, show a message and return
-            if (selectedLabels.length === 0) {
+            if (!selectedLabels || selectedLabels.length === 0) {
                 gallery.innerHTML = "<p>No images available. Please select at least one label.</p>";
-                totalPages = 1; // Reset pagination since there are no images
+                totalPages = 1;
                 createPaginationButtons();
                 return;
             }
 
-            // Otherwise, fetch images based on selected labels
             let url = 'http://localhost:3000/label-based-fetch';
             const options = {
                 method: 'POST',
@@ -410,69 +420,72 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    labels: selectedLabels,
+                    labels: Array.from(selectedLabels),
                     page: currentPage,
                     limit: imagesPerPage,
-                    eventId // Send selected event value here
+                    eventId
                 })
             };
 
             gallery.innerHTML = `<h3>Loading your images...</h3>`;
-            const response = await fetch(url, options);
-            const imagesData = await response.json();
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Fetch failed: ${response.status} - ${errorData.error}`);
+                }
+                const imagesData = await response.json();
 
-            images = imagesData.images.map(img => {
-                return {
+                images = imagesData.images.map(img => ({
                     data: `data:image/jpeg;base64,${img.data}`,
                     id: img.id
-                };
-            });
-            totalPages = imagesData.totalPages;
+                }));
+                totalPages = imagesData.totalPages;
 
-            displayImages(images);
-            createPaginationButtons();
+                displayImages(images);
+                createPaginationButtons();
+            } catch (error) {
+                console.error("Error in loadImages:", error);
+                gallery.innerHTML = "<p>Failed to load images. Please try again later.</p>";
+            }
         }
 
         function displayImages(images) {
-            console.log("images are these", images)
             const gallery = document.getElementById("imageContainer");
             gallery.innerHTML = "";
             images.forEach((src, index) => {
                 const div = document.createElement("div");
                 div.className = "imageGridItem";
-                div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
-                div.style.position = "relative"; // Ensure positioning context for the button
+                div.setAttribute("data-id", src.id);
+                div.style.position = "relative";
 
-                // Create the image element with lazy loading
                 const image = document.createElement("img");
-                image.src = src.data; // Assuming src.data contains the base64 image data
-                image.loading = "lazy"; // Enable lazy loading
-                image.alt = `Image ${src.id}`; // Add alt text for accessibility
+                image.src = src.data;
+                image.loading = "lazy";
+                image.alt = `Image ${src.id}`;
                 image.style.display = "block";
-                image.onclick = () => openImageLightbox(index);
 
-                image.addEventListener('dblclick', () => {
-                    
-                });
-
-                // Create the download button
                 const downloadButton = document.createElement("button");
                 downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
                     <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>`; // Down arrow symbol for download
+                </svg>`;
                 downloadButton.style.position = "absolute";
                 downloadButton.style.top = "10px";
                 downloadButton.style.right = "10px";
-                downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)"; // Match your pagination button style
+                downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
                 downloadButton.style.border = "none";
                 downloadButton.style.borderRadius = "5px";
                 downloadButton.style.padding = "3px";
                 downloadButton.style.cursor = "pointer";
-                downloadButton.style.opacity = "0"; // Initially hidden
-                downloadButton.style.transition = "opacity 0.2s ease-in-out"; // Smooth transition
+                downloadButton.style.opacity = "0";
+                downloadButton.style.transition = "opacity 0.2s ease-in-out";
 
-                // Add click event to fetch and download the original image
+                // Spinner for image loading
+                const spinner = document.createElement("div");
+                spinner.className = "imageSpinner";
+                spinner.style.display = "none";
+
                 downloadButton.onclick = async () => {
                     try {
                         const response = await fetch(`http://localhost:3000/original/${src.id}`, {
@@ -483,30 +496,34 @@
                         const url = window.URL.createObjectURL(blob);
                         const link = document.createElement("a");
                         link.href = url;
-                        link.download = `image_${src.id}.jpg`; // Default filename
+                        link.download = `image_${src.id}.jpg`;
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url); // Clean up
+                        window.URL.revokeObjectURL(url);
                     } catch (error) {
                         console.error("Error downloading image:", error);
                         alert("Failed to download the image.");
                     }
                 };
 
-                // Show download button on hover
                 div.addEventListener('mouseenter', () => {
-                    downloadButton.style.opacity = "1";
+                    if (spinner.style.display === "none") {
+                        downloadButton.style.opacity = "1";
+                    }
                 });
                 div.addEventListener('mouseleave', () => {
                     downloadButton.style.opacity = "0";
                 });
 
-                // Append the image and download button to the div
+                image.onclick = () => {
+                    spinner.style.display = "block"; // Show spinner
+                    setTimeout(() => openImageLightbox(index, spinner), 100); // Slight delay to ensure spinner visibility
+                };
+
                 div.appendChild(image);
                 div.appendChild(downloadButton);
-
-                // Append the div to the gallery
+                div.appendChild(spinner);
                 gallery.appendChild(div);
             });
         }
@@ -517,10 +534,9 @@
 
             if (totalPages <= 1) return;
 
-            const maxVisibleButtons = 4; // Maximum number of page buttons to show at once (excluding first/last and ellipsis)
+            const maxVisibleButtons = 4;
             const ellipsis = "...";
 
-            // Helper function to create a button
             function createButton(pageNum, isActive = false) {
                 const button = document.createElement("button");
                 button.style.backgroundColor = isActive ? '#FF5733' : '#3BB77E';
@@ -542,7 +558,6 @@
                 return button;
             }
 
-            // Helper function to create an ellipsis span
             function createEllipsis() {
                 const span = document.createElement("span");
                 span.innerText = ellipsis;
@@ -552,7 +567,6 @@
                 return span;
             }
 
-            // If total pages are small (e.g., ≤ 7), show all pages
             if (totalPages <= 7) {
                 for (let i = 1; i <= totalPages; i++) {
                     paginationContainer.appendChild(createButton(i, i === currentPage));
@@ -560,12 +574,9 @@
                 return;
             }
 
-            // Always show the first page
             paginationContainer.appendChild(createButton(1, currentPage === 1));
 
-            // Logic for dynamic pagination
             if (currentPage <= 3) {
-                // Show pages 1, 2, 3, 4, ..., last-1, last
                 for (let i = 2; i <= Math.min(4, totalPages - 2); i++) {
                     paginationContainer.appendChild(createButton(i, i === currentPage));
                 }
@@ -575,7 +586,6 @@
                     paginationContainer.appendChild(createButton(totalPages, currentPage === totalPages));
                 }
             } else if (currentPage >= totalPages - 2) {
-                // Show 1, ..., last-3, last-2, last-1, last
                 if (totalPages > 5) {
                     paginationContainer.appendChild(createEllipsis());
                     for (let i = totalPages - 3; i <= totalPages; i++) {
@@ -583,7 +593,6 @@
                     }
                 }
             } else {
-                // Show 1, ..., current-1, current, current+1, ..., last
                 paginationContainer.appendChild(createEllipsis());
                 const startPage = Math.max(2, currentPage - 1);
                 const endPage = Math.min(totalPages - 1, currentPage + 1);
@@ -607,11 +616,12 @@
             }
         }
 
-        function openImageLightbox(index) {
+        function openImageLightbox(index, spinner) {
             currentIndex = index;
             document.getElementById("imageLightbox").style.display = "flex";
             document.body.style.overflow = "hidden";
             updateImageLightbox();
+            spinner.style.display = "none"; // Hide spinner once lightbox opens
         }
 
         function closeImageLightbox() {
@@ -628,7 +638,6 @@
             const lightboxImg = document.getElementById("imageLightboxImg");
             lightboxImg.src = images[currentIndex].data;
 
-            // Check if download button already exists to avoid duplicates
             let downloadButton = document.getElementById("lightboxDownloadButton");
             if (!downloadButton) {
                 downloadButton = document.createElement("button");
@@ -639,14 +648,13 @@
                 </svg>`;
                 downloadButton.style.position = "absolute";
                 downloadButton.style.top = "0px";
-                downloadButton.style.right = "60px"; // Position it beside the close button (close is at 10px)
+                downloadButton.style.right = "60px";
                 downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
                 downloadButton.style.border = "none";
                 downloadButton.style.borderRadius = "5px";
                 downloadButton.style.padding = "3px";
                 downloadButton.style.cursor = "pointer";
 
-                // Add click event to fetch and download the original image
                 downloadButton.onclick = async () => {
                     try {
                         const response = await fetch(`http://localhost:3000/original/${images[currentIndex].id}`, {
@@ -668,76 +676,65 @@
                     }
                 };
 
-                // Append the download button to the lightbox
-                const lightbox = document.getElementById("imageLightbox");
-                lightbox.appendChild(downloadButton);
+                document.getElementById("imageLightbox").appendChild(downloadButton);
             }
         }
         
         async function downloadAllSelectedImages(eventId) {
-            if (!selectedLabels || selectedLabels.length === 0) {
-                alert("No labels selected to download.");
-                return;
-            }
+    if (!selectedLabels || selectedLabels.length === 0) {
+        alert("No labels selected to download.");
+        return;
+    }
 
-            try {
-                const response = await fetch('http://localhost:3000/download-all-selected', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        labels: Array.from(selectedLabels),
-                        eventId
-                    })
-                });
+    const downloadButton = document.getElementById('grandDownloadButton');
+    const originalContent = downloadButton.innerHTML; // Save original content (text + SVG)
+    const downloadSpinner = document.createElement("div");
+    downloadSpinner.className = "downloadSpinner";
+    downloadSpinner.style.display = "flex"; // Use flex to center the spinner
+    downloadSpinner.style.justifyContent = "center"; // Center horizontally
+    downloadSpinner.style.alignItems = "center"; // Center vertically
+    downloadSpinner.style.width = "24px"; // Match original spinner size
+    downloadSpinner.style.height = "24px"; // Match original spinner size
+    downloadSpinner.style.margin = "auto"; // Ensure centering within button
+    downloadSpinner.style.position = "relative"; // Relative to button
+    downloadButton.innerHTML = ""; // Clear content
+    downloadButton.appendChild(downloadSpinner); // Append spinner
 
-                if (!response.ok) throw new Error('Failed to fetch images for selected labels');
+    try {
+        const response = await fetch('http://localhost:3000/download-all-selected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                labels: Array.from(selectedLabels),
+                eventId
+            })
+        });
 
-                const imagesData = await response.json();
-                const images = imagesData.images;
-
-                console.log(`Received ${images.length} images from server`);
-
-                if (images.length === 0) {
-                    alert("No images found for the selected labels.");
-                    return;
-                }
-
-                // Helper function to download with delay
-                async function downloadImage(img) {
-                    const byteCharacters = atob(img.data);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = `image_${img.id}.jpg`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(url);
-                }
-
-                // Process downloads with a delay between each
-                for (let index = 0; index < images.length; index++) {
-                    await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay between downloads
-                    await downloadImage(images[index]);
-                }
-
-                console.log(`Downloaded ${images.length} images for labels:`, selectedLabels);
-            } catch (error) {
-                console.error("Error downloading all images:", error);
-                alert("Failed to download all images. Check the console for details.");
-            }
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Failed to fetch ZIP: ${response.status} - ${errorData}`);
         }
 
-        // Attach the function to the button after DOM is loaded
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `event_${eventId}_images.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        console.log("ZIP file downloaded successfully");
+    } catch (error) {
+        console.error("Error downloading ZIP:", error);
+        alert("Failed to download images. Check the console for details.");
+    } finally {
+        downloadButton.innerHTML = originalContent; // Restore original content
+    }
+}
         document.addEventListener('DOMContentLoaded', () => {
             const grandDownloadButton = document.getElementById('grandDownloadButton');
             grandDownloadButton.addEventListener('click', () => downloadAllSelectedImages(savedEventId));
