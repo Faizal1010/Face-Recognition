@@ -43,108 +43,108 @@
             cursor: pointer;
         }
     </style>
-        <style>
-            .imageGrid {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                align-items: center;
-                gap: 10px;
-                padding: 10px;
-            }
-            
-            .imageGridItem {
-                position: relative;
-                overflow: hidden;
-                border-radius: 8px;
-                cursor: pointer;
-                width: 200px;
-                height: 220px;
-            }
-            
-            .imageGridItem img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: transform 0.3s ease-in-out;
-            }
-            
-            .imageGridItem:hover img {
-                transform: scale(1.1);
-            }
-            
-            .imageLightbox {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                justify-content: center;
-                align-items: center;
-                z-index: 999999999;
-            }
-            
-            .imageLightbox img {
-                max-width: 80%;
-                max-height: 80%;
-                border-radius: 8px;
-            }
-            
-            .imageClose,
-            .imagePrev,
-            .imageNext {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                color: white;
-                border: none;
-                padding: 10px;
-                cursor: pointer;
-                font-size: 24px;
-                border-radius: 5px;
-            }
+    <style>
+        .imageGrid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        .imageGridItem {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 200px;
+            height: 220px;
+        }
+        
+        .imageGridItem img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .imageGridItem:hover img {
+            transform: scale(1.1);
+        }
+        
+        .imageLightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999999;
+        }
+        
+        .imageLightbox img {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 8px;
+        }
+        
+        .imageClose,
+        .imagePrev,
+        .imageNext {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 5px;
+        }
 
-            .imagePrev,
-            .imageNext {
-                background: rgba(62, 62, 62, 0.3);
+        .imagePrev,
+        .imageNext {
+            background: rgba(62, 62, 62, 0.3);
+        }
+        
+        .imageClose {
+            top: 17px;
+            right: 20px;
+            font-size: 30px;
+        }
+        
+        .imagePrev {
+            left: 20px;
+        }
+        
+        .imageNext {
+            right: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .imageGrid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
             }
-            
-            .imageClose {
-                top: 17px;
-                right: 20px;
-                font-size: 30px;
+            .imageGridItem {
+                width: 180px;
+                height: 170px;
             }
-            
-            .imagePrev {
-                left: 20px;
+            #imageLabelFilters{
+                width: 100%;
             }
-            
-            .imageNext {
-                right: 20px;
-            }
-            
-            @media (max-width: 600px) {
-                .imageGrid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                }
-                .imageGridItem {
-                    width: 180px;
-                    height: 170px;
-                }
-                #imageLabelFilters{
-                    width: 100%;
-                }
-            }
-            
-            .imagePaginationButton {
-                pointer-events: auto !important;
-                z-index: 99999 !important;
-                position: relative !important;
-            }
-        </style>
+        }
+        
+        .imagePaginationButton {
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+            position: relative !important;
+        }
+    </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; text-align: center;">
 
@@ -189,121 +189,101 @@
                     </a>
                 </div>
             </div>
-                
-                
             </div>
         </div>
 
-
-<div style="padding: 10px;">
-<style>
+        <div style="padding: 10px;">
+            <style>
                 @media (max-width: 600px) {
-                #main-container {
-                    display: flex;
-                    flex-direction: column;
+                    #main-container {
+                        display: flex;
+                        flex-direction: column;
+                    }
                 }
-            }
-</style>
-    <div  id="main-container" style="display: flex; justify-content: space-between; align-items: center;">
-        
-        <div id="imageLabelFilters" style="display: flex; align-items: center;"></div>
-    <div id="grandDownloadContainer" style="display: flex; gap: 2px;">
-            <a id="videoPageLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;" title="Download all the images under selected labels">
-                Videos<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#ffffff" fill="none">
-                    <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                    <circle cx="11.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.5" />
-                </svg>
-            </a>
-            <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the images under selected labels">
-                Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
-                    <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </button>
-            <a id="findYourselfLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;">
-                Find Yourself<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
-                    <path d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84664 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M17.5 17L17.2978 16.1511C17.1307 15.4497 16.5989 14.8925 15.9061 14.6929L13.5 13.9994L13.4997 12.5318C14.3964 11.9266 14.9997 10.7955 14.9997 9.5C14.9997 7.567 13.6565 6 11.9997 6C10.3428 6 8.99966 7.567 8.99966 9.5C8.99966 10.7955 9.60296 11.9266 10.4997 12.5318L10.5 13.9994L8.10885 14.6994C7.43747 14.896 6.91757 15.429 6.73787 16.1051L6.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </a>
-    </div>
-        </div>
-
-
-        <div class="image-section">
-
-    
-            <div style="display: flex; justify-content: center; align-items: center;">
-                <div class="imageGrid" id="imageContainer"></div>
-                <div class="imageLightbox" id="imageLightbox">
-                    <span class="imageClose" onclick="closeImageLightbox()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
-                        <path d="M18 6L12 12M12 12L6 18M12 12L18 18M12 12L6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg></span>
-                    <img id="imageLightboxImg">
-                    <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
-                    <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+            </style>
+            <div id="main-container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div id="imageLabelFilters" style="display: flex; align-items: center;"></div>
+                <div id="grandDownloadContainer" style="display: flex; gap: 2px;">
+                    <a id="videoPageLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;" title="Download all the images under selected labels">
+                        Videos<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#ffffff" fill="none">
+                            <path d="M2 11C2 7.70017 2 6.05025 3.02513 5.02513C4.05025 4 5.70017 4 9 4H10C13.2998 4 14.9497 4 15.9749 5.02513C17 6.05025 17 7.70017 17 11V13C17 16.2998 17 17.9497 15.9749 18.9749C14.9497 20 13.2998 20 10 20H9C5.70017 20 4.05025 20 3.02513 18.9749C2 17.9497 2 16.2998 2 13V11Z" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M17 8.90585L17.1259 8.80196C19.2417 7.05623 20.2996 6.18336 21.1498 6.60482C22 7.02628 22 8.42355 22 11.2181V12.7819C22 15.5765 22 16.9737 21.1498 17.3952C20.2996 17.8166 19.2417 16.9438 17.1259 15.198L17 15.0941" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <circle cx="11.5" cy="9.5" r="1.5" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                    </a>
+                    <button id="grandDownloadButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;" title="Download all the images under selected labels">
+                        Download<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <a id="findYourselfLink" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none;">
+                        Find Yourself<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                            <path d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84664 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M17.5 17L17.2978 16.1511C17.1307 15.4497 16.5989 14.8925 15.9061 14.6929L13.5 13.9994L13.4997 12.5318C14.3964 11.9266 14.9997 10.7955 14.9997 9.5C14.9997 7.567 13.6565 6 11.9997 6C10.3428 6 8.99966 7.567 8.99966 9.5C8.99966 10.7955 9.60296 11.9266 10.4997 12.5318L10.5 13.9994L8.10885 14.6994C7.43747 14.896 6.91757 15.429 6.73787 16.1051L6.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </a>
                 </div>
             </div>
-            <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+
+            <div class="image-section">
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <div class="imageGrid" id="imageContainer"></div>
+                    <div class="imageLightbox" id="imageLightbox">
+                        <span class="imageClose" onclick="closeImageLightbox()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                            <path d="M18 6L12 12M12 12L6 18M12 12L18 18M12 12L6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg></span>
+                        <img id="imageLightboxImg">
+                        <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
+                        <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+                    </div>
+                </div>
+                <div id="imagePagination" style="display: flex; gap: 5px; margin-top: 10px; flex-wrap:wrap;"></div>
+            </div>
         </div>
     </div>
-</div>
 
+    <script>
+        let savedEventId = localStorage.getItem("eventId"); // Initial value
+        document.addEventListener("DOMContentLoaded", function () {
+            if (savedEventId) {
+                const findYourselfLink = document.getElementById("findYourselfLink");
+                findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
 
+                const videoPageLink = document.getElementById("videoPageLink");
+                videoPageLink.href = `http://localhost:3000/video?eventId=${encodeURIComponent(savedEventId)}`;
+                loadLabels(savedEventId);
+                document.getElementById("popup").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+            }
+        });
 
+        document.getElementById("submitBtn").addEventListener("click", function () {
+            let eventId = document.getElementById("eventCodeInput").value.trim();
+            if (!eventId) {
+                alert("Please enter a valid event code.");
+                return;
+            }
 
-
-
-
-
-
-
-
-
-<script>
-    let savedEventId = localStorage.getItem("eventId"); // Initial value
-    document.addEventListener("DOMContentLoaded", function () {
-        if (savedEventId) {
-            const findYourselfLink = document.getElementById("findYourselfLink");
-            findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
-
-            const videoPageLink = document.getElementById("videoPageLink");
-            videoPageLink.href = `http://localhost:3000/video?eventId=${encodeURIComponent(savedEventId)}`;
-            loadLabels(savedEventId);
-            document.getElementById("popup").style.display = "none";
-            document.getElementById("main-content").style.display = "block";
-        }
-    });
-
-    document.getElementById("submitBtn").addEventListener("click", function () {
-        let eventId = document.getElementById("eventCodeInput").value.trim();
-        if (!eventId) {
-            alert("Please enter a valid event code.");
-            return;
-        }
-
-        fetch(`http://localhost:3000/event/check-event/${eventId}`, { method: "HEAD" })
-            .then(response => {
-                if (response.ok) {
-                    localStorage.setItem("eventId", eventId); // Save event code
-                    savedEventId = eventId; // Update the global variable
-                    loadLabels(eventId);
-                    console.log("Event Code Entered:", eventId);
-                    document.getElementById("popup").style.display = "none";
-                    document.getElementById("main-content").style.display = "block";
-                } else {
-                    alert("Event does not exist or the code is incorrect.");
-                }
-            })
-            .catch(error => {
-                console.error("Error checking event:", error);
-                alert("An error occurred. Please try again later.");
-            });
-    });
-</script>
-
-
+            fetch(`http://localhost:3000/event/check-event/${eventId}`, { method: "HEAD" })
+                .then(response => {
+                    if (response.ok) {
+                        localStorage.setItem("eventId", eventId); // Save event code
+                        savedEventId = eventId; // Update the global variable
+                        loadLabels(eventId);
+                        console.log("Event Code Entered:", eventId);
+                        document.getElementById("popup").style.display = "none";
+                        document.getElementById("main-content").style.display = "block";
+                    } else {
+                        alert("Event does not exist or the code is incorrect.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking event:", error);
+                    alert("An error occurred. Please try again later.");
+                });
+        });
+    </script>
 
     <script>
         let images = [];
@@ -318,7 +298,6 @@
             console.log("labels are ", new Set(labels));
             const labelFilters = document.getElementById('imageLabelFilters');
             labelFilters.innerHTML = ''; // No need to preserve the "All" checkbox parent
-            // selectedLabels = labels
 
             new Set(labels).forEach(label => {
                 const labelContainer = document.createElement('label');
@@ -412,143 +391,125 @@
         }
                 
         async function loadImages(eventId) {
-                    const gallery = document.getElementById("imageContainer");
-                    gallery.innerHTML = "";
+            const gallery = document.getElementById("imageContainer");
+            gallery.innerHTML = "";
 
-                    let url = selectedLabels.length > 0 ?
-                        'http://localhost:3000/label-based-fetch' :
-                        `http://localhost:3000/images?page=${currentPage}&limit=${imagesPerPage}&eventId=${eventId}`;
+            // If no labels are selected, show a message and return
+            if (selectedLabels.length === 0) {
+                gallery.innerHTML = "<p>No images available. Please select at least one label.</p>";
+                totalPages = 1; // Reset pagination since there are no images
+                createPaginationButtons();
+                return;
+            }
 
-                    const options = selectedLabels.length > 0 ? {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            labels: selectedLabels,
-                            page: currentPage,
-                            limit: imagesPerPage,
-                            eventId // Send selected event value here
-                        })
-                    } : {
-                        method: 'GET'
-                    };
-                    const response = await fetch(url, options);
-                    const imagesData = await response.json();
+            // Otherwise, fetch images based on selected labels
+            let url = 'http://localhost:3000/label-based-fetch';
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    labels: selectedLabels,
+                    page: currentPage,
+                    limit: imagesPerPage,
+                    eventId // Send selected event value here
+                })
+            };
 
-                    images = imagesData.images.map(img => {
-                        return {
-                            data: `data:image/jpeg;base64,${img.data}`,
-                            id: img.id
-                        };
-                    });
-                    totalPages = imagesData.totalPages;
+            gallery.innerHTML = `<h3>Loading your images...</h3>`;
+            const response = await fetch(url, options);
+            const imagesData = await response.json();
 
-                    displayImages(images);
-                    createPaginationButtons();
-                }
+            images = imagesData.images.map(img => {
+                return {
+                    data: `data:image/jpeg;base64,${img.data}`,
+                    id: img.id
+                };
+            });
+            totalPages = imagesData.totalPages;
+
+            displayImages(images);
+            createPaginationButtons();
+        }
 
         function displayImages(images) {
             console.log("images are these", images)
-    const gallery = document.getElementById("imageContainer");
-    gallery.innerHTML = "";
-    images.forEach((src, index) => {
-        const div = document.createElement("div");
-        div.className = "imageGridItem";
-        div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
-        div.style.position = "relative"; // Ensure positioning context for the button
+            const gallery = document.getElementById("imageContainer");
+            gallery.innerHTML = "";
+            images.forEach((src, index) => {
+                const div = document.createElement("div");
+                div.className = "imageGridItem";
+                div.setAttribute("data-id", src.id); // Set data-id to the image's unique ID
+                div.style.position = "relative"; // Ensure positioning context for the button
 
-        // Create a loading placeholder
-        // const loadingPlaceholder = document.createElement("div");
-        // loadingPlaceholder.className = "image-loading-placeholder";
-        // loadingPlaceholder.style.width = "100%";
-        // loadingPlaceholder.style.height = "100%";
-        // loadingPlaceholder.style.backgroundColor = "#e0e0e0"; // Light gray background
-        // loadingPlaceholder.style.display = "flex";
-        // loadingPlaceholder.style.alignItems = "center";
-        // loadingPlaceholder.style.justifyContent = "center";
-        // loadingPlaceholder.innerHTML = `
-        //     <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        //         <style>.spinner { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); }}</style>
-        //         <circle class="spinner" cx="12" cy="12" r="10" stroke="#666" stroke-width="4" fill="none"/>
-        //     </svg>
-        // `;
+                // Create the image element with lazy loading
+                const image = document.createElement("img");
+                image.src = src.data; // Assuming src.data contains the base64 image data
+                image.loading = "lazy"; // Enable lazy loading
+                image.alt = `Image ${src.id}`; // Add alt text for accessibility
+                image.style.display = "block";
+                image.onclick = () => openImageLightbox(index);
 
-        // // Append the loading placeholder initially
-        // div.appendChild(loadingPlaceholder);
-
-        // Create the image element with lazy loading
-        const image = document.createElement("img");
-        image.src = src.data; // Assuming src.data contains the base64 image data
-        image.loading = "lazy"; // Enable lazy loading
-        image.alt = `Image ${src.id}`; // Add alt text for accessibility
-        image.style.display = "none"; // Hide image until loaded
-        image.onload = () => {
-            // Once loaded, hide the placeholder and show the image
-            // loadingPlaceholder.style.display = "none";
-            image.style.display = "block";
-        };
-        image.onclick = () => openImageLightbox(index);
-
-        image.addEventListener('dblclick', () => {
-            
-        });
-
-        // Create the download button
-        const downloadButton = document.createElement("button");
-        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
-            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>`; // Down arrow symbol for download
-        downloadButton.style.position = "absolute";
-        downloadButton.style.top = "10px";
-        downloadButton.style.right = "10px";
-        downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)"; // Match your pagination button style
-        downloadButton.style.border = "none";
-        downloadButton.style.borderRadius = "5px";
-        downloadButton.style.padding = "3px";
-        downloadButton.style.cursor = "pointer";
-        downloadButton.style.opacity = "0"; // Initially hidden
-        downloadButton.style.transition = "opacity 0.2s ease-in-out"; // Smooth transition
-
-        // Add click event to fetch and download the original image
-        downloadButton.onclick = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/original/${src.id}`, {
-                    method: 'GET',
+                image.addEventListener('dblclick', () => {
+                    
                 });
-                if (!response.ok) throw new Error('Failed to fetch original image');
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `image_${src.id}.jpg`; // Default filename
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url); // Clean up
-            } catch (error) {
-                console.error("Error downloading image:", error);
-                alert("Failed to download the image.");
-            }
-        };
 
-        // Show download button on hover
-        div.addEventListener('mouseenter', () => {
-            downloadButton.style.opacity = "1";
-        });
-        div.addEventListener('mouseleave', () => {
-            downloadButton.style.opacity = "0";
-        });
+                // Create the download button
+                const downloadButton = document.createElement("button");
+                downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                    <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>`; // Down arrow symbol for download
+                downloadButton.style.position = "absolute";
+                downloadButton.style.top = "10px";
+                downloadButton.style.right = "10px";
+                downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)"; // Match your pagination button style
+                downloadButton.style.border = "none";
+                downloadButton.style.borderRadius = "5px";
+                downloadButton.style.padding = "3px";
+                downloadButton.style.cursor = "pointer";
+                downloadButton.style.opacity = "0"; // Initially hidden
+                downloadButton.style.transition = "opacity 0.2s ease-in-out"; // Smooth transition
 
-        // Append the image and download button to the div
-        div.appendChild(image);
-        div.appendChild(downloadButton);
+                // Add click event to fetch and download the original image
+                downloadButton.onclick = async () => {
+                    try {
+                        const response = await fetch(`http://localhost:3000/original/${src.id}`, {
+                            method: 'GET',
+                        });
+                        if (!response.ok) throw new Error('Failed to fetch original image');
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `image_${src.id}.jpg`; // Default filename
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url); // Clean up
+                    } catch (error) {
+                        console.error("Error downloading image:", error);
+                        alert("Failed to download the image.");
+                    }
+                };
 
-        // Append the div to the gallery
-        gallery.appendChild(div);
-    });
-}
+                // Show download button on hover
+                div.addEventListener('mouseenter', () => {
+                    downloadButton.style.opacity = "1";
+                });
+                div.addEventListener('mouseleave', () => {
+                    downloadButton.style.opacity = "0";
+                });
+
+                // Append the image and download button to the div
+                div.appendChild(image);
+                div.appendChild(downloadButton);
+
+                // Append the div to the gallery
+                gallery.appendChild(div);
+            });
+        }
 
         function createPaginationButtons() {
             const paginationContainer = document.getElementById("imagePagination");
@@ -664,132 +625,131 @@
         }
 
         function updateImageLightbox() {
-    const lightboxImg = document.getElementById("imageLightboxImg");
-    lightboxImg.src = images[currentIndex].data;
+            const lightboxImg = document.getElementById("imageLightboxImg");
+            lightboxImg.src = images[currentIndex].data;
 
-    // Check if download button already exists to avoid duplicates
-    let downloadButton = document.getElementById("lightboxDownloadButton");
-    if (!downloadButton) {
-        downloadButton = document.createElement("button");
-        downloadButton.id = "lightboxDownloadButton";
-        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
-            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>`;
-        downloadButton.style.position = "absolute";
-        downloadButton.style.top = "0px";
-        downloadButton.style.right = "60px"; // Position it beside the close button (close is at 10px)
-        downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        downloadButton.style.border = "none";
-        downloadButton.style.borderRadius = "5px";
-        downloadButton.style.padding = "3px";
-        downloadButton.style.cursor = "pointer";
+            // Check if download button already exists to avoid duplicates
+            let downloadButton = document.getElementById("lightboxDownloadButton");
+            if (!downloadButton) {
+                downloadButton = document.createElement("button");
+                downloadButton.id = "lightboxDownloadButton";
+                downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+                    <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>`;
+                downloadButton.style.position = "absolute";
+                downloadButton.style.top = "0px";
+                downloadButton.style.right = "60px"; // Position it beside the close button (close is at 10px)
+                downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
+                downloadButton.style.border = "none";
+                downloadButton.style.borderRadius = "5px";
+                downloadButton.style.padding = "3px";
+                downloadButton.style.cursor = "pointer";
 
-        // Add click event to fetch and download the original image
-        downloadButton.onclick = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/original/${images[currentIndex].id}`, {
-                    method: 'GET',
-                });
-                if (!response.ok) throw new Error('Failed to fetch original image');
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `image_${images[currentIndex].id}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Error downloading image:", error);
-                alert("Failed to download the image.");
+                // Add click event to fetch and download the original image
+                downloadButton.onclick = async () => {
+                    try {
+                        const response = await fetch(`http://localhost:3000/original/${images[currentIndex].id}`, {
+                            method: 'GET',
+                        });
+                        if (!response.ok) throw new Error('Failed to fetch original image');
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `image_${images[currentIndex].id}.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                        console.error("Error downloading image:", error);
+                        alert("Failed to download the image.");
+                    }
+                };
+
+                // Append the download button to the lightbox
+                const lightbox = document.getElementById("imageLightbox");
+                lightbox.appendChild(downloadButton);
             }
-        };
-
-        // Append the download button to the lightbox
-        const lightbox = document.getElementById("imageLightbox");
-        lightbox.appendChild(downloadButton);
-    }
-}
+        }
         
         async function downloadAllSelectedImages(eventId) {
-    if (!selectedLabels || selectedLabels.length === 0) {
-        alert("No labels selected to download.");
-        return;
-    }
+            if (!selectedLabels || selectedLabels.length === 0) {
+                alert("No labels selected to download.");
+                return;
+            }
 
-    try {
-        const response = await fetch('http://localhost:3000/download-all-selected', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                labels: Array.from(selectedLabels),
-                eventId
-            })
+            try {
+                const response = await fetch('http://localhost:3000/download-all-selected', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        labels: Array.from(selectedLabels),
+                        eventId
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch images for selected labels');
+
+                const imagesData = await response.json();
+                const images = imagesData.images;
+
+                console.log(`Received ${images.length} images from server`);
+
+                if (images.length === 0) {
+                    alert("No images found for the selected labels.");
+                    return;
+                }
+
+                // Helper function to download with delay
+                async function downloadImage(img) {
+                    const byteCharacters = atob(img.data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `image_${img.id}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }
+
+                // Process downloads with a delay between each
+                for (let index = 0; index < images.length; index++) {
+                    await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay between downloads
+                    await downloadImage(images[index]);
+                }
+
+                console.log(`Downloaded ${images.length} images for labels:`, selectedLabels);
+            } catch (error) {
+                console.error("Error downloading all images:", error);
+                alert("Failed to download all images. Check the console for details.");
+            }
+        }
+
+        // Attach the function to the button after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const grandDownloadButton = document.getElementById('grandDownloadButton');
+            grandDownloadButton.addEventListener('click', () => downloadAllSelectedImages(savedEventId));
         });
 
-        if (!response.ok) throw new Error('Failed to fetch images for selected labels');
-
-        const imagesData = await response.json();
-        const images = imagesData.images;
-
-        console.log(`Received ${images.length} images from server`);
-
-        if (images.length === 0) {
-            alert("No images found for the selected labels.");
-            return;
-        }
-
-        // Helper function to download with delay
-        async function downloadImage(img) {
-            const byteCharacters = atob(img.data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `image_${img.id}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        }
-
-        // Process downloads with a delay between each
-        for (let index = 0; index < images.length; index++) {
-            await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay between downloads
-            await downloadImage(images[index]);
-        }
-
-        console.log(`Downloaded ${images.length} images for labels:`, selectedLabels);
-    } catch (error) {
-        console.error("Error downloading all images:", error);
-        alert("Failed to download all images. Check the console for details.");
-    }
-}
-
-// Attach the function to the button after DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const grandDownloadButton = document.getElementById('grandDownloadButton');
-    grandDownloadButton.addEventListener('click', () => downloadAllSelectedImages(savedEventId));
-});
-
-setTimeout(() => {
-    const labelFilters = document.getElementById('imageLabelFilters');
-    labelFilters.style.overflowX = "auto";
-    labelFilters.style.flexWrap = "nowrap";
-    labelFilters.style.whiteSpace = "nowrap";
-    labelFilters.style.maxWidth = "95%";
-}, 100);
-
-        </script>
+        setTimeout(() => {
+            const labelFilters = document.getElementById('imageLabelFilters');
+            labelFilters.style.overflowX = "auto";
+            labelFilters.style.flexWrap = "nowrap";
+            labelFilters.style.whiteSpace = "nowrap";
+            labelFilters.style.maxWidth = "95%";
+        }, 100);
+    </script>
 </body>
 </html>

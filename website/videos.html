@@ -249,7 +249,7 @@
     </div>
 
     <script>
-        let savedEventId = localStorage.getItem("eventId") || "defaultEventId"; // Fallback event ID
+        let savedEventId = new URLSearchParams(window.location.search).get('eventId');
         let videos = [];
         let currentPage = 1;
         const videosPerPage = 20;
@@ -698,6 +698,7 @@
                 alert("Failed to download all videos.");
             }
         }
+
         document.getElementById('grandDownloadButton').addEventListener('click', downloadAllSelectedVideos);
     </script>
 </body>
