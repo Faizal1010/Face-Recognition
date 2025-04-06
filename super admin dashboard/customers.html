@@ -74,7 +74,6 @@
               <li class="menu-item active"  >
                   <a class="menu-link" href="http://localhost:3000/super-admin-dashboard/customers">
                       <i class="icon material-icons md-group"></i>
-
                       <span class="text">Customers</span>
                   </a>
               </li>
@@ -85,14 +84,7 @@
                       <span class="text">Add Customer</span>
                   </a>
               </li>
-
-              <!-- <li class="menu-item active">
-                  <a class="menu-link" href="index.html">
-                      <i class="icon material-icons md-home"></i>
-                      <span class="text">Dashboard</span>
-                  </a>
-              </li> -->
-
+          </ul>
           <br/>
           <br/>
       </nav>
@@ -231,8 +223,6 @@
             <p>Manage all your clients from here.</p>
           </div>
           <div>
-            <!-- <a href="#" class="btn btn-light rounded font-md">Export</a> -->
-            <!-- <a href="#" class="btn btn-light rounded font-md">Import</a> -->
             <a href="http://localhost:3000/super-admin-dashboard/add-customers" class="btn btn-primary btn-sm rounded">Add new Client</a>
           </div>
         </div>
@@ -246,7 +236,6 @@
           <!-- card-header end// -->
           <div class="card-body">
             <div id="grid-card" class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
-
             </div>
             <!-- row.// -->
           </div>
@@ -281,23 +270,13 @@
             <script>
               document.write(new Date().getFullYear());
             </script>
-            &copy; Nest - HTML Ecommerce Template .
+            © Nest - HTML Ecommerce Template .
           </div>
           <div class="col-sm-6">
             <div class="text-sm-end">All rights reserved</div>
           </div>
         </div>
       </footer>
-
-
-
-
-
-
-
-
-
-
 
       <div onclick="closePopup()" id="overlay" style="background-color: rgba(0, 0, 0, 0.7); width: 100vw; height: 100vh; display: none; position: fixed; z-index: 999; top: 0; left: 0;">
         <div id="popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1c1e26; color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; width: 700px; max-height: 80vh; overflow-y: auto; z-index: 1000;">
@@ -314,6 +293,12 @@
                     <input id="clientCode" style="background: none; border: none; color: #fff; font-size: 16px;" readonly>
                     <span style="font-weight: bold;">Address:</span>
                     <span id="clientAddress" style="font-size: 16px;"></span>
+                    <span style="font-weight: bold;">Total Image Size:</span>
+                    <span id="totalImageSize" style="font-size: 16px;"></span>
+                    <span style="font-weight: bold;">Total Video Size:</span>
+                    <span id="totalVideoSize" style="font-size: 16px;"></span>
+                    <span style="font-weight: bold;">Video Count:</span>
+                    <span id="videoCount" style="font-size: 16px;"></span>
                 </div>
             </div>
     
@@ -329,10 +314,6 @@
             </button>
         </div>
     </div>
-
-
-
-
       
     </main>
     <script src="http://localhost:3000/assets/js/vendors/jquery-3.6.0.min.js"></script>
@@ -343,64 +324,16 @@
     <!-- Main Script -->
     <script src="http://localhost:3000/assets/js/main.js?v=6.0" type="text/javascript"></script>
 
-
-
-    <!-- <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        // Select the second form using a more specific query
-        const forms = document.querySelectorAll('form');
-        const secondForm = forms[1]; // Select the second form (index 1)
-      
-        secondForm.addEventListener('submit', (event) => {
-      
-          const notificationData = {
-            ClientName: secondForm.querySelector('#clientName').value,
-            ClientId: secondForm.querySelector('#clientCode').value,
-            ClientEmail: secondForm.querySelector('#clientEmail').value,
-            Notification: secondForm.querySelector('#message').value,
-          }
-      
-          fetch('http://localhost:3000/notification/send-notification', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(notificationData)
-          })
-          .then(response => response.json())  // Convert the response to JSON
-          .then(data => {
-            if (data.error) {
-              // Handle error response
-              alert('Error: ' + data.error);
-            } else {
-              // Handle success response
-              alert('Notification sent successfully!');
-              console.log('Saved notification data:', data);
-            }
-          })
-          .catch(error => {
-            // Handle network or other errors
-            console.error('Error sending notification:', error);
-            alert('Failed to send notification. Please try again later.');
-          });
-        });
-      });
-    </script> -->
-    
-    
-
-
     <script>
-      let allClients = []; // Store all fetched clients for filtering
+      let allClients = [];
     
-      // Function to show the delete confirmation popup
       function showDeleteConfirmation(event) {
-        event.preventDefault(); // Prevent the default anchor link behavior
+        event.preventDefault();
     
         const clientId = event.target.closest('a').getAttribute('data-id');
         const clientElement = event.target.closest('.card-product-grid');
-        const clientName = clientElement.querySelector('.title').textContent.split(' - ')[0]; // Extract name
-        const clientCode = clientId; // CustomerId is the code
+        const clientName = clientElement.querySelector('.title').textContent.split(' - ')[0];
+        const clientCode = clientId;
     
         // Create or get the delete confirmation overlay
         let deleteOverlay = document.getElementById('delete-client-overlay');
@@ -445,7 +378,6 @@
           });
     
           if (response.ok) {
-            // If successful, remove the client from the DOM and update the list
             clientElement.remove();
             allClients = allClients.filter(client => client.CustomerId !== clientId); // Update the stored clients
             alert('Client deleted successfully!');
@@ -472,6 +404,9 @@
         const clientContactNo = document.getElementById('clientContactNo');
         const clientCode = document.getElementById('clientCode');
         const clientAddress = document.getElementById('clientAddress');
+        const totalImageSize = document.getElementById('totalImageSize');
+        const totalVideoSize = document.getElementById('totalVideoSize');
+        const videoCount = document.getElementById('videoCount');
     
         // Reset content and show loading state
         clientName.value = '';
@@ -479,6 +414,9 @@
         clientContactNo.value = '';
         clientCode.value = '';
         clientAddress.textContent = '';
+        totalImageSize.textContent = '';
+        totalVideoSize.textContent = '';
+        videoCount.textContent = '';
         eventsContainer.innerHTML = '<p style="text-align: center; font-style: italic;">Loading...</p>';
     
         // Show popup immediately
@@ -497,7 +435,7 @@
           })
           .then(response => response.json())
           .then(data => {
-            console.log("speific details", data.client);
+            console.log("specific details", data.client);
     
             // Populate client details
             clientName.value = `${data.client.FirstName} ${data.client.LastName}`;
@@ -514,6 +452,11 @@
     
             clientAddress.textContent = `${data.client.Address}, ${data.client.PostalCode}` || 'Not provided';
     
+            // Populate total sizes and video count
+            totalImageSize.textContent = data.client.totalImageSize || '0 Bytes';
+            totalVideoSize.textContent = data.client.totalVideoSize || '0 Bytes';
+            videoCount.textContent = data.client.videoCount || '0';
+    
             // Populate events
             eventsContainer.innerHTML = ''; // Clear loading message
             if (data.client.events && data.client.events.length > 0) {
@@ -525,18 +468,51 @@
                 eventTitle.textContent = `${event.name} (Code: ${event.event_code})`;
                 eventTitle.style = 'margin: 0 0 10px 0; font-size: 18px;';
     
-                const labelsList = document.createElement('ul');
-                labelsList.style = 'margin: 0; padding-left: 20px;';
+                // Image Labels
+                const imageLabelsTitle = document.createElement('h5');
+                imageLabelsTitle.textContent = 'Images:';
+                imageLabelsTitle.style = 'margin: 10px 0 5px 0; font-size: 16px;';
+                const imageLabelsList = document.createElement('ul');
+                imageLabelsList.style = 'margin: 0; padding-left: 20px;';
+                if (event.imageLabels.length > 0) {
+                  event.imageLabels.forEach(label => {
+                    const labelItem = document.createElement('li');
+                    labelItem.textContent = `${label.name} - ${label.imageCount} images`;
+                    labelItem.style = 'margin: 5px 0;';
+                    imageLabelsList.appendChild(labelItem);
+                  });
+                } else {
+                  const noImages = document.createElement('li');
+                  noImages.textContent = 'No images';
+                  noImages.style = 'margin: 5px 0; font-style: italic;';
+                  imageLabelsList.appendChild(noImages);
+                }
     
-                event.labels.forEach(label => {
-                  const labelItem = document.createElement('li');
-                  labelItem.textContent = `${label.name} - ${label.imageCount} images`;
-                  labelItem.style = 'margin: 5px 0;';
-                  labelsList.appendChild(labelItem);
-                });
+                // Video Labels
+                const videoLabelsTitle = document.createElement('h5');
+                videoLabelsTitle.textContent = 'Videos:';
+                videoLabelsTitle.style = 'margin: 10px 0 5px 0; font-size: 16px;';
+                const videoLabelsList = document.createElement('ul');
+                videoLabelsList.style = 'margin: 0; padding-left: 20px;';
+                if (event.videoLabels.length > 0) {
+                  event.videoLabels.forEach(label => {
+                    const labelItem = document.createElement('li');
+                    labelItem.textContent = `${label.name} - ${label.videoCount} videos`;
+                    labelItem.style = 'margin: 5px 0;';
+                    videoLabelsList.appendChild(labelItem);
+                  });
+                } else {
+                  const noVideos = document.createElement('li');
+                  noVideos.textContent = 'No videos';
+                  noVideos.style = 'margin: 5px 0; font-style: italic;';
+                  videoLabelsList.appendChild(noVideos);
+                }
     
                 eventDiv.appendChild(eventTitle);
-                eventDiv.appendChild(labelsList);
+                eventDiv.appendChild(imageLabelsTitle);
+                eventDiv.appendChild(imageLabelsList);
+                eventDiv.appendChild(videoLabelsTitle);
+                eventDiv.appendChild(videoLabelsList);
                 eventsContainer.appendChild(eventDiv);
               });
             } else {
@@ -631,15 +607,12 @@
       }
     </script>
 
-
     <script>
       document.getElementById('logout').addEventListener('click', function () {
-  localStorage.removeItem('token');
-  
-  alert('You have been logged out successfully!');
-  
-  window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
-  });
-  </script>
+        localStorage.removeItem('token');
+        alert('You have been logged out successfully!');
+        window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
+      });
+    </script>
   </body>
 </html>

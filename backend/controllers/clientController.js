@@ -302,6 +302,7 @@ const getLatestClients = async (req, res) => {
         });
     }
 };
+
 const getClientById = async (req, res) => {
     const clientId = req.params.id; // Retrieve client ID from the request parameters
 
@@ -331,11 +332,11 @@ const getClientById = async (req, res) => {
             });
         });
 
-        // Prepare events array with labels and image counts
+        // Prepare events array with labels and counts for both images and videos
         const events = [];
         for (const event of eventsResults) {
             // Query 3: Fetch distinct labels and image counts for each event
-            const labelsQuery = `
+            const imageLabelsQuery = `
                 SELECT 
                     i.label AS name, 
                     COUNT(i.id) AS imageCount 
@@ -343,8 +344,24 @@ const getClientById = async (req, res) => {
                 WHERE i.client_id = ? AND i.event_code = ? 
                 GROUP BY i.label
             `;
-            const labelsResults = await new Promise((resolve, reject) => {
-                db.query(labelsQuery, [clientId, event.event_code], (err, results) => {
+            const imageLabelsResults = await new Promise((resolve, reject) => {
+                db.query(imageLabelsQuery, [clientId, event.event_code], (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                });
+            });
+
+            // Query 4: Fetch distinct labels and video counts for each event
+            const videoLabelsQuery = `
+                SELECT 
+                    v.label AS name, 
+                    COUNT(DISTINCT v.video_id) AS videoCount 
+                FROM videos v 
+                WHERE v.client_id = ? AND v.event_code = ? 
+                GROUP BY v.label
+            `;
+            const videoLabelsResults = await new Promise((resolve, reject) => {
+                db.query(videoLabelsQuery, [clientId, event.event_code], (err, results) => {
                     if (err) reject(err);
                     else resolve(results);
                 });
@@ -353,27 +370,58 @@ const getClientById = async (req, res) => {
             events.push({
                 name: event.name,
                 event_code: event.event_code,
-                labels: labelsResults.map(label => ({
+                imageLabels: imageLabelsResults.map(label => ({
                     name: label.name || 'Unlabeled', // Handle NULL labels
                     imageCount: parseInt(label.imageCount, 10)
+                })),
+                videoLabels: videoLabelsResults.map(label => ({
+                    name: label.name || 'Unlabeled', // Handle NULL labels
+                    videoCount: parseInt(label.videoCount, 10)
                 }))
             });
         }
 
-        // Query 4: Calculate total size of images (in bytes) for the client
-        const sizeQuery = `
+        // Query 5: Calculate total size of images (in bytes) for the client
+        const imageSizeQuery = `
             SELECT SUM(LENGTH(image)) AS totalImageSize 
             FROM images 
             WHERE client_id = ?
         `;
-        const sizeResult = await new Promise((resolve, reject) => {
-            db.query(sizeQuery, [clientId], (err, results) => {
+        const imageSizeResult = await new Promise((resolve, reject) => {
+            db.query(imageSizeQuery, [clientId], (err, results) => {
                 if (err) reject(err);
                 else resolve(results[0]);
             });
         });
+        const totalImageSize = imageSizeResult.totalImageSize || 0; // Default to 0 if no images
 
-        const totalImageSize = sizeResult.totalImageSize || 0; // Default to 0 if no images
+        // Query 6: Calculate total size of videos (in bytes) and total video count for the client
+        const videoSizeQuery = `
+            SELECT 
+                SUM(LENGTH(chunk)) AS totalVideoSize,
+                COUNT(DISTINCT video_id) AS videoCount
+            FROM videos 
+            WHERE client_id = ?
+        `;
+        const videoSizeResult = await new Promise((resolve, reject) => {
+            db.query(videoSizeQuery, [clientId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results[0]);
+            });
+        });
+        const totalVideoSize = videoSizeResult.totalVideoSize || 0; // Default to 0 if no videos
+        const videoCount = videoSizeResult.videoCount || 0; // Number of unique videos
+
+        // Convert sizes to MB or GB for response
+        const formatSize = (sizeInBytes) => {
+            if (sizeInBytes >= 1024 * 1024 * 1024) { // GB
+                return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+            } else if (sizeInBytes >= 1024 * 1024) { // MB
+                return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
+            } else { // Bytes
+                return `${sizeInBytes} Bytes`;
+            }
+        };
 
         // Send success response with all data
         res.status(200).json({
@@ -381,8 +429,10 @@ const getClientById = async (req, res) => {
             message: "Client details retrieved successfully",
             client: {
                 ...clientResults, // Spread client details
-                events,           // Array of events with labels
-                totalImageSize    // Total size of images in bytes
+                events,           // Array of events with image and video labels
+                totalImageSize: formatSize(totalImageSize), // Formatted total size of images
+                totalVideoSize: formatSize(totalVideoSize), // Formatted total size of videos
+                videoCount        // Number of videos
             }
         });
     } catch (error) {
