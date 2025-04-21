@@ -32,11 +32,19 @@ const storage = multer.diskStorage({
         cb(null, emailFolderPath);
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname);
+        if (file.fieldname === 'logo') {
+            cb(null, 'logo.png');
+        } else {
+            cb(null, file.originalname);
+        }
     }
 });
 
-const upload = multer({ storage }).single('profile');
+// Accept both profile and logo
+const upload = multer({ storage }).fields([
+    { name: 'profile', maxCount: 1 },
+    { name: 'logo', maxCount: 1 }
+]);
 
 // Upload Profile handler
 const uploadProfile = async (req, res) => {
@@ -50,20 +58,24 @@ const uploadProfile = async (req, res) => {
             });
         }
 
-        if (!req.file) {
+        if (!req.files || !req.files.profile) {
             return res.status(400).json({
                 success: false,
-                message: 'No file uploaded',
+                message: 'No profile image uploaded',
             });
         }
 
         res.status(201).json({
             success: true,
-            message: 'Image uploaded successfully',
-            filePath: path.relative(path.join(__dirname, '../../Frontend'), req.file.path), // Return relative path for frontend usage
+            message: 'Image(s) uploaded successfully',
+            filePath: path.relative(
+                path.join(__dirname, '../../Frontend'),
+                req.files.profile[0].path
+            ), // Return relative path of profile image
         });
     });
 };
+
 
 // Add Client handler (using MySQL)
 const addClient = async (req, res) => {

@@ -219,17 +219,25 @@
     <textarea id="address" rows="2" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
   </div>
 
-  <!-- Notes -->
+  <!-- Logo -->
   <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
-    <label for="notes" style="margin-bottom: 5px;">Notes:</label>
-    <textarea id="notes" rows="2" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+    <label style="margin-bottom: 5px;">Logo:</label>
+    <input id="logo" type="file" accept=".png" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px;">
+    <span style="font-size: 12px; color: gray;">Allowed file types: png</span>
   </div>
+
 
   <!-- Profile -->
   <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
     <label style="margin-bottom: 5px;">Profile:</label>
     <input id="profile" type="file" accept=".png,.jpg,.jpeg" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px;">
     <span style="font-size: 12px; color: gray;">Allowed file types: png, jpg, jpeg.</span>
+  </div>
+
+  <!-- Notes -->
+  <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+    <label for="notes" style="margin-bottom: 5px;">Notes:</label>
+    <textarea id="notes" rows="2" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
   </div>
 
   <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
@@ -329,11 +337,13 @@ const customerId = 'C' + lettersPart + numberPart + finalLetter;
                 if (data.success) {
                     // Second fetch: Send image to the server
                     const profileImage = document.getElementById('profile').files[0];
+                    const logo = document.getElementById('logo').files[0];
                     const email = document.getElementById('email').value
                     if (profileImage) {
                         const formData = new FormData();
                         formData.append('email', email)
                         formData.append('profile', profileImage);
+                        formData.append('logo', logo);
                         console.log([...formData.entries()]); // Logs all keys and values in the FormData
                         fetch('http://localhost:3000/clients/upload-profile', {
                             method: 'POST',

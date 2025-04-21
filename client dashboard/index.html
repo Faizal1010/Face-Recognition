@@ -53,7 +53,7 @@
         <aside class="navbar-aside" id="offcanvas_aside">
             <div class="" style="display: flex; justify-content: space-between; align-items: center;">
                 <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                    <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                    <img id="logo" style="width: 250px;" src="" class="logo" alt="Nest Dashboard" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -636,6 +636,9 @@
             .then(data=>{
                 const profile = document.getElementById('user-profile').querySelector('img')
                 profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`
+
+                const logo = document.getElementById('logo')
+                logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
             })
         })
       </script>  
