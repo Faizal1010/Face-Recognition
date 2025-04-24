@@ -297,97 +297,95 @@ if (!clientId) {
         
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const form = document.querySelector('form');
-                const videoInput = document.getElementById('videoInput');
-                const eventSelect = document.getElementById('event');
-                const labelInput = document.getElementById('label');
-                const clientCodeInput = document.getElementById('client-code');
-                const thumbnailInput = document.getElementById('thumbnailInput'); // Add this input in your HTML
-        
-                document.getElementById('add-videos-button').addEventListener('click', function (event) {
-                    event.preventDefault(); // Prevent default form submission
-        
-                    const files = videoInput.files;
-                    const thumbnail = thumbnailInput.files[0];
-                    const selectedEvent = eventSelect.value;
-                    const label = labelInput.value.trim();
-                    const clientCode = clientCodeInput.value;
-        
-                    if (!files.length) {
-                        alert('Please select at least one video.');
-                        return;
-                    }
-        
-                    if (!thumbnail) {
-                        alert('Please select a thumbnail image.');
-                        return;
-                    }
-        
-                    if (!selectedEvent) {
-                        alert('Please select an event.');
-                        return;
-                    }
-        
-                    if (!label) {
-                        alert('Please enter a label.');
-                        return;
-                    }
-        
-                    // Add loading state
-                    const button = this;
-                    const originalContent = button.innerHTML;
-                    button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
-                    button.disabled = true;
-        
-                    // Add CSS for spinning animation
-                    const style = document.createElement('style');
-                    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-                    document.head.appendChild(style);
-        
-                    // Prepare FormData to send to backend
-                    const formData = new FormData();
-                    formData.append('thumbnail', thumbnail);
-                    formData.append('event_code', selectedEvent);
-                    formData.append('label', label);
-                    formData.append('client_id', clientCode);
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('video', files[i]);
-                    }
-        
-                    // Log FormData contents
-                    console.log('FormData contents:');
-                    for (const [key, value] of formData.entries()) {
-                        console.log(`${key}:`, value);
-                    }
-        
-                    // Send data to backend
-                    fetch('/video/add-videos', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const parsedData = JSON.parse(data.data.trim());
-                        console.log(parsedData)
-        
-                        if (parsedData.status === 'completed') {
-                            alert('Processing completed successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Something went wrong.'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Upload error:', error);
-                        alert('Failed to upload. Please try again.');
-                    })
-                    .finally(() => {
-                        // Restore button state
-                        button.innerHTML = originalContent;
-                        button.disabled = false;
-                    });
-                });
-            });
+    const form = document.querySelector('form');
+    const videoInput = document.getElementById('videoInput');
+    const eventSelect = document.getElementById('event');
+    const labelInput = document.getElementById('label');
+    const clientCodeInput = document.getElementById('client-code');
+    const thumbnailInput = document.getElementById('thumbnailInput');
+
+    document.getElementById('add-videos-button').addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const files = videoInput.files;
+        const thumbnail = thumbnailInput.files[0];
+        const selectedEvent = eventSelect.value;
+        const label = labelInput.value.trim();
+        const clientCode = clientCodeInput.value;
+
+        if (!files.length) {
+            alert('Please select at least one video.');
+            return;
+        }
+
+        if (!thumbnail) {
+            alert('Please select a thumbnail image.');
+            return;
+        }
+
+        if (!selectedEvent) {
+            alert('Please select an event.');
+            return;
+        }
+
+        if (!label) {
+            alert('Please enter a label.');
+            return;
+        }
+
+        const button = this;
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
+        button.disabled = true;
+
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        const formData = new FormData();
+        formData.append('thumbnail', thumbnail);
+        formData.append('event_code', selectedEvent);
+        formData.append('label', label);
+        formData.append('client_id', clientCode);
+        for (let i = 0; i < files.length; i++) {
+            formData.append('video', files[i]);
+        }
+
+        console.log('FormData contents:');
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+
+        fetch('/video/add-videos', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const parsedData = JSON.parse(data.data.trim());
+            console.log(parsedData);
+
+            if (parsedData.status === 'completed') {
+                alert('Processing completed successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Something went wrong.'));
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            alert('Failed to upload. Please try again.');
+        })
+        .finally(() => {
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
+    });
+});
         </script>
             
 

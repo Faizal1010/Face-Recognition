@@ -27,19 +27,38 @@ const db = mysql.createConnection({
 // Handler to store videos
 exports.storeVideos = [
     upload.fields([
-        { name: 'video', maxCount: 10 }, // Adjust maxCount as needed
+        { name: 'video', maxCount: 10 },
         { name: 'thumbnail', maxCount: 1 }
     ]),
     (req, res) => {
         const { client_id, event_code, label } = req.body;
-        const videos = req.files['video']; // Access video files
+        const videos = req.files['video'];
         const thumbnail = req.files['thumbnail'] ? req.files['thumbnail'][0] : null;
 
         console.log("Request body:", req.body);
         console.log("Uploaded video files:", videos);
         console.log("Uploaded thumbnail:", thumbnail);
 
+        // Function to clean up all temporary files
+        const cleanupFiles = () => {
+            videos.forEach(file => {
+                try {
+                    fs.unlinkSync(file.path);
+                } catch (unlinkErr) {
+                    console.error(`Error deleting temp file ${file.path}:`, unlinkErr);
+                }
+            });
+            if (thumbnail) {
+                try {
+                    fs.unlinkSync(thumbnail.path);
+                } catch (unlinkErr) {
+                    console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
+                }
+            }
+        };
+
         if (!client_id || !event_code || !videos || videos.length === 0) {
+            cleanupFiles();
             return res.status(400).json({ error: 'client_id, event_code, and video files are required' });
         }
 
@@ -49,44 +68,44 @@ exports.storeVideos = [
         console.log("label:", label);
         console.log("Number of videos:", videos.length);
 
-        // Calculate total size of videos and thumbnail in MB (each video file is counted once)
         const totalSizeMB = videos.reduce((total, video) => total + (video.size / (1024 * 1024)), 0) +
                            (thumbnail ? thumbnail.size / (1024 * 1024) : 0);
 
-        // Read thumbnail data once (if present) to reuse for all videos
         let thumbnailData = null;
         if (thumbnail) {
             try {
                 thumbnailData = fs.readFileSync(thumbnail.path);
             } catch (err) {
                 console.error('Error reading thumbnail file:', err);
+                cleanupFiles();
                 return res.status(500).json({ error: 'Error reading thumbnail file' });
             }
         }
 
-        // Check storage limit and expiry date
         db.query(
             'SELECT Storage_limit, Storage_used, Expiry_date FROM client WHERE CustomerId = ?',
             [client_id],
             (err, result) => {
                 if (err) {
                     console.error('Error checking storage limit and expiry date:', err);
+                    cleanupFiles();
                     return res.status(500).json({ error: 'Error checking storage limit and expiry date' });
                 }
                 if (result.length === 0) {
+                    cleanupFiles();
                     return res.status(404).json({ error: 'Client not found' });
                 }
                 const { Storage_limit, Storage_used, Expiry_date } = result[0];
 
-                // Check if plan has expired
                 const currentDate = new Date();
                 if (Expiry_date && Expiry_date < currentDate) {
+                    cleanupFiles();
                     return res.status(400).json({ error: 'The plan has expired. Please renew.' });
                 }
 
-                // Check storage limit
                 if (Storage_used + totalSizeMB > Storage_limit) {
                     const spaceLeft = Storage_limit - Storage_used;
+                    cleanupFiles();
                     return res.status(400).json({
                         error: `Videos were not uploaded. You only have ${spaceLeft.toFixed(2)} MB left. Please upgrade or upload within left space.`
                     });
@@ -98,16 +117,15 @@ exports.storeVideos = [
                         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
                         console.log(`Processing video: ${file.originalname} (${fileSizeMB} MB)`);
 
-                        const chunkSize = 10 * 1024 * 1024; // 10 MB chunks
+                        const chunkSize = 10 * 1024 * 1024;
                         const stream = fs.createReadStream(filePath, { highWaterMark: chunkSize });
                         const chunks = [];
-                        const videoId = uuidv4(); // Generate unique video_id for this video
+                        const videoId = uuidv4();
                         stream.on('data', (chunk) => chunks.push(chunk));
                         stream.on('end', () => {
                             const totalChunks = chunks.length;
                             console.log(`Total chunks for ${file.originalname}: ${totalChunks}`);
 
-                            // Start a database transaction
                             db.beginTransaction((err) => {
                                 if (err) {
                                     console.error('Error starting transaction:', err);
@@ -140,14 +158,12 @@ exports.storeVideos = [
 
                                 Promise.all(chunkPromises)
                                     .then((chunkIds) => {
-                                        // Commit the transaction
                                         db.commit((commitErr) => {
                                             if (commitErr) {
                                                 console.error('Error committing transaction:', commitErr);
                                                 return db.rollback(() => reject(commitErr));
                                             }
 
-                                            // Clean up temporary video file after successful commit
                                             fs.unlink(filePath, (unlinkErr) => {
                                                 if (unlinkErr) console.error(`Error deleting temp file ${filePath}:`, unlinkErr);
                                             });
@@ -171,20 +187,19 @@ exports.storeVideos = [
 
                 Promise.all(insertPromises)
                     .then((insertedIds) => {
-                        // Clean up thumbnail file after all videos are processed
                         if (thumbnail) {
                             fs.unlink(thumbnail.path, (unlinkErr) => {
                                 if (unlinkErr) console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
                             });
                         }
 
-                        // Update Storage_used after all videos are successfully stored
                         db.query(
                             'UPDATE client SET Storage_used = LEAST(Storage_limit, Storage_used + ?) WHERE CustomerId = ?',
                             [totalSizeMB, client_id],
                             (updateErr) => {
                                 if (updateErr) {
                                     console.error('Error updating Storage_used:', updateErr);
+                                    cleanupFiles();
                                     return res.status(500).json({ error: 'Error updating storage usage' });
                                 }
                                 console.log(`Added ${totalSizeMB} MB to Storage_used for client ${client_id}`);
@@ -199,12 +214,7 @@ exports.storeVideos = [
                         );
                     })
                     .catch((err) => {
-                        // Clean up thumbnail file if an error occurs
-                        if (thumbnail) {
-                            fs.unlink(thumbnail.path, (unlinkErr) => {
-                                if (unlinkErr) console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
-                            });
-                        }
+                        cleanupFiles();
                         console.error('Error storing videos:', err);
                         res.status(500).json({ error: 'Error storing videos' });
                     });

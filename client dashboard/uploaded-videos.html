@@ -801,66 +801,91 @@
         }
     
         function deleteSelectedLabels() {
-            const labelArray = Array.from(selectedLabels);
-            const eventSelect = document.getElementById('event');
-            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-            const eventCode = selectedOption.value;
-    
-            if (!labelArray.length || !eventCode) {
-                alert('Please select at least one label and an event.');
-                return;
-            }
-    
-            fetch('http://localhost:3000/video/delete-videos', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ label: labelArray, event_code: eventCode })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert(data.error || 'Error deleting videos.');
-                }
-            })
-            .catch(err => {
-                console.error('Error deleting videos:', err);
-                alert('Error deleting videos.');
-            });
+    const labelArray = Array.from(selectedLabels);
+    const eventSelect = document.getElementById('event');
+    const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+    const eventCode = selectedOption.value;
+
+    if (!labelArray.length || !eventCode) {
+        alert('Please select at least one label and an event.');
+        return;
+    }
+
+    // Store labels to delete before clearing selectedLabels
+    const labelsToDelete = [...labelArray];
+
+    // Immediately update frontend: remove videos with selected labels
+    videos = videos.filter(video => !labelArray.includes(video.label));
+    selectedLabels = [];
+    displayVideos();
+    toggleBottomSection(checkedVideos.length > 0);
+
+    // Close the confirmation popup
+    document.getElementById('delete-overlay').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+
+    // Send delete request to backend with stored labels
+    fetch('http://localhost:3000/video/delete-videos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: labelsToDelete, event_code: eventCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+        } else {
+            alert(data.error || 'Error deleting videos on server. Videos removed from view.');
         }
-    
+    })
+    .catch(err => {
+        console.error('Error deleting videos:', err);
+        alert('Error deleting videos on server. Videos removed from view.');
+    });
+}
+
         async function deleteSelectedVideos() {
-            if (checkedVideos.length === 0) {
-                alert('No videos selected for deletion!');
-                return;
-            }
-    
-            const confirmation = confirm('Are you sure you want to delete the selected videos?');
-            if (!confirmation) return;
-    
-            try {
-                const response = await fetch('http://localhost:3000/video/delete-videos-by-ids', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ videoIds: checkedVideos })
-                });
-    
-                if (!response.ok) throw new Error('Failed to delete videos');
-                const data = await response.json();
-                if (data.message === 'Videos deleted successfully') {
-                    alert('Videos deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Failed to delete videos.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error deleting videos.');
-            }
+    if (checkedVideos.length === 0) {
+        alert('No videos selected for deletion!');
+        return;
+    }
+
+    const confirmation = confirm('Are you sure you want to delete the selected videos?');
+    if (!confirmation) return;
+
+    // Store video IDs to delete before clearing checkedVideos
+    const videoIdsToDelete = [...checkedVideos];
+
+    // Immediately update frontend: remove selected videos
+    videos = videos.filter(video => !checkedVideos.includes(video.id));
+    checkedVideos = [];
+    displayVideos();
+    toggleBottomSection(false);
+
+    // Close the confirmation popup
+    document.getElementById('delete-overlay').style.display = 'none';
+
+    // Send delete request to backend with stored video IDs
+    try {
+        const response = await fetch('http://localhost:3000/video/delete-videos-by-ids', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoIds: videoIdsToDelete })
+        });
+
+        if (!response.ok) throw new Error('Failed to delete videos');
+        const data = await response.json();
+        if (data.message === 'Videos deleted successfully') {
+            alert('Videos deleted successfully!');
+        } else {
+            alert('Failed to delete videos on server. Videos removed from view.');
         }
-    
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting videos on server. Videos removed from view.');
+    }
+}
+
         async function changeLabel() {
             const newLabel = document.getElementById('newLabelForSelectedVideos').value;
             if (checkedVideos.length === 0) {
