@@ -14,6 +14,7 @@ import mysql.connector
 import sys
 import json
 import time
+from datetime import date
 
 # Initialize face analysis
 app = FaceAnalysis()
@@ -24,8 +25,9 @@ BATCH_SIZE = 5
 
 def extract_and_store(image_paths, labels, client_ids, event_codes):
     if len(image_paths) != len(labels) or len(image_paths) != len(client_ids) or len(image_paths) != len(event_codes):
-        print(json.dumps({"status": "error", "message": "Mismatched number of images, labels, client_ids, and event_codes"}))
-        return
+        error_message = {"status": "error", "message": "Mismatched number of images, labels, client_ids, and event_codes"}
+        print(json.dumps(error_message))
+        sys.exit(1)
 
     # Connecting to MySQL
     try:
@@ -37,8 +39,60 @@ def extract_and_store(image_paths, labels, client_ids, event_codes):
         )
         cursor = conn.cursor()
     except mysql.connector.Error as err:
-        print(json.dumps({"status": "error", "message": f"MySQL Connection Failed: {err}"}))
-        return
+        error_message = {"status": "error", "message": f"MySQL Connection Failed: {err}"}
+        print(json.dumps(error_message))
+        sys.exit(1)
+
+    # Check expiry date and storage limit for the client
+    try:
+        cursor.execute(
+            "SELECT Expiry_date, Storage_limit, Storage_used FROM client WHERE CustomerId = %s",
+            (client_ids[0],)  # Assuming all client_ids are the same for this batch
+        )
+        result = cursor.fetchone()
+        if not result:
+            error_message = {"status": "error", "message": "Client not found"}
+            print(json.dumps(error_message))
+            cursor.close()
+            conn.close()
+            sys.exit(1)
+
+        expiry_date, storage_limit, storage_used = result
+        current_date = date.today()
+
+        # Check if plan has expired
+        if expiry_date and expiry_date <= current_date:
+            error_message = {"status": "error", "message": "The plan has expired. Please renew."}
+            print(json.dumps(error_message))
+            cursor.close()
+            conn.close()
+            sys.exit(1)
+
+        # Calculate total size of images in MB
+        total_image_size_mb = 0
+        for image_path in image_paths:
+            image_size_bytes = os.path.getsize(image_path)
+            image_size_mb = image_size_bytes / (1024 * 1024)  # Convert bytes to MB
+            total_image_size_mb += image_size_mb
+
+        # Check if storage limit would be exceeded
+        if storage_used + total_image_size_mb > storage_limit:
+            space_left = storage_limit - storage_used
+            error_message = {
+                "status": "error",
+                "message": f"Photos were not uploaded. You only have {space_left:.2f} MB left. Please upgrade or upload images within left space."
+            }
+            print(json.dumps(error_message))
+            cursor.close()
+            conn.close()
+            sys.exit(1)
+
+    except mysql.connector.Error as err:
+        error_message = {"status": "error", "message": f"MySQL Query Failed: {err}"}
+        print(json.dumps(error_message))
+        cursor.close()
+        conn.close()
+        sys.exit(1)
 
     results = []
     progress = {"status": "progress", "processed": 0, "total": len(image_paths)}
@@ -93,8 +147,37 @@ def extract_and_store(image_paths, labels, client_ids, event_codes):
         # Update progress after processing each batch
         progress["processed"] += len(batch_paths)
 
+    # Update storage_used in client table
+    try:
+        cursor.execute(
+            "UPDATE client SET Storage_used = Storage_used + %s WHERE CustomerId = %s",
+            (total_image_size_mb, client_ids[0])
+        )
+        conn.commit()
+    except mysql.connector.Error as err:
+        error_message = {"status": "error", "message": f"Failed to update storage usage: {err}"}
+        print(json.dumps(error_message))
+        cursor.close()
+        conn.close()
+        sys.exit(1)
+
     cursor.close()
     conn.close()
+
+    # Check if all images were processed successfully
+    all_successful = all(
+        result.get("status") in ["success", "No face found"]
+        for result in results
+    )
+
+    if not all_successful:
+        error_message = {
+            "status": "error",
+            "message": "Some images failed to process. Check results for details.",
+            "results": results
+        }
+        print(json.dumps(error_message))
+        sys.exit(1)
 
     # Combine the progress and results into one output
     final_output = {
@@ -120,4 +203,6 @@ if __name__ == "__main__":
 
         extract_and_store(file_paths, [label] * len(file_paths), [client_id] * len(file_paths), [event_code] * len(file_paths))
     except Exception as e:
-        print(json.dumps({"status": "error", "message": f"Failed to read JSON file: {str(e)}"}))
+        error_message = {"status": "error", "message": f"Failed to read JSON file: {str(e)}"}
+        print(json.dumps(error_message))
+        sys.exit(1)

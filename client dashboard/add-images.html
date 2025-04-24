@@ -286,84 +286,94 @@ if (!clientId) {
           
           <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const form = document.querySelector('form');
-                const imageInput = document.getElementById('imageInput');
-                const eventSelect = document.getElementById('event');
-                const labelInput = document.getElementById('label');
-                const clientCodeInput = document.getElementById('client-code');
-            
-document.getElementById('add-images-button').addEventListener('click', function (event) {
-    event.preventDefault(); // Prevent default form submission
+    const form = document.querySelector('form');
+    const imageInput = document.getElementById('imageInput');
+    const eventSelect = document.getElementById('event');
+    const labelInput = document.getElementById('label');
+    const clientCodeInput = document.getElementById('client-code');
 
-    const files = imageInput.files;
-    const selectedEvent = eventSelect.value;
-    const label = labelInput.value.trim();
-    const clientCode = clientCodeInput.value;
+    document.getElementById('add-images-button').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default form submission
 
-    if (!files.length) {
-        alert('Please select at least one image.');
-        return;
-    }
+        const files = imageInput.files;
+        const selectedEvent = eventSelect.value;
+        const label = labelInput.value.trim();
+        const clientCode = clientCodeInput.value;
 
-    if (!selectedEvent) {
-        alert('Please select an event.');
-        return;
-    }
-
-    if (!label) {
-        alert('Please enter a label.');
-        return;
-    }
-
-    // Add loading state
-    const button = this;
-    const originalContent = button.innerHTML;
-    button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
-    button.disabled = true;
-
-    // Add CSS for spinning animation
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-    document.head.appendChild(style);
-
-    // Prepare FormData to send to backend
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-        formData.append('image', files[i]);
-    }
-    formData.append('event_code', selectedEvent);
-    formData.append('label', label);
-    formData.append('client_id', clientCode);
-
-    // Send data to backend
-    fetch('/upload', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        const parsedData = JSON.parse(data.data.trim());
-        console.log(parsedData)
-
-        if (parsedData.status === 'completed') {
-            alert('Processing completed successfully!');
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Something went wrong.'));
+        if (!files.length) {
+            alert('Please select at least one image.');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Upload error:', error);
-        alert('Failed to upload. Please try again.');
-    })
-    .finally(() => {
-        // Restore button state
-        button.innerHTML = originalContent;
-        button.disabled = false;
+
+        if (!selectedEvent) {
+            alert('Please select an event.');
+            return;
+        }
+
+        if (!label) {
+            alert('Please enter a label.');
+            return;
+        }
+
+        // Add loading state
+        const button = this;
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
+        button.disabled = true;
+
+        // Add CSS for spinning animation
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        // Prepare FormData to send to backend
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('image', files[i]);
+        }
+        formData.append('event_code', selectedEvent);
+        formData.append('label', label);
+        formData.append('client_id', clientCode);
+
+        // Send data to backend
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            return response.json().then(data => ({ status: response.status, data }));
+        })
+        .then(({ status, data }) => {
+            let parsedData;
+            try {
+                parsedData = JSON.parse(data.data.trim());
+            } catch (e) {
+                throw new Error('Invalid response format from server');
+            }
+            console.log(parsedData);
+
+            if (parsedData.status === 'completed') {
+                alert('Images uploaded and processed successfully!');
+                location.reload();
+            } else if (parsedData.status === 'error') {
+                // Display specific error message from backend
+                alert(parsedData.message);
+            } else {
+                alert('An unexpected error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            alert(error.message || 'Failed to upload images. Please check your connection and try again.');
+        })
+        .finally(() => {
+            // Restore button state
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
     });
 });
- });
-            </script>
+          </script>
             
 
             <script>

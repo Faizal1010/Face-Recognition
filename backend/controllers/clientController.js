@@ -80,24 +80,28 @@ const uploadProfile = async (req, res) => {
 // Add Client handler (using MySQL)
 const addClient = async (req, res) => {
     try {
-        const { FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId } = req.body;
+        const { FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date } = req.body;
 
         console.log(CustomerId);
 
         // Validate the input
-        if (!FirstName || !LastName || !Email || !ContactNo || !Password || !PostalCode || !State || !City || !Address || !Notes || !Profile || !CustomerId) {
+        if (!FirstName || !LastName || !Email || !ContactNo || !Password || !PostalCode || !State || !City || !Address || !Notes || !Profile || !CustomerId || !Storage_limit || Storage_used === undefined) {
             return res.status(400).json({
                 success: false,
                 message: "All client details are required!"
             });
         }
 
+        // Extract storage limit from Storage_limit (format: storage_limit+validity) and convert from GB to MB
+        const storageLimitValue = parseInt(Storage_limit.split('+')[0]);
+        const storageLimitInMB = storageLimitValue * 1024;
+
         // Create the client record in MySQL
         const query = `
-            INSERT INTO client (FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            INSERT INTO client (FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        const values = [FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId];
+        const values = [FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, storageLimitInMB, Storage_used, Expiry_date || null];
 
         db.query(query, values, (err, result) => {
             if (err) {
@@ -121,7 +125,10 @@ const addClient = async (req, res) => {
                 Address,
                 Notes,
                 Profile,
-                CustomerId
+                CustomerId,
+                Storage_limit: storageLimitInMB,
+                Storage_used,
+                Expiry_date
             };
 
             res.status(201).json({

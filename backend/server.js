@@ -49,7 +49,9 @@ function runPythonScript(scriptPath, args, callback) {
     pythonProcess.on('close', (code) => {
         console.log(`Python script exited with code ${code}`);
         if (code !== 0) {
-            return callback(new Error(`Python script failed with code ${code}.\nError: ${errorOutput}`), output);
+            // If there's an error, include the output (which contains the error message) in the callback
+            const errorMessage = output || errorOutput || `Python script failed with code ${code}`;
+            return callback(new Error(errorMessage), output);
         }
         callback(null, output);
     });
@@ -94,10 +96,17 @@ app.post('/upload', upload.array('image', 500), async (req, res) => {
     process.nextTick(() => {
         runPythonScript(scriptPath, [jsonFilePath], (err, output) => {
             if (err) {
-                console.error(`❌ Python script error: ${err}`);
+                console.error(`❌ Python script error: ${err.message}`);
                 req.files.forEach(file => fs.unlinkSync(file.path));
                 fs.unlinkSync(jsonFilePath);
-                return res.status(500).send('Error processing images');
+                // Send the error message (from Python script output) to the frontend
+                let errorData;
+                try {
+                    errorData = JSON.parse(output);
+                } catch (parseErr) {
+                    errorData = { status: "error", message: "Failed to process images" };
+                }
+                return res.status(500).json({ message: 'Error processing images', data: JSON.stringify(errorData) });
             }
 
             console.log(`✅ All files processed successfully.`);
@@ -287,6 +296,7 @@ app.use('/video', require('./routes/videoRoutes'));
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/clients', require('./routes/clientRoutes'));
 app.use('/event', require('./routes/eventRoutes'));
+app.use('/plan', require('./routes/planRoutes'));
 
 app.use('/client-dashboard', require('./routes/clientDashboard'))
 app.use('/super-admin-dashboard', require('./routes/superAdminDashboard'))

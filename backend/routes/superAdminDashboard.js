@@ -19,4 +19,8 @@ router.get('/add-customers', (req, res) => {
     res.sendFile(path.join(__dirname, '../../super admin dashboard/add-customers.html'))
 })
 
+router.get('/plans', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../super admin dashboard/plans.html'))
+})
+
 module.exports = router

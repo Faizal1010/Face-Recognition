@@ -240,6 +240,14 @@
     <textarea id="notes" rows="2" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
   </div>
 
+  <!-- Plans -->
+  <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
+    <label for="plans" style="margin-bottom: 5px;">Event: <span style="color: red;">*</span></label>
+    <select id="plans" style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+      <!-- <option value="" selected>Events</option> -->
+    </select>
+  </div>
+
   <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
     <label for="customer-id" style="margin-bottom: 5px;">Customer Id: <span style="color: red;">*</span>
     </label>
@@ -277,9 +285,47 @@
         <script src="http://localhost:3000/assets/js/main.js?v=6.0" type="text/javascript"></script>
 
 
+<!-- creating drodown for Plans -->
+<script>
+    fetch(`/plan/fetch-all-plans`, {
+      method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => displayEvents(data.plans))
+    .catch(error => console.error('Error fetching events:', error));
+  
+    function displayEvents(plans) {
+        console.log(plans)
+      const planSelect = document.getElementById('plans');
+      planSelect.innerHTML = ''; // Clear any existing options
 
+      if(!plans){
+      // If no events are found, show a "No Events" option
+      const noPlansOption = document.createElement('option');
+      noPlansOption.value = '';
+      noPlansOption.textContent = 'No Events Available';
+      planSelect.appendChild(noPlansOption);
+      return
+      }
+  
+        // Populate the select dropdown with event options
+        plans.forEach(plan => {
+          const option = document.createElement('option');
+          option.value = plan.storage_limit + "+" + plan.validity; // assuming the event has an 'id' field
+          option.textContent = plan.plan_name + " - " + plan.storage_limit + " GB"; // assuming the event has a 'name' field
+          planSelect.appendChild(option);
+        });
+  
+      // Add event listener to log selected option
+      planSelect.addEventListener('change', function() {
+          const selectedOption = planSelect.options[planSelect.selectedIndex];
+        console.log('Selected Event ID:', selectedOption.value);
+        console.log('Selected Event Name:', selectedOption.textContent);
+      });
+    }
+</script>
 
-        <script>
+<script>
     document.getElementById('submitButton').addEventListener('click', () => {
 
         const getRandomLetter = () => {
@@ -302,23 +348,30 @@ const finalLetter = getFinalLetter();  // One random letter for the end
 // Store the final product code
 const customerId = 'C' + lettersPart + numberPart + finalLetter;
 
-
-
-
-
-
+        // Calculate Expiry_date based on validity
+        const planValue = document.getElementById('plans').value;
+        const validity = parseInt(planValue.split('+')[1]); // Extract and convert validity to number
+        let expiryDate = '';
+        if (!isNaN(validity) && validity > 0) {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + validity); // Add validity days
+            expiryDate = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        }
 
         const clientDetails = {
             FirstName: document.getElementById('first-name').value,
             LastName: document.getElementById('last-name').value,
             Email: document.getElementById('email').value,
-            ContactNo : document.getElementById('contact').value,
+            ContactNo: document.getElementById('contact').value,
             Password: document.getElementById('password').value,
             PostalCode: document.getElementById('postal-code').value,
             State: document.getElementById('state').value,
             City: document.getElementById('city').value,
             Address: document.getElementById('address').value,
             Notes: document.getElementById('notes').value,
+            Storage_limit: document.getElementById('plans').value,
+            Storage_used: 0,
+            Expiry_date: expiryDate,
             Profile: document.getElementById('profile').files[0]?.name || "", // Use the file name
             CustomerId: customerId
         };

@@ -346,13 +346,13 @@ if (!clientId) {
         
                     // Prepare FormData to send to backend
                     const formData = new FormData();
-                    for (let i = 0; i < files.length; i++) {
-                        formData.append('video', files[i]);
-                    }
                     formData.append('thumbnail', thumbnail);
                     formData.append('event_code', selectedEvent);
                     formData.append('label', label);
                     formData.append('client_id', clientCode);
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('video', files[i]);
+                    }
         
                     // Log FormData contents
                     console.log('FormData contents:');

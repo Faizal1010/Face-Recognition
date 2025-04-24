@@ -10,7 +10,7 @@ router.get('/get-video-labels/:eventId', videoController.getVideoLabels);
 
 // New Routes
 router.put('/update-video-labels', videoController.updateVideoLabels);
-router.delete('/delete-selected-videos', videoController.deleteSelectedVideos);
+// router.delete('/delete-selected-videos', videoController.deleteSelectedVideos);
 router.post('/get-videos-by-labels', videoController.getVideosByLabels);
 router.delete('/delete-videos-by-ids', videoController.deleteVideosByIds);
 router.put('/update-video-labels-by-id', videoController.updateVideoLabelsById);

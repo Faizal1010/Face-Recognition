@@ -75,19 +75,27 @@ exports.deleteImage = (req, res) => {
     // Step 1: Loop through each label in the provided array
     const deletePromises = label.map((singleLabel) => {
         return new Promise((resolve, reject) => {
-            // Step 2: Find images that match the current label and event_code
-            const selectQuery = 'SELECT id FROM images WHERE event_code = ? AND label = ?';
+            // Step 2: Find images that match the current label and event_code, including image data and client_id
+            const selectQuery = 'SELECT id, client_id, LENGTH(image) as image_size FROM images WHERE event_code = ? AND label = ?';
 
             db.query(selectQuery, [event_code, singleLabel], (err, results) => {
                 if (err) {
                     console.error(`Error fetching images for label "${singleLabel}":`, err);
-                    return reject(err); // Reject if there's an error fetching images
+                    return reject(err);
                 }
 
                 if (results.length === 0) {
                     console.log(`No images found for label "${singleLabel}" and event_code "${event_code}"`);
-                    return resolve(); // Resolve if no images are found (continue to next label)
+                    return resolve();
                 }
+
+                // Calculate total size of images to be deleted (in MB)
+                const totalSizeMB = results.reduce((total, image) => {
+                    return total + (image.image_size / (1024 * 1024)); // Convert bytes to MB
+                }, 0);
+
+                // Get the client_id (assuming all images in this batch have the same client_id)
+                const clientId = results[0].client_id;
 
                 // Step 3: For each image, delete references from imageData first, then from images
                 const deletePromisesForLabel = results.map(image => {
@@ -115,10 +123,24 @@ exports.deleteImage = (req, res) => {
                     });
                 });
 
-                // Step 4: Wait for all deletions for this label to finish
+                // Step 4: Wait for all deletions for this label to finish, then update Storage_used
                 Promise.all(deletePromisesForLabel)
-                    .then(() => resolve()) // Resolve when all images for this label have been deleted
-                    .catch(reject); // Reject if there's an error deleting any of the images
+                    .then(() => {
+                        // Update Storage_used for the client
+                        db.query(
+                            'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+                            [totalSizeMB, clientId],
+                            (err, updateResult) => {
+                                if (err) {
+                                    console.error(`Error updating Storage_used for client ${clientId}:`, err);
+                                    return reject(err);
+                                }
+                                console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+                                resolve();
+                            }
+                        );
+                    })
+                    .catch(reject);
             });
         });
     });
@@ -230,19 +252,54 @@ exports.deleteSelectedImages = (req, res) => {
         return res.status(400).json({ error: 'No image IDs provided' });
     }
 
-    db.query('DELETE FROM imageData WHERE image_id IN (?)', [ids], (err, result) => {
+    // Step 1: Fetch image sizes and client_id before deleting
+    db.query('SELECT client_id, LENGTH(image) as image_size FROM images WHERE id IN (?)', [ids], (err, results) => {
         if (err) {
-            console.error('Error deleting image data:', err);
-            return res.status(500).json({ error: 'Error deleting image data' });
+            console.error('Error fetching image sizes:', err);
+            return res.status(500).json({ error: 'Error fetching image sizes' });
         }
 
-        db.query('DELETE FROM images WHERE id IN (?)', [ids], (err, result) => {
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No images found for the provided IDs' });
+        }
+
+        // Calculate total size of images to be deleted (in MB)
+        const totalSizeMB = results.reduce((total, image) => {
+            return total + (image.image_size / (1024 * 1024)); // Convert bytes to MB
+        }, 0);
+
+        // Get the client_id (assuming all images have the same client_id)
+        const clientId = results[0].client_id;
+
+        // Step 2: Delete from imageData
+        db.query('DELETE FROM imageData WHERE image_id IN (?)', [ids], (err, result) => {
             if (err) {
-                console.error('Error deleting images:', err);
-                return res.status(500).json({ error: 'Error deleting images' });
+                console.error('Error deleting image data:', err);
+                return res.status(500).json({ error: 'Error deleting image data' });
             }
 
-            res.json({ message: 'Images deleted successfully', affectedRows: result.affectedRows });
+            // Step 3: Delete from images
+            db.query('DELETE FROM images WHERE id IN (?)', [ids], (err, result) => {
+                if (err) {
+                    console.error('Error deleting images:', err);
+                    return res.status(500).json({ error: 'Error deleting images' });
+                }
+
+                // Step 4: Update Storage_used for the client
+                db.query(
+                    'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+                    [totalSizeMB, clientId],
+                    (err, updateResult) => {
+                        if (err) {
+                            console.error(`Error updating Storage_used for client ${clientId}:`, err);
+                            return res.status(500).json({ error: 'Error updating storage usage' });
+                        }
+
+                        console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+                        res.json({ message: 'Images deleted successfully', affectedRows: result.affectedRows });
+                    }
+                );
+            });
         });
     });
 };
@@ -300,50 +357,81 @@ exports.getImagesByLabels = (req, res) => {
 };
 
 exports.deleteImagesByIds = (req, res) => {
-    const { imageIds } = req.body; // Array of image IDs from the request body
+    const { imageIds } = req.body;
 
-    // Check if imageIds array is provided and is not empty
     if (!Array.isArray(imageIds) || imageIds.length === 0) {
         return res.status(400).json({ error: 'An array of image IDs is required' });
     }
 
     console.log("Deleting images with IDs:", imageIds);
 
-    // Step 1: Loop through each image ID in the provided array
-    const deletePromises = imageIds.map((imageId) => {
-        return new Promise((resolve, reject) => {
-            // Step 2: Delete image references from imageData table first
-            db.query('DELETE FROM imageData WHERE image_id = ?', [imageId], (err, result) => {
-                if (err) {
-                    console.error(`Error deleting image data for image id ${imageId}:`, err);
-                    return reject(err); // Reject if there's an error deleting from imageData
-                }
+    // Step 1: Fetch image sizes and client_id before deleting
+    db.query('SELECT client_id, LENGTH(image) as image_size FROM images WHERE id IN (?)', [imageIds], (err, results) => {
+        if (err) {
+            console.error('Error fetching image sizes:', err);
+            return res.status(500).json({ error: 'Error fetching image sizes' });
+        }
 
-                console.log(`Deleted from imageData for image id ${imageId}`);
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No images found for the provided IDs' });
+        }
 
-                // Step 3: Now delete the image from the images table
-                db.query('DELETE FROM images WHERE id = ?', [imageId], (err, result) => {
+        // Calculate total size of images to be deleted (in MB)
+        const totalSizeMB = results.reduce((total, image) => {
+            return total + (image.image_size / (1024 * 1024)); // Convert bytes to MB
+        }, 0);
+
+        // Get the client_id (assuming all images have the same client_id)
+        const clientId = results[0].client_id;
+
+        // Step 2: Loop through each image ID in the provided array
+        const deletePromises = imageIds.map((imageId) => {
+            return new Promise((resolve, reject) => {
+                // Delete image references from imageData table first
+                db.query('DELETE FROM imageData WHERE image_id = ?', [imageId], (err, result) => {
                     if (err) {
-                        console.error(`Error deleting image from images table for image id ${imageId}:`, err);
-                        return reject(err); // Reject if there's an error deleting from images
+                        console.error(`Error deleting image data for image id ${imageId}:`, err);
+                        return reject(err);
                     }
 
-                    console.log(`Deleted image id ${imageId} from images table`);
-                    resolve(result); // Resolve if deletion is successful
+                    console.log(`Deleted from imageData for image id ${imageId}`);
+
+                    // Now delete the image from the images table
+                    db.query('DELETE FROM images WHERE id = ?', [imageId], (err, result) => {
+                        if (err) {
+                            console.error(`Error deleting image from images table for image id ${imageId}:`, err);
+                            return reject(err);
+                        }
+
+                        console.log(`Deleted image id ${imageId} from images table`);
+                        resolve(result);
+                    });
                 });
             });
         });
-    });
 
-    // Step 4: Wait for all deletions to finish
-    Promise.all(deletePromises)
-        .then(() => {
-            res.json({ message: 'Images deleted successfully' });
-        })
-        .catch((err) => {
-            console.error('Error deleting images:', err);
-            res.status(500).json({ error: 'Error deleting images' });
-        });
+        // Step 3: Wait for all deletions to finish, then update Storage_used
+        Promise.all(deletePromises)
+            .then(() => {
+                db.query(
+                    'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+                    [totalSizeMB, clientId],
+                    (err, updateResult) => {
+                        if (err) {
+                            console.error(`Error updating Storage_used for client ${clientId}:`, err);
+                            return res.status(500).json({ error: 'Error updating storage usage' });
+                        }
+
+                        console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+                        res.json({ message: 'Images deleted successfully' });
+                    }
+                );
+            })
+            .catch((err) => {
+                console.error('Error deleting images:', err);
+                res.status(500).json({ error: 'Error deleting images' });
+            });
+    });
 };
 
 exports.updateLabelsById = (req, res) => {
@@ -469,4 +557,4 @@ exports.downloadAllSelectedImages = (req, res) => {
             }
         });
     });
-};
+};  

@@ -49,103 +49,167 @@ exports.storeVideos = [
         console.log("label:", label);
         console.log("Number of videos:", videos.length);
 
-        const insertPromises = videos.map((file) => {
-            return new Promise((resolve, reject) => {
-                const filePath = file.path;
-                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                console.log(`Processing video: ${file.originalname} (${fileSizeMB} MB)`);
+        // Calculate total size of videos and thumbnail in MB (each video file is counted once)
+        const totalSizeMB = videos.reduce((total, video) => total + (video.size / (1024 * 1024)), 0) +
+                           (thumbnail ? thumbnail.size / (1024 * 1024) : 0);
 
-                const chunkSize = 10 * 1024 * 1024; // 10 MB chunks
-                const stream = fs.createReadStream(filePath, { highWaterMark: chunkSize });
-                const chunks = [];
-                const videoId = uuidv4(); // Generate unique video_id for this video
-                stream.on('data', (chunk) => chunks.push(chunk));
-                stream.on('end', () => {
-                    const totalChunks = chunks.length;
-                    console.log(`Total chunks for ${file.originalname}: ${totalChunks}`);
+        // Read thumbnail data once (if present) to reuse for all videos
+        let thumbnailData = null;
+        if (thumbnail) {
+            try {
+                thumbnailData = fs.readFileSync(thumbnail.path);
+            } catch (err) {
+                console.error('Error reading thumbnail file:', err);
+                return res.status(500).json({ error: 'Error reading thumbnail file' });
+            }
+        }
 
-                    // Start a database transaction
-                    db.beginTransaction((err) => {
-                        if (err) {
-                            console.error('Error starting transaction:', err);
-                            return reject(err);
-                        }
+        // Check storage limit and expiry date
+        db.query(
+            'SELECT Storage_limit, Storage_used, Expiry_date FROM client WHERE CustomerId = ?',
+            [client_id],
+            (err, result) => {
+                if (err) {
+                    console.error('Error checking storage limit and expiry date:', err);
+                    return res.status(500).json({ error: 'Error checking storage limit and expiry date' });
+                }
+                if (result.length === 0) {
+                    return res.status(404).json({ error: 'Client not found' });
+                }
+                const { Storage_limit, Storage_used, Expiry_date } = result[0];
 
-                        const chunkPromises = chunks.map((chunk, index) => {
-                            return new Promise((resolveChunk, rejectChunk) => {
-                                console.log(`Storing chunk ${index + 1} of ${totalChunks}, size: ${chunk.length} bytes`);
-                                const query = 'INSERT INTO videos (video_id, chunk, chunk_index, total_chunks, client_id, event_code, label, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-                                const params = [
-                                    videoId, // Add video_id to each chunk
-                                    chunk,
-                                    index,
-                                    totalChunks,
-                                    client_id,
-                                    event_code,
-                                    label,
-                                    index === 0 && thumbnail ? fs.readFileSync(thumbnail.path) : null
-                                ];
-                                db.execute(query, params, (err, result) => {
-                                    if (err) {
-                                        console.error(`Error storing chunk ${index + 1} of ${file.originalname}:`, err);
-                                        return rejectChunk(err);
-                                    }
-                                    resolveChunk(result.insertId);
+                // Check if plan has expired
+                const currentDate = new Date();
+                if (Expiry_date && Expiry_date < currentDate) {
+                    return res.status(400).json({ error: 'The plan has expired. Please renew.' });
+                }
+
+                // Check storage limit
+                if (Storage_used + totalSizeMB > Storage_limit) {
+                    const spaceLeft = Storage_limit - Storage_used;
+                    return res.status(400).json({
+                        error: `Videos were not uploaded. You only have ${spaceLeft.toFixed(2)} MB left. Please upgrade or upload within left space.`
+                    });
+                }
+
+                const insertPromises = videos.map((file) => {
+                    return new Promise((resolve, reject) => {
+                        const filePath = file.path;
+                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        console.log(`Processing video: ${file.originalname} (${fileSizeMB} MB)`);
+
+                        const chunkSize = 10 * 1024 * 1024; // 10 MB chunks
+                        const stream = fs.createReadStream(filePath, { highWaterMark: chunkSize });
+                        const chunks = [];
+                        const videoId = uuidv4(); // Generate unique video_id for this video
+                        stream.on('data', (chunk) => chunks.push(chunk));
+                        stream.on('end', () => {
+                            const totalChunks = chunks.length;
+                            console.log(`Total chunks for ${file.originalname}: ${totalChunks}`);
+
+                            // Start a database transaction
+                            db.beginTransaction((err) => {
+                                if (err) {
+                                    console.error('Error starting transaction:', err);
+                                    return reject(err);
+                                }
+
+                                const chunkPromises = chunks.map((chunk, index) => {
+                                    return new Promise((resolveChunk, rejectChunk) => {
+                                        console.log(`Storing chunk ${index + 1} of ${totalChunks}, size: ${chunk.length} bytes`);
+                                        const query = 'INSERT INTO videos (video_id, chunk, chunk_index, total_chunks, client_id, event_code, label, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+                                        const params = [
+                                            videoId,
+                                            chunk,
+                                            index,
+                                            totalChunks,
+                                            client_id,
+                                            event_code,
+                                            label,
+                                            index === 0 ? thumbnailData : null
+                                        ];
+                                        db.execute(query, params, (err, result) => {
+                                            if (err) {
+                                                console.error(`Error storing chunk ${index + 1} of ${file.originalname}:`, err);
+                                                return rejectChunk(err);
+                                            }
+                                            resolveChunk(result.insertId);
+                                        });
+                                    });
                                 });
+
+                                Promise.all(chunkPromises)
+                                    .then((chunkIds) => {
+                                        // Commit the transaction
+                                        db.commit((commitErr) => {
+                                            if (commitErr) {
+                                                console.error('Error committing transaction:', commitErr);
+                                                return db.rollback(() => reject(commitErr));
+                                            }
+
+                                            // Clean up temporary video file after successful commit
+                                            fs.unlink(filePath, (unlinkErr) => {
+                                                if (unlinkErr) console.error(`Error deleting temp file ${filePath}:`, unlinkErr);
+                                            });
+                                            resolve(chunkIds[0]);
+                                        });
+                                    })
+                                    .catch((chunkErr) => {
+                                        db.rollback(() => {
+                                            console.error('Rolling back transaction due to error:', chunkErr);
+                                            reject(chunkErr);
+                                        });
+                                    });
                             });
                         });
-
-                        Promise.all(chunkPromises)
-                            .then((chunkIds) => {
-                                // Commit the transaction
-                                db.commit((commitErr) => {
-                                    if (commitErr) {
-                                        console.error('Error committing transaction:', commitErr);
-                                        return db.rollback(() => reject(commitErr));
-                                    }
-
-                                    // Clean up temporary files after successful commit
-                                    fs.unlink(filePath, (unlinkErr) => {
-                                        if (unlinkErr) console.error(`Error deleting temp file ${filePath}:`, unlinkErr);
-                                    });
-                                    if (thumbnail) {
-                                        fs.unlink(thumbnail.path, (unlinkErr) => {
-                                            if (unlinkErr) console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
-                                        });
-                                    }
-                                    resolve(chunkIds[0]); // Return the first chunk’s ID
-                                });
-                            })
-                            .catch((chunkErr) => {
-                                // Rollback on error
-                                db.rollback(() => {
-                                    console.error('Rolling back transaction due to error:', chunkErr);
-                                    reject(chunkErr);
-                                });
-                            });
+                        stream.on('error', (err) => {
+                            console.error(`Error reading file ${file.originalname}:`, err);
+                            reject(err);
+                        });
                     });
                 });
-                stream.on('error', (err) => {
-                    console.error(`Error reading file ${file.originalname}:`, err);
-                    reject(err);
-                });
-            });
-        });
 
-        Promise.all(insertPromises)
-            .then((insertedIds) => {
-                console.log(`Successfully stored ${insertedIds.length} video(s) with IDs:`, insertedIds);
-                res.json({
-                    data: JSON.stringify({ status: 'completed' }),
-                    message: 'Videos stored successfully',
-                    videoIds: insertedIds,
-                    affectedRows: insertedIds.length
-                });
-            })
-            .catch((err) => {
-                console.error('Error storing videos:', err);
-                res.status(500).json({ error: 'Error storing videos' });
-            });
+                Promise.all(insertPromises)
+                    .then((insertedIds) => {
+                        // Clean up thumbnail file after all videos are processed
+                        if (thumbnail) {
+                            fs.unlink(thumbnail.path, (unlinkErr) => {
+                                if (unlinkErr) console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
+                            });
+                        }
+
+                        // Update Storage_used after all videos are successfully stored
+                        db.query(
+                            'UPDATE client SET Storage_used = LEAST(Storage_limit, Storage_used + ?) WHERE CustomerId = ?',
+                            [totalSizeMB, client_id],
+                            (updateErr) => {
+                                if (updateErr) {
+                                    console.error('Error updating Storage_used:', updateErr);
+                                    return res.status(500).json({ error: 'Error updating storage usage' });
+                                }
+                                console.log(`Added ${totalSizeMB} MB to Storage_used for client ${client_id}`);
+                                console.log(`Successfully stored ${insertedIds.length} video(s) with IDs:`, insertedIds);
+                                res.json({
+                                    data: JSON.stringify({ status: 'completed' }),
+                                    message: 'Videos stored successfully',
+                                    videoIds: insertedIds,
+                                    affectedRows: insertedIds.length
+                                });
+                            }
+                        );
+                    })
+                    .catch((err) => {
+                        // Clean up thumbnail file if an error occurs
+                        if (thumbnail) {
+                            fs.unlink(thumbnail.path, (unlinkErr) => {
+                                if (unlinkErr) console.error(`Error deleting temp thumbnail ${thumbnail.path}:`, unlinkErr);
+                            });
+                        }
+                        console.error('Error storing videos:', err);
+                        res.status(500).json({ error: 'Error storing videos' });
+                    });
+            }
+        );
     }
 ];
 
@@ -243,7 +307,13 @@ exports.deleteVideo = (req, res) => {
 
     const deletePromises = label.map((singleLabel) => {
         return new Promise((resolve, reject) => {
-            const selectQuery = 'SELECT DISTINCT video_id FROM videos WHERE event_code = ? AND label = ?';
+            const selectQuery = `
+                SELECT video_id, client_id, 
+                       SUM(LENGTH(chunk)) as total_size, 
+                       MAX(LENGTH(thumbnail)) as thumbnail_size 
+                FROM videos 
+                WHERE event_code = ? AND label = ? 
+                GROUP BY video_id, client_id`;
             db.query(selectQuery, [event_code, singleLabel], (err, results) => {
                 if (err) {
                     console.error(`Error fetching video_ids for label "${singleLabel}":`, err);
@@ -256,6 +326,13 @@ exports.deleteVideo = (req, res) => {
                 }
 
                 const videoIds = results.map(r => r.video_id);
+                const totalSizeMB = results.reduce((total, r) => {
+                    const videoSize = r.total_size / (1024 * 1024);
+                    const thumbSize = r.thumbnail_size ? r.thumbnail_size / (1024 * 1024) : 0;
+                    return total + videoSize + thumbSize;
+                }, 0);
+                const clientId = results[0].client_id;
+
                 const deleteQuery = 'DELETE FROM videos WHERE video_id IN (?)';
                 db.query(deleteQuery, [videoIds], (err, result) => {
                     if (err) {
@@ -263,7 +340,20 @@ exports.deleteVideo = (req, res) => {
                         return reject(err);
                     }
                     console.log(`Deleted ${result.affectedRows} chunks for label "${singleLabel}"`);
-                    resolve(result);
+
+                    // Update Storage_used
+                    db.query(
+                        'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+                        [totalSizeMB, clientId],
+                        (updateErr) => {
+                            if (updateErr) {
+                                console.error(`Error updating Storage_used for client ${clientId}:`, updateErr);
+                                return reject(updateErr);
+                            }
+                            console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+                            resolve(result);
+                        }
+                    );
                 });
             });
         });
@@ -348,39 +438,65 @@ exports.updateVideoLabels = (req, res) => {
 };
 
 // Delete selected videos by IDs
-exports.deleteSelectedVideos = (req, res) => {
-    const { videoIds } = req.body;
+// exports.deleteSelectedVideos = (req, res) => {
+//     const { videoIds } = req.body;
 
-    if (!videoIds || !Array.isArray(videoIds) || videoIds.length === 0) {
-        return res.status(400).json({ error: 'No video IDs provided' });
-    }
+//     if (!videoIds || !Array.isArray(videoIds) || videoIds.length === 0) {
+//         return res.status(400).json({ error: 'No video IDs provided' });
+//     }
 
-    console.log("Deleting all chunks for videos with IDs:", videoIds);
+//     console.log("Deleting all chunks for videos with IDs:", videoIds);
 
-    const selectQuery = 'SELECT DISTINCT video_id FROM videos WHERE id IN (?)';
-    db.query(selectQuery, [videoIds], (err, results) => {
-        if (err) {
-            console.error('Error fetching video_ids:', err);
-            return res.status(500).json({ error: 'Error fetching video_ids' });
-        }
+//     const selectQuery = `
+//         SELECT video_id, client_id, 
+//                SUM(LENGTH(chunk)) as total_size, 
+//                MAX(LENGTH(thumbnail)) as thumbnail_size 
+//         FROM videos 
+//         WHERE id IN (?) 
+//         GROUP BY video_id, client_id`;
+//     db.query(selectQuery, [videoIds], (err, results) => {
+//         if (err) {
+//             console.error('Error fetching video_ids:', err);
+//             return res.status(500).json({ error: 'Error fetching video_ids' });
+//         }
 
-        if (results.length === 0) {
-            console.log('No videos found for the provided IDs');
-            return res.json({ message: 'No videos found to delete' });
-        }
+//         if (results.length === 0) {
+//             console.log('No videos found for the provided IDs');
+//             return res.json({ message: 'No videos found to delete' });
+//         }
 
-        const videoIdList = results.map(r => r.video_id);
-        const deleteQuery = 'DELETE FROM videos WHERE video_id IN (?)';
-        db.query(deleteQuery, [videoIdList], (err, result) => {
-            if (err) {
-                console.error('Error deleting video chunks:', err);
-                return res.status(500).json({ error: 'Error deleting videos' });
-            }
-            console.log(`Deleted ${result.affectedRows} chunks for video IDs:`, videoIds);
-            res.json({ message: 'Videos deleted successfully', affectedRows: result.affectedRows });
-        });
-    });
-};
+//         const videoIdList = results.map(r => r.video_id);
+//         const totalSizeMB = results.reduce((total, r) => {
+//             const videoSize = r.total_size / (1024 * 1024);
+//             const thumbSize = r.thumbnail_size ? r.thumbnail_size / (1024 * 1024) : 0;
+//             return total + videoSize + thumbSize;
+//         }, 0);
+//         const clientId = results[0].client_id;
+
+//         const deleteQuery = 'DELETE FROM videos WHERE video_id IN (?)';
+//         db.query(deleteQuery, [videoIdList], (err, result) => {
+//             if (err) {
+//                 console.error('Error deleting video chunks:', err);
+//                 return res.status(500).json({ error: 'Error deleting videos' });
+//             }
+//             console.log(`Deleted ${result.affectedRows} chunks for video IDs:`, videoIds);
+
+//             // Update Storage_used
+//             db.query(
+//                 'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+//                 [totalSizeMB, clientId],
+//                 (updateErr) => {
+//                     if (updateErr) {
+//                         console.error(`Error updating Storage_used for client ${clientId}:`, updateErr);
+//                         return res.status(500).json({ error: 'Error updating storage usage' });
+//                     }
+//                     console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+//                     res.json({ message: 'Videos deleted successfully', affectedRows: result.affectedRows });
+//                 }
+//             );
+//         });
+//     });
+// };
 
 // Get videos by labels (Updated to include video_id and fix pagination)
 exports.getVideosByLabels = (req, res) => {
@@ -446,27 +562,69 @@ exports.deleteVideosByIds = (req, res) => {
 
     console.log("Deleting videos with IDs:", videoIds);
 
-    const selectQuery = 'SELECT DISTINCT video_id FROM videos WHERE id IN (?)';
-    db.query(selectQuery, [videoIds], (err, results) => {
+    // Step 1: Get the video_id(s) associated with the provided id(s)
+    const getVideoIdsQuery = 'SELECT DISTINCT video_id FROM videos WHERE id IN (?)';
+    db.query(getVideoIdsQuery, [videoIds], (err, videoIdResults) => {
         if (err) {
             console.error('Error fetching video_ids:', err);
             return res.status(500).json({ error: 'Error fetching video_ids' });
         }
 
-        if (results.length === 0) {
+        if (videoIdResults.length === 0) {
             console.log('No videos found for the provided IDs');
             return res.json({ message: 'No videos found to delete' });
         }
 
-        const videoIdList = results.map(r => r.video_id);
-        const deleteQuery = 'DELETE FROM videos WHERE video_id IN (?)';
-        db.query(deleteQuery, [videoIdList], (err, result) => {
+        const videoIdList = videoIdResults.map(r => r.video_id);
+
+        // Step 2: Get the total size of all chunks for the video_id(s)
+        const selectQuery = `
+            SELECT video_id, client_id, 
+                   SUM(LENGTH(chunk)) as total_size, 
+                   MAX(LENGTH(thumbnail)) as thumbnail_size 
+            FROM videos 
+            WHERE video_id IN (?) 
+            GROUP BY video_id, client_id`;
+        db.query(selectQuery, [videoIdList], (err, results) => {
             if (err) {
-                console.error('Error deleting video chunks:', err);
-                return res.status(500).json({ error: 'Error deleting videos' });
+                console.error('Error fetching video sizes:', err);
+                return res.status(500).json({ error: 'Error fetching video sizes' });
             }
-            console.log(`Deleted ${result.affectedRows} chunks for video IDs:`, videoIds);
-            res.json({ message: 'Videos deleted successfully', affectedRows: result.affectedRows });
+
+            if (results.length === 0) {
+                console.log('No videos found for the provided video_ids');
+                return res.json({ message: 'No videos found to delete' });
+            }
+
+            const totalSizeMB = results.reduce((total, r) => {
+                const videoSize = r.total_size / (1024 * 1024);
+                const thumbSize = r.thumbnail_size ? r.thumbnail_size / (1024 * 1024) : 0;
+                return total + videoSize + thumbSize;
+            }, 0);
+            const clientId = results[0].client_id;
+
+            const deleteQuery = 'DELETE FROM videos WHERE video_id IN (?)';
+            db.query(deleteQuery, [videoIdList], (err, result) => {
+                if (err) {
+                    console.error('Error deleting video chunks:', err);
+                    return res.status(500).json({ error: 'Error deleting videos' });
+                }
+                console.log(`Deleted ${result.affectedRows} chunks for video IDs:`, videoIds);
+
+                // Update Storage_used
+                db.query(
+                    'UPDATE client SET Storage_used = GREATEST(0, Storage_used - ?) WHERE CustomerId = ?',
+                    [totalSizeMB, clientId],
+                    (updateErr) => {
+                        if (updateErr) {
+                            console.error(`Error updating Storage_used for client ${clientId}:`, updateErr);
+                            return res.status(500).json({ error: 'Error updating storage usage' });
+                        }
+                        console.log(`Subtracted ${totalSizeMB} MB from Storage_used for client ${clientId}`);
+                        res.json({ message: 'Videos deleted successfully', affectedRows: result.affectedRows });
+                    }
+                );
+            });
         });
     });
 };
@@ -568,7 +726,6 @@ exports.downloadAllSelectedVideos = (req, res) => {
         res.json({ videos });
     });
 };
-
 
 // fetching all videos without client id (same as getVideos handler just without client_id)
 exports.getVideosNoClient = (req, res) => {
