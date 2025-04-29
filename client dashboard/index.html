@@ -44,6 +44,7 @@
                     return null;
                 }
             }
+        
         </script>
         
     </head>
@@ -51,14 +52,22 @@
     <body>
         <div class="screen-overlay"></div>
         <aside class="navbar-aside" id="offcanvas_aside">
-            <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="aside-top">
+                <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
+                    <img id="logo" style="height: 36px;" src="" class="logo" alt="logo" />
+                </a>
+                <div>
+                    <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
+                </div>
+            </div>
+            <!-- <div class="" style="display: flex; justify-content: space-between; align-items: center;">
                 <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
                     <img id="logo" style="width: 250px;" src="" class="logo" alt="Nest Dashboard" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
                 </div>
-            </div>
+            </div> -->
             <nav>
                 <ul class="menu-aside">
                     <li class="menu-item active">
@@ -641,7 +650,7 @@
                 logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
             })
         })
-      </script>  
+      </script>
 
 
         <!-- Logout -->

@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
+const fs = require('fs');
 
 // MySQL Database Connection
 const db = mysql.createConnection({
@@ -75,7 +75,6 @@ const uploadProfile = async (req, res) => {
         });
     });
 };
-
 
 // Add Client handler (using MySQL)
 const addClient = async (req, res) => {
@@ -232,7 +231,58 @@ const deleteClient = async (req, res) => {
             });
         });
 
-        // Step 4: Delete related events (depends on client_id)
+        // Step 4: Delete related videos (depends on client_id) and their files
+        const videoQuery = 'SELECT filename, event_code FROM videos WHERE client_id = ?';
+        const videoResults = await new Promise((resolve, reject) => {
+            db.query(videoQuery, [clientId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+        for (const video of videoResults) {
+            const videoPath = path.join(__dirname, '../../public/videos', video.event_code, video.filename);
+            try {
+                await new Promise((resolve, reject) => {
+                    fs.unlink(videoPath, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+                console.log(`Successfully deleted video file: ${videoPath}`);
+            } catch (err) {
+                if (err.code !== 'ENOENT') {
+                    console.error(`Error deleting video file ${videoPath}:`, err);
+                }
+            }
+        }
+
+        // Delete video folders for each event_code
+        const eventCodes = [...new Set(videoResults.map(video => video.event_code))];
+        for (const eventCode of eventCodes) {
+            const videoFolderPath = path.join(__dirname, '../videos', eventCode);
+            try {
+                await new Promise((resolve, reject) => {
+                    fs.rm(videoFolderPath, { recursive: true, force: true }, (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+                console.log(`Successfully deleted video folder for event ${eventCode}: ${videoFolderPath}`);
+            } catch (err) {
+                console.error(`Error deleting video folder ${videoFolderPath}:`, err);
+            }
+        }
+
+        const deleteVideosQuery = 'DELETE FROM videos WHERE client_id = ?';
+        await new Promise((resolve, reject) => {
+            db.query(deleteVideosQuery, [clientId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+
+        // Step 5: Delete related events (depends on client_id)
         const deleteEventsQuery = 'DELETE FROM events WHERE client_id = ?';
         await new Promise((resolve, reject) => {
             db.query(deleteEventsQuery, [clientId], (err, result) => {
@@ -241,17 +291,22 @@ const deleteClient = async (req, res) => {
             });
         });
 
-        // Step 5: Delete the client folder
+        // Step 6: Delete the client folder
         const emailFolderPath = path.join(__dirname, '../../public/assets/clientsProfiles', email);
         try {
-            fs.rmSync(emailFolderPath, { recursive: true, force: true });
+            await new Promise((resolve, reject) => {
+                fs.rm(emailFolderPath, { recursive: true, force: true }, (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
             console.log(`Successfully deleted the folder for ${email}`);
         } catch (err) {
             console.error('Error deleting folder:', err);
             // Not failing the request since folder deletion is secondary
         }
 
-        // Step 6: Delete the client
+        // Step 7: Delete the client
         const deleteClientQuery = 'DELETE FROM client WHERE CustomerId = ?';
         const deleteResult = await new Promise((resolve, reject) => {
             db.query(deleteClientQuery, [clientId], (err, result) => {
@@ -270,7 +325,7 @@ const deleteClient = async (req, res) => {
         // Send success response
         res.status(200).json({
             success: true,
-            message: "Client and all associated data (events, images, imageData, and profile folder) deleted successfully"
+            message: "Client and all associated data (events, images, imageData, videos, video folders, and profile folder) deleted successfully"
         });
     } catch (error) {
         console.error('Error deleting client and associated data:', error);
@@ -353,6 +408,9 @@ const getClientById = async (req, res) => {
 
         // Prepare events array with labels and counts for both images and videos
         const events = [];
+        let totalVideoSize = 0;
+        let totalVideoCount = 0;
+
         for (const event of eventsResults) {
             // Query 3: Fetch distinct labels and image counts for each event
             const imageLabelsQuery = `
@@ -370,11 +428,11 @@ const getClientById = async (req, res) => {
                 });
             });
 
-            // Query 4: Fetch distinct labels and video counts for each event
+            // Query 4: Fetch video labels and counts for the event
             const videoLabelsQuery = `
                 SELECT 
                     v.label AS name, 
-                    COUNT(DISTINCT v.video_id) AS videoCount 
+                    COUNT(v.id) AS videoCount 
                 FROM videos v 
                 WHERE v.client_id = ? AND v.event_code = ? 
                 GROUP BY v.label
@@ -385,6 +443,41 @@ const getClientById = async (req, res) => {
                     else resolve(results);
                 });
             });
+
+            // Query 5: Fetch video filenames for size calculation
+            const videoFilesQuery = `
+                SELECT filename 
+                FROM videos 
+                WHERE client_id = ? AND event_code = ?
+            `;
+            const videoFilesResults = await new Promise((resolve, reject) => {
+                db.query(videoFilesQuery, [clientId, event.event_code], (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                });
+            });
+
+            console.log(`Video files for event ${event.event_code}:`, videoFilesResults);
+
+            for (const video of videoFilesResults) {
+                const videoPath = path.join(__dirname, '../videos', event.event_code, video.filename);
+                try {
+                    const stats = await new Promise((resolve, reject) => {
+                        fs.stat(videoPath, (err, stats) => {
+                            if (err) reject(err);
+                            else resolve(stats);
+                        });
+                    });
+                    totalVideoSize += stats.size;
+                    totalVideoCount += 1;
+                    console.log(`Found video: ${videoPath}, size: ${stats.size} bytes`);
+                } catch (err) {
+                    console.error(`Failed to read video file ${videoPath}:`, err.message);
+                    if (err.code === 'ENOENT') {
+                        console.error(`Video file does not exist: ${videoPath}`);
+                    }
+                }
+            }
 
             events.push({
                 name: event.name,
@@ -400,7 +493,7 @@ const getClientById = async (req, res) => {
             });
         }
 
-        // Query 5: Calculate total size of images (in bytes) for the client
+        // Query 6: Calculate total size of images (in bytes) for the client
         const imageSizeQuery = `
             SELECT SUM(LENGTH(image)) AS totalImageSize 
             FROM images 
@@ -414,23 +507,6 @@ const getClientById = async (req, res) => {
         });
         const totalImageSize = imageSizeResult.totalImageSize || 0; // Default to 0 if no images
 
-        // Query 6: Calculate total size of videos (in bytes) and total video count for the client
-        const videoSizeQuery = `
-            SELECT 
-                SUM(LENGTH(chunk)) AS totalVideoSize,
-                COUNT(DISTINCT video_id) AS videoCount
-            FROM videos 
-            WHERE client_id = ?
-        `;
-        const videoSizeResult = await new Promise((resolve, reject) => {
-            db.query(videoSizeQuery, [clientId], (err, results) => {
-                if (err) reject(err);
-                else resolve(results[0]);
-            });
-        });
-        const totalVideoSize = videoSizeResult.totalVideoSize || 0; // Default to 0 if no videos
-        const videoCount = videoSizeResult.videoCount || 0; // Number of unique videos
-
         // Convert sizes to MB or GB for response
         const formatSize = (sizeInBytes) => {
             if (sizeInBytes >= 1024 * 1024 * 1024) { // GB
@@ -442,6 +518,8 @@ const getClientById = async (req, res) => {
             }
         };
 
+        console.log(`Total video size: ${totalVideoSize} bytes, Total video count: ${totalVideoCount}`);
+
         // Send success response with all data
         res.status(200).json({
             success: true,
@@ -451,7 +529,7 @@ const getClientById = async (req, res) => {
                 events,           // Array of events with image and video labels
                 totalImageSize: formatSize(totalImageSize), // Formatted total size of images
                 totalVideoSize: formatSize(totalVideoSize), // Formatted total size of videos
-                videoCount        // Number of videos
+                videoCount: totalVideoCount // Number of videos
             }
         });
     } catch (error) {

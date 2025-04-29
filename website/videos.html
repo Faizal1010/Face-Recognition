@@ -256,6 +256,7 @@
         let totalPages = 1;
         let currentIndex = 0;
         let selectedLabels = [];
+        let isClosingPopup = false; // Flag to suppress error alerts during popup closure
 
         document.addEventListener("DOMContentLoaded", function () {
             const findYourselfLink = document.getElementById("findYourselfLink");
@@ -577,16 +578,35 @@
             currentIndex = index;
             const video = videos[currentIndex];
             try {
-                const response = await fetch(`http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
-                if (!response.ok) throw new Error('Error fetching video');
-                const videoBlob = await response.blob();
-                const videoUrl = URL.createObjectURL(videoBlob);
-
+                const videoUrl = `http://localhost:3000/video/all-videos-no-client?event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`;
                 const player = document.getElementById("videoPlayer");
-                player.src = videoUrl;
-                document.getElementById("videoPopup").style.display = "flex";
-                spinner.style.display = "none"; // Hide spinner when video is ready
 
+                // Reset isClosingPopup and clear existing event listeners
+                isClosingPopup = false;
+                player.onerror = null;
+                player.oncanplay = null;
+
+                // Set video source directly to stream
+                player.src = videoUrl;
+                player.load();
+                document.getElementById("videoPopup").style.display = "flex";
+
+                // Hide spinner when video is ready to play
+                player.oncanplay = () => {
+                    spinner.style.display = "none";
+                };
+
+                // Suppress error alert during popup closure
+                player.onerror = () => {
+                    // if (!isClosingPopup) {
+                    //     console.error('Error loading video stream');
+                    //     alert('Error loading video');
+                    // }
+                    spinner.style.display = "none";
+                    document.getElementById("videoPopup").style.display = "none";
+                };
+
+                // Create or update download button
                 let downloadButton = document.getElementById("videoDownloadButton");
                 if (!downloadButton) {
                     downloadButton = document.createElement("button");
@@ -628,16 +648,19 @@
             } catch (error) {
                 console.error('Error opening video popup:', error);
                 alert('Error fetching video');
-                spinner.style.display = "none"; // Hide spinner on error
-                document.getElementById("videoPopup").style.display = "none"; // Hide popup on error
+                spinner.style.display = "none";
+                document.getElementById("videoPopup").style.display = "none";
             }
         }
 
         function closeVideoPopup() {
+            isClosingPopup = true; // Set flag to suppress error alert
             const player = document.getElementById("videoPlayer");
             player.pause();
             player.src = "";
+            player.load(); // Ensure video is reset
             document.getElementById("videoPopup").style.display = "none";
+            isClosingPopup = false; // Reset flag
         }
 
         function changeVideoDisplay(step) {

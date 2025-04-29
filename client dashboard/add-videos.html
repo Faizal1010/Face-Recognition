@@ -31,42 +31,42 @@ if (!clientId) {
   window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
 }
 
-                // const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token');
             
-                // if (!token) {
-                //     alert('Access denied. Please log in.');
-                //     window.location.href = 'page-account-login.html'; // Redirect to login page
-                //     return;
-                // }
+                if (!token) {
+                    alert('Access denied. Please log in.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                    return;
+                }
         
-                // // Decode the JWT to verify the user's role
-                // const decodedToken = decodeJWT(token);
+                // Decode the JWT to verify the user's role
+                const decodedToken = decodeJWT(token);
         
-                // if (!decodedToken) {
-                //     alert('Unauthorized access.');
-                //     window.location.href = 'page-account-login.html'; // Redirect to login page
-                // }
+                if (!decodedToken) {
+                    alert('Unauthorized access.');
+                    window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page
+                }
             });
         
-            // // Function to decode the JWT and extract the payload
-            // function decodeJWT(token) {
-            //     try {
-            //         const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-            //         return payload;
-            //     } catch (error) {
-            //         console.error('Error decoding JWT token:', error);
-            //         return null;
-            //     }
-            // }
+            // Function to decode the JWT and extract the payload
+            function decodeJWT(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                    return payload;
+                } catch (error) {
+                    console.error('Error decoding JWT token:', error);
+                    return null;
+                }
+            }
         </script>
     </head>
 
     <body>
         <div class="screen-overlay"></div>
         <aside class="navbar-aside" id="offcanvas_aside">
-            <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="aside-top">
                 <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                    <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                    <img id="logo" style="height: 36px;" src="" class="logo" alt="logo" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -174,7 +174,10 @@ if (!clientId) {
                 <div class="row">
                     <div class="col-9">
                         <div class="content-header">
-                            <h2 class="content-title">Add New Images</h2>
+                            <div>
+                                <h2 class="content-title">Add New Images</h2>
+                                <span style="color: red;">Do not close this page or browser while uploading.</span>
+                            </div>
                             <!-- <div>
                                 <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
                             </div> -->
@@ -297,98 +300,103 @@ if (!clientId) {
         
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form');
-    const videoInput = document.getElementById('videoInput');
-    const eventSelect = document.getElementById('event');
-    const labelInput = document.getElementById('label');
-    const clientCodeInput = document.getElementById('client-code');
-    const thumbnailInput = document.getElementById('thumbnailInput');
-
-    document.getElementById('add-videos-button').addEventListener('click', function (event) {
-        event.preventDefault();
-
-        const files = videoInput.files;
-        const thumbnail = thumbnailInput.files[0];
-        const selectedEvent = eventSelect.value;
-        const label = labelInput.value.trim();
-        const clientCode = clientCodeInput.value;
-
-        if (!files.length) {
-            alert('Please select at least one video.');
-            return;
-        }
-
-        if (!thumbnail) {
-            alert('Please select a thumbnail image.');
-            return;
-        }
-
-        if (!selectedEvent) {
-            alert('Please select an event.');
-            return;
-        }
-
-        if (!label) {
-            alert('Please enter a label.');
-            return;
-        }
-
-        const button = this;
-        const originalContent = button.innerHTML;
-        button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
-        button.disabled = true;
-
-        const style = document.createElement('style');
-        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-        document.head.appendChild(style);
-
-        const formData = new FormData();
-        formData.append('thumbnail', thumbnail);
-        formData.append('event_code', selectedEvent);
-        formData.append('label', label);
-        formData.append('client_id', clientCode);
-        for (let i = 0; i < files.length; i++) {
-            formData.append('video', files[i]);
-        }
-
-        console.log('FormData contents:');
-        for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
-
-        fetch('/video/add-videos', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
-            const parsedData = JSON.parse(data.data.trim());
-            console.log(parsedData);
-
-            if (parsedData.status === 'completed') {
-                alert('Processing completed successfully!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Something went wrong.'));
-            }
-        })
-        .catch(error => {
-            console.error('Upload error:', error);
-            alert('Failed to upload. Please try again.');
-        })
-        .finally(() => {
-            button.innerHTML = originalContent;
-            button.disabled = false;
-        });
-    });
-});
+                const form = document.querySelector('form');
+                const videoInput = document.getElementById('videoInput');
+                const eventSelect = document.getElementById('event');
+                const labelInput = document.getElementById('label');
+                const clientCodeInput = document.getElementById('client-code');
+                const thumbnailInput = document.getElementById('thumbnailInput');
+        
+                document.getElementById('add-videos-button').addEventListener('click', function (event) {
+                    event.preventDefault();
+        
+                    const files = videoInput.files;
+                    const thumbnail = thumbnailInput.files[0];
+                    const selectedEvent = eventSelect.value;
+                    const label = labelInput.value.trim();
+                    const clientCode = clientCodeInput.value;
+        
+                    if (!files.length) {
+                        alert('Please select at least one video.');
+                        return;
+                    }
+        
+                    if (!thumbnail) {
+                        alert('Please select a thumbnail image.');
+                        return;
+                    }
+        
+                    // Check if thumbnail size exceeds 1 MB (1,048,576 bytes)
+                    if (thumbnail.size > 5*1048576) {
+                        alert('Thumbnail image must be 5 MB or less. Please upload a smaller image.');
+                        return;
+                    }
+        
+                    if (!selectedEvent) {
+                        alert('Please select an event.');
+                        return;
+                    }
+        
+                    if (!label) {
+                        alert('Please enter a label.');
+                        return;
+                    }
+        
+                    const button = this;
+                    const originalContent = button.innerHTML;
+                    button.innerHTML = '<span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></span>';
+                    button.disabled = true;
+        
+                    const style = document.createElement('style');
+                    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                    document.head.appendChild(style);
+        
+                    const formData = new FormData();
+                    formData.append('thumbnail', thumbnail);
+                    formData.append('event_code', selectedEvent);
+                    formData.append('label', label);
+                    formData.append('client_id', clientCode);
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('video', files[i]);
+                    }
+        
+                    console.log('FormData contents:');
+                    for (const [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
+        
+                    fetch('/video/add-videos', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        const parsedData = JSON.parse(data.data.trim());
+                        console.log(parsedData);
+        
+                        if (parsedData.status === 'completed') {
+                            alert('Processing completed successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.message || 'Something went wrong.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        alert('Failed to upload. Please try again.');
+                    })
+                    .finally(() => {
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                    });
+                });
+            });
         </script>
             
-
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const token = localStorage.getItem('token');
@@ -403,6 +411,9 @@ if (!clientId) {
                         .then(data => {
                             const profile = document.getElementById('user-profile').querySelector('img');
                             profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+
+                            const logo = document.getElementById('logo')
+                            logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
 
                             const addImagesLink = document.getElementById('add-images')
                             addImagesLink.href = `http://localhost:3000/client-dashboard/add-images?clientId=${encodeURIComponent(decodedToken.id)}`;
@@ -421,7 +432,7 @@ if (!clientId) {
             </script>
             
         <script>
-            document.getElementById('logout').addEventListener('click', function () {
+        document.getElementById('logout').addEventListener('click', function () {
         // Remove the token from localStorage
         localStorage.removeItem('token');
         

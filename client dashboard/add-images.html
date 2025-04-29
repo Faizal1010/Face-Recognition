@@ -64,9 +64,9 @@ if (!clientId) {
     <body>
         <div class="screen-overlay"></div>
         <aside class="navbar-aside" id="offcanvas_aside">
-            <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="aside-top">
                 <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                    <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                    <img id="logo" style="height: 36px;" src="" class="logo" alt="logo" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -390,6 +390,9 @@ if (!clientId) {
                         .then(data => {
                             const profile = document.getElementById('user-profile').querySelector('img');
                             profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+
+                             logo = document.getElementById('logo')
+                            logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
 
                             const addVideosLink = document.getElementById('add-videos')
                             addVideosLink.href = `http://localhost:3000/client-dashboard/add-videos?clientId=${encodeURIComponent(decodedToken.id)}`;

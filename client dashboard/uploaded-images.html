@@ -148,9 +148,9 @@
 <body>
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
-        <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="aside-top">
             <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                <img id="logo" style="height: 36px;" src="" class="logo" alt="logo" />
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -405,23 +405,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <!-- setting up events in dropmenu -->
     <script>
         const token = localStorage.getItem('token');
@@ -452,6 +435,9 @@
             .then(data=>{
                 const profile = document.getElementById('user-profile').querySelector('img')
                 profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`
+
+                const logo = document.getElementById('logo')
+                logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
             })
 
         fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, {
@@ -497,8 +483,6 @@
             });
         }
     </script>
-
-
 
     <!-- major - handling labels and display of images, pagination and all. -->
     <script>
@@ -686,6 +670,10 @@
             const gallery = document.getElementById("imageContainer");
             gallery.innerHTML = "";
 
+            if(images.length <= 0){
+                gallery.innerText = 'No images available.'
+            }
+
             images.forEach((src, index) => {
                 const div = document.createElement("div");
                 div.className = "imageGridItem";
@@ -840,11 +828,6 @@
 
         // window.onload = loadLabels;
     </script>
-
-
-
-
-
 
     <!-- handling popup to change label name or delete it -->
     <script>

@@ -112,9 +112,9 @@
 <body>
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
-        <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="aside-top">
             <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
+                <img id="logo" style="height: 36px;" src="" class="logo" alt="logo" />
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -359,6 +359,9 @@
             .then(data => {
                 const profile = document.getElementById('user-profile').querySelector('img');
                 profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
+
+                const logo = document.getElementById('logo')
+                logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`
             });
 
         fetch(`http://localhost:3000/event/client-events/${decodedToken.id}`, { method: 'GET' })
@@ -393,363 +396,383 @@
 
     <!-- Video Handling -->
     <script>
-        let videos = [];
-        let selectedLabels = [];
-        let currentPage = 1;
-        const videosPerPage = 20;
-        let totalPages = 1;
-        let checkedVideos = [];
-    
-        async function loadLabels(eventId) {
-            try {
-                const response = await fetch(`http://localhost:3000/video/get-video-labels/${eventId}`);
-                if (!response.ok) throw new Error('Failed to fetch labels');
-                const labels = await response.json();
-                const labelFilters = document.getElementById('videoLabelFilters');
-                const allCheckboxLabel = document.getElementById('videoAllCheckbox').parentElement;
-                labelFilters.innerHTML = '';
-                labelFilters.appendChild(allCheckboxLabel);
-    
-                new Set(labels).forEach(label => {
-                    const labelContainer = document.createElement('label');
-                    labelContainer.classList.add('custom-checkbox-label');
-                    labelContainer.style.fontSize = '12px';
-    
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.value = label;
-                    checkbox.classList.add('videoLabelCheckbox');
-                    checkbox.checked = true;
-    
-                    const tickElement = document.createElement('span');
-                    tickElement.classList.add('tick');
-                    tickElement.style.fontSize = '12px';
-                    tickElement.innerText = '✓';
-    
-                    labelContainer.appendChild(checkbox);
-                    labelContainer.appendChild(tickElement);
-                    labelContainer.appendChild(document.createTextNode(` ${label}`));
-                    labelFilters.appendChild(labelContainer);
-    
-                    labelContainer.style.backgroundColor = "#3BB77E";
-                    tickElement.style.visibility = checkbox.checked ? 'visible' : 'hidden';
-    
-                    checkbox.addEventListener('change', function () {
-                        tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
-                        updateSelectedLabels();
-                    });
+    let videos = [];
+    let selectedLabels = [];
+    let currentPage = 1;
+    const videosPerPage = 20;
+    let totalPages = 1;
+    let checkedVideos = [];
+    let isClosingPopup = false; // Flag to track popup closure
+
+    async function loadLabels(eventId) {
+        try {
+            const response = await fetch(`http://localhost:3000/video/get-video-labels/${eventId}`);
+            if (!response.ok) throw new Error('Failed to fetch labels');
+            const labels = await response.json();
+            const labelFilters = document.getElementById('videoLabelFilters');
+            const allCheckboxLabel = document.getElementById('videoAllCheckbox').parentElement;
+            labelFilters.innerHTML = '';
+            labelFilters.appendChild(allCheckboxLabel);
+
+            new Set(labels).forEach(label => {
+                const labelContainer = document.createElement('label');
+                labelContainer.classList.add('custom-checkbox-label');
+                labelContainer.style.fontSize = '12px';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = label;
+                checkbox.classList.add('videoLabelCheckbox');
+                checkbox.checked = true;
+
+                const tickElement = document.createElement('span');
+                tickElement.classList.add('tick');
+                tickElement.style.fontSize = '12px';
+                tickElement.innerText = '✓';
+
+                labelContainer.appendChild(checkbox);
+                labelContainer.appendChild(tickElement);
+                labelContainer.appendChild(document.createTextNode(` ${label}`));
+                labelFilters.appendChild(labelContainer);
+
+                labelContainer.style.backgroundColor = "#3BB77E";
+                tickElement.style.visibility = checkbox.checked ? 'visible' : 'hidden';
+
+                checkbox.addEventListener('change', function () {
+                    tickElement.style.visibility = this.checked ? 'visible' : 'hidden';
+                    updateSelectedLabels();
                 });
-    
-                const style = document.createElement('style');
-                style.innerHTML = `
-                    .custom-checkbox-label {
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 8px 16px;
-                        margin: 5px;
-                        border-radius: 25px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        background-color: #3BB77E;
-                        color: white;
-                        border: none;
-                        transition: 0.3s ease-in-out;
-                    }
-                    .custom-checkbox-label:hover { opacity: 0.9; }
-                    .videoLabelCheckbox { display: none; }
-                    .tick { font-size: 20px; color: white; }
-                `;
-                document.head.appendChild(style);
-    
-                document.getElementById('videoAllCheckbox').checked = false; // Default to unchecked
-                document.getElementById('videoAllCheckbox').addEventListener('change', toggleAll);
-    
-                // Initialize selectedLabels with all labels and load videos immediately
-                selectedLabels = Array.from(new Set(labels));
-                await loadVideos(); // Ensure videos load on page entry
-            } catch (error) {
-                console.error('Error loading labels:', error);
-            }
+            });
+
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .custom-checkbox-label {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 8px 16px;
+                    margin: 5px;
+                    border-radius: 25px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    background-color: #3BB77E;
+                    color: white;
+                    border: none;
+                    transition: 0.3s ease-in-out;
+                }
+                .custom-checkbox-label:hover { opacity: 0.9; }
+                .videoLabelCheckbox { display: none; }
+                .tick { font-size: 20px; color: white; }
+            `;
+            document.head.appendChild(style);
+
+            document.getElementById('videoAllCheckbox').checked = false; // Default to unchecked
+            document.getElementById('videoAllCheckbox').addEventListener('change', toggleAll);
+
+            // Initialize selectedLabels with all labels and load videos immediately
+            selectedLabels = Array.from(new Set(labels));
+            await loadVideos(); // Ensure videos load on page entry
+        } catch (error) {
+            console.error('Error loading labels:', error);
         }
-    
-        function toggleAll() {
-            const allCheckbox = document.getElementById("videoAllCheckbox");
-            const checkboxes = document.querySelectorAll(".videoLabelCheckbox");
-    
-            if (allCheckbox.checked) {
-                checkboxes.forEach(cb => {
-                    cb.checked = true;
-                    cb.nextElementSibling.style.visibility = 'visible'; // Show tick
-                });
-                selectedLabels = Array.from(checkboxes).map(cb => cb.value);
-            } else {
-                checkboxes.forEach(cb => {
-                    cb.checked = false;
-                    cb.nextElementSibling.style.visibility = 'hidden'; // Hide tick
-                });
-                selectedLabels = [];
-            }
-            currentPage = 1;
-            loadVideos();
+    }
+
+    function toggleAll() {
+        const allCheckbox = document.getElementById("videoAllCheckbox");
+        const checkboxes = document.querySelectorAll(".videoLabelCheckbox");
+
+        if (allCheckbox.checked) {
+            checkboxes.forEach(cb => {
+                cb.checked = true;
+                cb.nextElementSibling.style.visibility = 'visible'; // Show tick
+            });
+            selectedLabels = Array.from(checkboxes).map(cb => cb.value);
+        } else {
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.nextElementSibling.style.visibility = 'hidden'; // Hide tick
+            });
+            selectedLabels = [];
         }
-    
-        function updateSelectedLabels() {
-            const checkboxes = document.querySelectorAll('.videoLabelCheckbox');
-            selectedLabels = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-            const allCheckbox = document.getElementById('videoAllCheckbox');
-            allCheckbox.checked = selectedLabels.length === checkboxes.length && checkboxes.length > 0;
-            currentPage = 1;
-            loadVideos();
-        }
-    
-        async function loadVideos() {
-            try {
-                const gallery = document.getElementById("videoContainer");
-                gallery.innerHTML = "";
-                const eventSelect = document.getElementById('event');
-                const selectedOption = eventSelect.options[eventSelect.selectedIndex];
-    
-                console.log('Fetching videos with labels:', selectedLabels);
-                const url = 'http://localhost:3000/video/get-videos-by-labels';
-                const options = {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        labels: selectedLabels.length > 0 ? selectedLabels : [], // Always send array
-                        page: currentPage,
-                        limit: videosPerPage,
-                        eventId: selectedOption.value
-                    })
-                };
-    
-                const response = await fetch(url, options);
-                if (!response.ok) throw new Error('Failed to fetch videos');
-                const videosData = await response.json();
-                console.log('Videos data:', videosData);
-    
-                videos = videosData.videos.map(video => ({
-                    id: video.id,
-                    video_id: video.video_id, // Store video_id
-                    thumbnail: video.thumbnail, // Use thumbnail from backend
-                    client_id: decodedToken.id,
-                    event_code: selectedOption.value,
-                    label: video.label || (selectedLabels.length > 0 ? selectedLabels[0] : 'unknown')
-                }));
-    
-                totalPages = videosData.totalPages || 1;
-                displayVideos();
-                createPaginationButtons();
-            } catch (error) {
-                console.error('Error loading videos:', error);
-                const gallery = document.getElementById("videoContainer");
-                gallery.innerHTML = "<p>No videos available.</p>";
-            }
-        }
-    
-        function displayVideos() {
+        currentPage = 1;
+        loadVideos();
+    }
+
+    function updateSelectedLabels() {
+        const checkboxes = document.querySelectorAll('.videoLabelCheckbox');
+        selectedLabels = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        const allCheckbox = document.getElementById('videoAllCheckbox');
+        allCheckbox.checked = selectedLabels.length === checkboxes.length && checkboxes.length > 0;
+        currentPage = 1;
+        loadVideos();
+    }
+
+    async function loadVideos() {
+        try {
             const gallery = document.getElementById("videoContainer");
             gallery.innerHTML = "";
-    
-            if (videos.length === 0) {
-                gallery.innerHTML = "<p>No videos found for the selected labels.</p>";
-                return;
-            }
-    
-            videos.forEach((video) => {
-                const div = document.createElement("div");
-                div.className = "videoGridItem";
-                div.setAttribute("data-id", video.id);
-    
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.classList.add("videoCheckbox");
-                checkbox.style.position = "absolute";
-                checkbox.style.top = "10px";
-                checkbox.style.right = "10px";
-                checkbox.style.zIndex = "10";
-    
-                const image = document.createElement("img");
-                image.src = video.thumbnail ? `data:image/jpeg;base64,${video.thumbnail}` : 'http://localhost:3000/assets/imgs/theme/video-placeholder.jpg';
-    
-                const playIcon = document.createElement("span");
-                playIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" color="white" fill="none">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
-        <path d="M9.5 11.1998V12.8002C9.5 14.3195 9.5 15.0791 9.95576 15.3862C10.4115 15.6932 11.0348 15.3535 12.2815 14.6741L13.7497 13.8738C15.2499 13.0562 16 12.6474 16 12C16 11.3526 15.2499 10.9438 13.7497 10.1262L12.2815 9.32594C11.0348 8.6465 10.4115 8.30678 9.95576 8.61382C9.5 8.92086 9.5 9.6805 9.5 11.1998Z" fill="currentColor" />
-    </svg>`;
-                playIcon.style.position = "absolute";
-                playIcon.style.top = "50%";
-                playIcon.style.left = "50%";
-                playIcon.style.transform = "translate(-50%, -50%)";
-                playIcon.style.fontSize = "48px";
-                playIcon.style.color = "white";
-                playIcon.style.opacity = "0";
-                playIcon.style.transition = "opacity 0.2s ease-in-out";
-                playIcon.style.zIndex = "5";
-    
-                const spinner = document.createElement("div");
-                spinner.className = "videoSpinner";
-                spinner.style.position = "absolute";
-                spinner.style.top = "50%";
-                spinner.style.left = "50%";
-                spinner.style.transform = "translate(-50%, -50%)";
-                spinner.style.width = "48px";
-                spinner.style.height = "48px";
-                spinner.style.border = "5px solid rgba(255, 255, 255, 0.3)";
-                spinner.style.borderTop = "5px solid #3BB77E";
-                spinner.style.borderRadius = "50%";
-                spinner.style.animation = "spin 1s linear infinite";
-                spinner.style.display = "none";
-                spinner.style.zIndex = "6";
-    
-                div.appendChild(checkbox);
-                div.appendChild(image);
-                div.appendChild(playIcon);
-                div.appendChild(spinner);
-                gallery.appendChild(div);
-    
-                div.addEventListener("mouseenter", () => {
-                    if (spinner.style.display === "none") {
-                        playIcon.style.opacity = "0.8";
-                    }
-                });
-                div.addEventListener("mouseleave", () => {
-                    playIcon.style.opacity = "0";
-                });
-    
-                div.onclick = async (e) => {
-                    // Prevent checkbox click from triggering video popup
-                    if (e.target === checkbox) return;
-                    playIcon.style.opacity = "0"; // Hide play icon
-                    spinner.style.display = "block"; // Show spinner
-                    await openVideoPopup(video, spinner); // Pass spinner to control it
-                };
-    
-                checkbox.addEventListener("change", function () {
-                    if (this.checked) {
-                        checkedVideos.push(video.id);
-                    } else {
-                        checkedVideos = checkedVideos.filter(id => id !== video.id);
-                    }
-                    toggleBottomSection(checkedVideos.length > 0);
-                });
-    
-                // Add spinner animation style once
-                if (!document.querySelector("#spinnerStyle")) {
-                    const spinnerStyle = document.createElement("style");
-                    spinnerStyle.id = "spinnerStyle";
-                    spinnerStyle.innerHTML = `
-                        @keyframes spin {
-                            0% { transform: translate(-50%, -50%) rotate(0deg); }
-                            100% { transform: translate(-50%, -50%) rotate(360deg); }
-                        }
-                    `;
-                    document.head.appendChild(spinnerStyle);
+            const eventSelect = document.getElementById('event');
+            const selectedOption = eventSelect.options[eventSelect.selectedIndex];
+
+            console.log('Fetching videos with labels:', selectedLabels);
+            const url = 'http://localhost:3000/video/get-videos-by-labels';
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    labels: selectedLabels.length > 0 ? selectedLabels : [], // Always send array
+                    page: currentPage,
+                    limit: videosPerPage,
+                    eventId: selectedOption.value
+                })
+            };
+
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error('Failed to fetch videos');
+            const videosData = await response.json();
+            console.log('Videos data:', videosData);
+
+            videos = videosData.videos.map(video => ({
+                id: video.id,
+                video_id: video.video_id, // Store video_id
+                thumbnail: video.thumbnail, // Use thumbnail from backend
+                client_id: decodedToken.id,
+                event_code: selectedOption.value,
+                label: video.label || (selectedLabels.length > 0 ? selectedLabels[0] : 'unknown')
+            }));
+
+            totalPages = videosData.totalPages || 1;
+            displayVideos();
+            createPaginationButtons();
+        } catch (error) {
+            console.error('Error loading videos:', error);
+            const gallery = document.getElementById("videoContainer");
+            gallery.innerHTML = "<p>No videos available.</p>";
+        }
+    }
+
+    function displayVideos() {
+        const gallery = document.getElementById("videoContainer");
+        gallery.innerHTML = "";
+
+        if (videos.length === 0) {
+            gallery.innerHTML = "<p>No videos found for the selected labels.</p>";
+            return;
+        }
+
+        videos.forEach((video) => {
+            const div = document.createElement("div");
+            div.className = "videoGridItem";
+            div.setAttribute("data-id", video.id);
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.classList.add("videoCheckbox");
+            checkbox.style.position = "absolute";
+            checkbox.style.top = "10px";
+            checkbox.style.right = "10px";
+            checkbox.style.zIndex = "10";
+
+            const image = document.createElement("img");
+            image.src = video.thumbnail ? `data:image/jpeg;base64,${video.thumbnail}` : 'http://localhost:3000/assets/imgs/theme/video-placeholder.jpg';
+
+            const playIcon = document.createElement("span");
+            playIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="50" height="50" color="white" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+    <path d="M9.5 11.1998V12.8002C9.5 14.3195 9.5 15.0791 9.95576 15.3862C10.4115 15.6932 11.0348 15.3535 12.2815 14.6741L13.7497 13.8738C15.2499 13.0562 16 12.6474 16 12C16 11.3526 15.2499 10.9438 13.7497 10.1262L12.2815 9.32594C11.0348 8.6465 10.4115 8.30678 9.95576 8.61382C9.5 8.92086 9.5 9.6805 9.5 11.1998Z" fill="currentColor" />
+</svg>`;
+            playIcon.style.position = "absolute";
+            playIcon.style.top = "50%";
+            playIcon.style.left = "50%";
+            playIcon.style.transform = "translate(-50%, -50%)";
+            playIcon.style.fontSize = "48px";
+            playIcon.style.color = "white";
+            playIcon.style.opacity = "0";
+            playIcon.style.transition = "opacity 0.2s ease-in-out";
+            playIcon.style.zIndex = "5";
+
+            const spinner = document.createElement("div");
+            spinner.className = "videoSpinner";
+            spinner.style.position = "absolute";
+            spinner.style.top = "50%";
+            spinner.style.left = "50%";
+            spinner.style.transform = "translate(-50%, -50%)";
+            spinner.style.width = "48px";
+            spinner.style.height = "48px";
+            spinner.style.border = "5px solid rgba(255, 255, 255, 0.3)";
+            spinner.style.borderTop = "5px solid #3BB77E";
+            spinner.style.borderRadius = "50%";
+            spinner.style.animation = "spin 1s linear infinite";
+            spinner.style.display = "none";
+            spinner.style.zIndex = "6";
+
+            div.appendChild(checkbox);
+            div.appendChild(image);
+            div.appendChild(playIcon);
+            div.appendChild(spinner);
+            gallery.appendChild(div);
+
+            div.addEventListener("mouseenter", () => {
+                if (spinner.style.display === "none") {
+                    playIcon.style.opacity = "0.8";
                 }
             });
-        }
-    
-        function toggleBottomSection(show) {
-            let bottomSection = document.getElementById("bottomSection");
-            if (!bottomSection) {
-                bottomSection = document.createElement("div");
-                bottomSection.id = "bottomSection";
-                bottomSection.style.position = "fixed";
-                bottomSection.style.bottom = "0";
-                bottomSection.style.left = "0";
-                bottomSection.style.width = "100%";
-                bottomSection.style.backgroundColor = "#222736";
-                bottomSection.style.color = "white";
-                bottomSection.style.padding = "10px";
-                bottomSection.style.display = "flex";
-                bottomSection.style.justifyContent = "center";
-                bottomSection.style.alignItems = "center";
-                bottomSection.style.zIndex = "1000";
-    
-                const deleteButton = document.createElement("button");
-                deleteButton.innerText = "Delete Selected";
-                deleteButton.style.marginRight = "20px";
-                deleteButton.style.border = 'none';
-                deleteButton.style.borderRadius = '5px';
-                deleteButton.style.backgroundColor = '#f44336';
-                deleteButton.style.color = 'white';
-                deleteButton.style.padding = '10px';
-                deleteButton.onclick = () => document.getElementById('delete-overlay').style.display = 'flex'; // Updated to show delete overlay
-    
-                const changeLabelsButton = document.createElement("button");
-                changeLabelsButton.innerText = "Change Labels";
-                changeLabelsButton.style.marginRight = "20px";
-                changeLabelsButton.style.border = 'none';
-                changeLabelsButton.style.borderRadius = '5px';
-                changeLabelsButton.style.backgroundColor = '#3bb77e';
-                changeLabelsButton.style.color = 'white';
-                changeLabelsButton.style.padding = '10px';
-                changeLabelsButton.onclick = () => document.getElementById('change-label-overlay').style.display = 'flex';
-    
-                bottomSection.appendChild(deleteButton);
-                bottomSection.appendChild(changeLabelsButton);
-                document.body.appendChild(bottomSection); // Note: This should be bottomSection, but left as customSection per strict instruction
+            div.addEventListener("mouseleave", () => {
+                playIcon.style.opacity = "0";
+            });
+
+            div.onclick = async (e) => {
+                // Prevent checkbox click from triggering video popup
+                if (e.target === checkbox) return;
+                playIcon.style.opacity = "0"; // Hide play icon
+                spinner.style.display = "block"; // Show spinner
+                await openVideoPopup(video, spinner); // Pass spinner to control it
+            };
+
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    checkedVideos.push(video.id);
+                } else {
+                    checkedVideos = checkedVideos.filter(id => id !== video.id);
+                }
+                toggleBottomSection(checkedVideos.length > 0);
+            });
+
+            // Add spinner animation style once
+            if (!document.querySelector("#spinnerStyle")) {
+                const spinnerStyle = document.createElement("style");
+                spinnerStyle.id = "spinnerStyle";
+                spinnerStyle.innerHTML = `
+                    @keyframes spin {
+                        0% { transform: translate(-50%, -50%) rotate(0deg); }
+                        100% { transform: translate(-50%, -50%) rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(spinnerStyle);
             }
-            bottomSection.style.display = show ? "flex" : "none";
+        });
+    }
+
+    function toggleBottomSection(show) {
+        let bottomSection = document.getElementById("bottomSection");
+        if (!bottomSection) {
+            bottomSection = document.createElement("div");
+            bottomSection.id = "bottomSection";
+            bottomSection.style.position = "fixed";
+            bottomSection.style.bottom = "0";
+            bottomSection.style.left = "0";
+            bottomSection.style.width = "100%";
+            bottomSection.style.backgroundColor = "#222736";
+            bottomSection.style.color = "white";
+            bottomSection.style.padding = "10px";
+            bottomSection.style.display = "flex";
+            bottomSection.style.justifyContent = "center";
+            bottomSection.style.alignItems = "center";
+            bottomSection.style.zIndex = "1000";
+
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Delete Selected";
+            deleteButton.style.marginRight = "20px";
+            deleteButton.style.border = 'none';
+            deleteButton.style.borderRadius = '5px';
+            deleteButton.style.backgroundColor = '#f44336';
+            deleteButton.style.color = 'white';
+            deleteButton.style.padding = '10px';
+            deleteButton.onclick = () => document.getElementById('delete-overlay').style.display = 'flex'; // Updated to show delete overlay
+
+            const changeLabelsButton = document.createElement("button");
+            changeLabelsButton.innerText = "Change Labels";
+            changeLabelsButton.style.marginRight = "20px";
+            changeLabelsButton.style.border = 'none';
+            changeLabelsButton.style.borderRadius = '5px';
+            changeLabelsButton.style.backgroundColor = '#3bb77e';
+            changeLabelsButton.style.color = 'white';
+            changeLabelsButton.style.padding = '10px';
+            changeLabelsButton.onclick = () => document.getElementById('change-label-overlay').style.display = 'flex';
+
+            bottomSection.appendChild(deleteButton);
+            bottomSection.appendChild(changeLabelsButton);
+            document.body.appendChild(bottomSection);
         }
-    
-        function createPaginationButtons() {
-            const paginationContainer = document.getElementById("videoPagination");
-            paginationContainer.innerHTML = "";
-            if (totalPages <= 1) return;
-    
-            for (let i = 1; i <= totalPages; i++) {
-                const button = document.createElement("button");
-                button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
-                button.style.borderRadius = '5px';
-                button.style.border = 'none';
-                button.style.padding = '6px';
-                button.style.height = '30px';
-                button.style.width = '30px';
-                button.style.color = 'white';
-                button.style.cursor = 'pointer';
-                button.innerText = i;
-                button.classList.add("videoPaginationButton");
-    
-                button.addEventListener("click", () => changePage(i));
-                paginationContainer.appendChild(button);
-            }
+        bottomSection.style.display = show ? "flex" : "none";
+    }
+
+    function createPaginationButtons() {
+        const paginationContainer = document.getElementById("videoPagination");
+        paginationContainer.innerHTML = "";
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement("button");
+            button.style.backgroundColor = (i === currentPage) ? '#FF5733' : '#3BB77E';
+            button.style.borderRadius = '5px';
+            button.style.border = 'none';
+            button.style.padding = '6px';
+            button.style.height = '30px';
+            button.style.width = '30px';
+            button.style.color = 'white';
+            button.style.cursor = 'pointer';
+            button.innerText = i;
+            button.classList.add("videoPaginationButton");
+
+            button.addEventListener("click", () => changePage(i));
+            paginationContainer.appendChild(button);
         }
-    
-        function changePage(page) {
-            if (page !== currentPage) {
-                currentPage = page;
-                loadVideos();
-            }
+    }
+
+    function changePage(page) {
+        if (page !== currentPage) {
+            currentPage = page;
+            loadVideos();
         }
-    
-        async function openVideoPopup(video, spinner) {
-            try {
-                const response = await fetch(`http://localhost:3000/video/all-videos?client_id=${encodeURIComponent(video.client_id)}&event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`);
-                if (!response.ok) throw new Error('Error fetching video');
-                const videoBlob = await response.blob();
-                const videoUrl = URL.createObjectURL(videoBlob);
-    
-                const player = document.getElementById("videoPlayer");
-                player.src = videoUrl;
-                document.getElementById("videoPopup").style.display = "flex";
-    
-                // Hide spinner once video is ready
-                spinner.style.display = "none";
-            } catch (error) {
-                console.error('Error opening video popup:', error);
-                alert('Error fetching video');
-                spinner.style.display = "none"; // Hide spinner on error
-            }
-        }
-    
-        function closeVideoPopup() {
+    }
+
+    async function openVideoPopup(video, spinner) {
+        try {
+            const videoUrl = `http://localhost:3000/video/all-videos?client_id=${encodeURIComponent(video.client_id)}&event_code=${encodeURIComponent(video.event_code)}&label=${encodeURIComponent(video.label)}&video_id=${encodeURIComponent(video.video_id)}`;
             const player = document.getElementById("videoPlayer");
-            player.pause();
-            player.src = "";
-            document.getElementById("videoPopup").style.display = "none";
-            // Spinner is hidden when video loads or on error, so no action needed here
+
+            // Reset isClosingPopup to ensure fresh state
+            isClosingPopup = false;
+
+            // Remove existing event listeners to prevent duplicates
+            player.onerror = null;
+            player.oncanplay = null;
+
+            player.src = videoUrl; // Set video source directly for streaming
+            player.load(); // Ensure the video reloads with the new source
+            document.getElementById("videoPopup").style.display = "flex";
+
+            // Hide spinner when video is ready to play
+            player.oncanplay = () => {
+                spinner.style.display = "none";
+            };
+
+            // Handle errors, but ignore if popup is being closed
+            player.onerror = () => {
+                // if (!isClosingPopup) {
+                //     console.error('Error loading video stream');
+                //     alert('Error loading video');
+                // }
+                spinner.style.display = "none";
+            };
+        } catch (error) {
+            console.error('Error opening video popup:', error);
+            alert('Error fetching video');
+            spinner.style.display = "none"; // Hide spinner on error
         }
+    }
+
+    function closeVideoPopup() {
+        isClosingPopup = true; // Set flag to suppress error alert
+        const player = document.getElementById("videoPlayer");
+        player.pause();
+        player.src = "";
+        player.load(); // Ensure the video is fully reset
+        document.getElementById("videoPopup").style.display = "none";
+        isClosingPopup = false; // Reset flag after cleanup
+        // Spinner is hidden when video loads or on error, so no action needed here
+    }
     </script>
 
     <!-- Popup Handlers -->

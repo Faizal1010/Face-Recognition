@@ -36,6 +36,7 @@
               alert('Unauthorized access. Admins only.');
               window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page
           }
+
       });
   
       // Function to decode the JWT and extract the payload
@@ -54,7 +55,7 @@
   <body>
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
-      <div class="" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="aside-top" style="display: flex; justify-content: space-between; align-items: center;">
           <a href="http://localhost:3000/super-admin-dashboard" class="brand-wrap">
               <img style="width: 250px;" src="http://localhost:3000/assets/imgs/theme/logo.png" class="logo" alt="Nest Dashboard" />
           </a>
@@ -71,9 +72,10 @@
                   </a>
               </li>
         
-              <li class="menu-item active"  >
+              <li class="menu-item active">
                   <a class="menu-link" href="http://localhost:3000/super-admin-dashboard/customers">
                       <i class="icon material-icons md-group"></i>
+
                       <span class="text">Customers</span>
                   </a>
               </li>
@@ -84,7 +86,13 @@
                       <span class="text">Add Customer</span>
                   </a>
               </li>
-          </ul>
+              
+              <li class="menu-item">
+                  <a class="menu-link" href="http://localhost:3000/super-admin-dashboard/plans">
+                      <i class="icon material-icons md-request_quote"></i>
+                      <span class="text">Plans</span>
+                  </a>
+              </li>
           <br/>
           <br/>
       </nav>
@@ -188,30 +196,15 @@
                   src="http://localhost:3000/assets/imgs/people/avatar-2.png"
                   alt="User"
               /></a>
-              <div
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="dropdownAccount"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-perm_identity"></i>Edit
-                  Profile</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-settings"></i>Account Settings</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-account_balance_wallet"></i
-                  >Wallet</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-receipt"></i>Billing</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="material-icons md-help_outline"></i>Help center</a
-                >
-                <div class="dropdown-divider"></div>
-                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
-              </div>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
+                                <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                                <div class="dropdown-divider"></div>
+                                <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
+                            </div>
             </li>
           </ul>
         </div>
@@ -421,6 +414,8 @@
     
         // Show popup immediately
         popup.style.display = 'block';
+        overlay.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
+        overlay.style.zIndex = '1000';
         overlay.style.display = 'block';
     
         // Get client ID from the button

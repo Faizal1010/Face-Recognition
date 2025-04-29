@@ -301,4 +301,19 @@ app.use('/plan', require('./routes/planRoutes'));
 app.use('/client-dashboard', require('./routes/clientDashboard'))
 app.use('/super-admin-dashboard', require('./routes/superAdminDashboard'))
 
+
+
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (fs.existsSync(uploadsDir)) {
+    fs.readdirSync(uploadsDir).forEach(file => {
+        const filePath = path.join(uploadsDir, file);
+        try {
+            fs.unlinkSync(filePath);
+            console.log(`Deleted residual file: ${filePath}`);
+        } catch (err) {
+            console.error(`Error deleting file ${filePath}:`, err);
+        }
+    });
+}
 app.listen(3000, () => console.log('🚀 Server running on port 3000'));
