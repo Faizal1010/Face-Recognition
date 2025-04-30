@@ -166,6 +166,20 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
     </style>
+      <script>
+        document.addEventListener('DOMContentLoaded',() => {
+    
+            const eventCode = localStorage.getItem('eventId')
+            fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('heyyyy')
+                        } else {
+                            window.location.href = 'http://localhost:3000/gallery.html'
+                        }
+                    })
+        })
+    </script>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; text-align: center;">
 

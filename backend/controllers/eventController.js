@@ -205,6 +205,7 @@ const getEventsByClientId = async (req, res) => {
 };
 
 const checkEventExists = (req, res) => {
+    console.log('Hit checkEventExist')
     const { event_code } = req.params;
 
     if (!event_code) {

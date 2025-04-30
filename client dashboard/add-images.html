@@ -31,33 +31,49 @@ if (!clientId) {
   window.location.href = 'http://localhost:3000/super-admin-dashboard/login';
 }
 
-                // const token = localStorage.getItem('token');
+                const token = localStorage.getItem('token');
             
-                // if (!token) {
-                //     alert('Access denied. Please log in.');
-                //     window.location.href = 'page-account-login.html'; // Redirect to login page
-                //     return;
-                // }
+                if (!token) {
+                    alert('Access denied. Please log in.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                    return;
+                }
         
-                // // Decode the JWT to verify the user's role
-                // const decodedToken = decodeJWT(token);
+                // Decode the JWT to verify the user's role
+                const decodedToken = decodeJWT(token);
         
-                // if (!decodedToken) {
-                //     alert('Unauthorized access.');
-                //     window.location.href = 'page-account-login.html'; // Redirect to login page
-                // }
+                if (!decodedToken) {
+                    alert('Unauthorized access.');
+                    window.location.href = 'page-account-login.html'; // Redirect to login page
+                }
+
+
+                const checkExistenceOfClient = fetch(`/clients/code-client/${decodedToken.id}`)
+                    .then(response=>response.json())
+                    .then(data=>{
+                        console.log(data, "data s")
+                        if(data.success == !true){
+                            alert("Client doesn't exist.")
+                            window.location.href = 'http://localhost:3000/super-admin-dashboard/login'
+                        }
+                        else{
+                            console.log("working")
+                            const storage_used_span = document.getElementById('storage_used_span')
+                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used}`
+                        }
+                    })
             });
         
-            // // Function to decode the JWT and extract the payload
-            // function decodeJWT(token) {
-            //     try {
-            //         const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
-            //         return payload;
-            //     } catch (error) {
-            //         console.error('Error decoding JWT token:', error);
-            //         return null;
-            //     }
-            // }
+            // Function to decode the JWT and extract the payload
+            function decodeJWT(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload from the JWT token
+                    return payload;
+                } catch (error) {
+                    console.error('Error decoding JWT token:', error);
+                    return null;
+                }
+            }
         </script>
     </head>
 
@@ -120,15 +136,11 @@ if (!clientId) {
                 <div class="col-search">
                     <form class="searchform">
                         <div class="input-group">
-                            <input list="search_terms" type="text" class="form-control" placeholder="Search term" />
-                            <button class="btn btn-light bg" type="button"><i class="material-icons md-search"></i></button>
+                            <span id="storage_used_span" style="color: white; font-size: 20px;">
+
+                            </span>
                         </div>
-                        <datalist id="search_terms">
-                            <option value="Products"></option>
-                            <option value="New orders"></option>
-                            <option value="Apple iphone"></option>
-                            <option value="Ahmed Hassan"></option>
-                        </datalist>
+
                     </form>
                 </div>
                 <div class="col-nav">

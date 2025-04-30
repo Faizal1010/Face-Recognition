@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wedding Story</title>
+    <script>
+        document.addEventListener('DOMContentLoaded',() => {
+
+            const eventCode = localStorage.getItem('eventId')
+            fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('heyyyy')
+                        } else {
+                            document.getElementById("popup").style.display = "flex";
+                            document.getElementById("main-content").style.display = "none";
+                        }
+                    })
+        })
+    </script>
+
+
     <style>
         /* Full-screen popup */
         #popup {
@@ -177,36 +194,49 @@
 
     <!-- Main Content (Hidden Initially) -->
     <div id="main-content">
-        <div style="position: relative; width: 100%; height: 100vh; background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;">
-            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box;">
-                
-                <div style="position: absolute; bottom: 30px;">
-                <h1 style="font-size: 2.5rem; margin: 10px 0;">Annyasha & Sudipta Stories</h1>
-                <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
-
-                <a href="#" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
-
-                <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
-                
-                <div style="margin-top: 10px;">
-                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="asset/social-media-icons/facebook.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
-                    </a>
-                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="asset/social-media-icons/instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
-                    </a>
-                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="asset/social-media-icons/whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
-                    </a>
-                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="asset/social-media-icons/twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
-                    </a>
-                    <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
-                        <img src="asset/social-media-icons/youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
-                    </a>
+        <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
+            <img src="https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp" alt="Wedding moment 1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 1; transition: opacity 1s ease-in-out; z-index: 1;">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUPIfiGgUML8G3ZqsNLHfaCnZK3I5g4tJabQ&s" alt="Wedding moment 2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
+            <img src="https://media.istockphoto.com/id/1317323736/photo/a-view-up-into-the-trees-direction-sky.jpg?s=612x612&w=0&k=20&c=i4HYO7xhao7CkGy7Zc_8XSNX_iqG0vAwNsrH1ERmw2Q=" alt="Wedding moment 3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box; z-index: 2;">
+                <div style="position: absolute; bottom: 30px; text-align: center;">
+                    <h1 style="font-size: 2.5rem; margin: 10px 0;">Saikat & Rajrupa Stories</h1>
+                    <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
+                    <a href="#" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
+                    <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
+                    <div style="margin-top: 10px;">
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/facebook.png" alt="Facebook icon" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/instagram.png" alt="Instagram icon" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/whatsapp.png" alt="WhatsApp icon" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/twitter.png" alt="Twitter icon" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                        <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+                            <img src="asset/social-media-icons/youtube.png" alt="YouTube icon" style="height: 80%; width: 80%; object-fit: contain;">
+                        </a>
+                    </div>
                 </div>
             </div>
-            </div>
+            <script>
+                const sliderImages = document.querySelectorAll('img[alt^="Wedding moment"]');
+                let currentIndex = 0;
+        
+                function showNextImage() {
+                    sliderImages[currentIndex].style.opacity = '0';
+                    sliderImages[currentIndex].style.zIndex = '0';
+                    currentIndex = (currentIndex + 1) % sliderImages.length;
+                    sliderImages[currentIndex].style.opacity = '1';
+                    sliderImages[currentIndex].style.zIndex = '1';
+                }
+        
+                setInterval(showNextImage, 5000); // Change image every 5 seconds
+            </script>
         </div>
 
         <div style="padding: 10px;">
