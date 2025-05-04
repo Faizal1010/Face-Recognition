@@ -16,6 +16,39 @@
     <!-- Template CSS -->
     <script src="http://localhost:3000/assets/js/vendors/color-modes.js"></script>
     <link href="http://localhost:3000/assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        .main-wrap {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .content-main {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .table-responsive {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+        }
+        body.popup-active {
+            overflow: hidden;
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
@@ -43,9 +76,11 @@
                             window.location.href = 'http://localhost:3000/super-admin-dashboard/login'
                         }
                         else{
-                            console.log("working")
                             const storage_used_span = document.getElementById('storage_used_span')
-                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used}`
+                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
+
+                            const expiry_date_span = document.getElementById('expiry_date_span')
+                            expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
                         }
                     })
         });
@@ -122,11 +157,13 @@
             <div class="col-search">
                 <form class="searchform">
                     <div class="input-group">
-                        <span id="storage_used_span" style="color: white; font-size: 20px;">
-
-                        </span>
+                        <div>
+                            <span id="storage_used_span" style="color: white; font-size: 13px;">
+                            </span><br>
+                            <span id="expiry_date_span" style="color: white; font-size: 13px;">
+                            </span>
+                        </div>
                     </div>
-
                 </form>
             </div>
             <div class="col-nav">
@@ -161,7 +198,7 @@
                             <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
-                            <div class="dropdown-divider"></div>
+                            <div class="dropdowndivider"></div>
                             <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
                         </div>
                     </li>
@@ -198,20 +235,53 @@
                         </div>
                         <div class="col-md-9">
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
                                     <thead>
-                                        <tr>
-                                            <th class="text-center">
-                                            </th>
-                                            <th>S. No</th>
-                                            <th>Event Name</th>
-                                            <th>Event Code</th>
-                                            <th class="text-end">Action</th>
+                                        <tr style="background-color: #32394e; display: table-row;">
+                                            <th style="padding: 12px; text-align: center; width: 5%;"></th>
+                                            <th style="padding: 12px; width: 10%;">S. No</th>
+                                            <th style="padding: 12px; width: 35%;">Event Name</th>
+                                            <th style="padding: 12px; width: 25%;">Event Code</th>
+                                            <th style="padding: 12px; text-align: right; width: 25%;">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody style="display: table-row-group;">
                                     </tbody>
                                 </table>
+                                <style>
+                                    @media (max-width: 768px) {
+                                        table {
+                                            display: block;
+                                            overflow-x: auto;
+                                            white-space: nowrap;
+                                        }
+                                        thead, tbody, tr {
+                                            display: table-row !important;
+                                            width: 100%;
+                                        }
+                                        th, td {
+                                            display: table-cell !important;
+                                            padding: 8px !important;
+                                            font-size: 12px !important;
+                                            min-width: 80px;
+                                        }
+                                        th:nth-child(1), td:nth-child(1) {
+                                            min-width: 30px;
+                                        }
+                                        th:nth-child(2), td:nth-child(2) {
+                                            min-width: 50px;
+                                        }
+                                        th:nth-child(3), td:nth-child(3) {
+                                            min-width: 120px;
+                                        }
+                                        th:nth-child(4), td:nth-child(4) {
+                                            min-width: 100px;
+                                        }
+                                        th:nth-child(5), td:nth-child(5) {
+                                            min-width: 80px;
+                                        }
+                                    }
+                                </style>
                             </div>
                         </div>
                         <!-- .col// -->
@@ -229,7 +299,7 @@
                     <script>
                         document.write(new Date().getFullYear());
                     </script>
-                    &copy; Nest - HTML Ecommerce Template .
+                    © Nest - HTML Ecommerce Template .
                 </div>
                 <div class="col-sm-6">
                     <div class="text-sm-end">All rights reserved</div>
@@ -289,21 +359,15 @@
             events.forEach((event, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                        <td class="text-center"></td>
-                        <td>${index + 1}</td>
-                        <td><b>${event.name}</b></td>
-                        <td>${event.event_code}</td>
-                        <td class="text-end">
-                            <div class="dropdown">
-                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm" style="padding: 0.25rem 0.5rem;">
-                                    <i class="material-icons md-more_horiz"></i>
-                                </a>
-                                <div class="dropdown-menu" style="position: fixed; min-width: 0; max-width: 150px; top: 100px; left: 300px; z-index: 1000; transform: translate(0, 0);">
-                                    <a class="dropdown-item" href="#">View detail</a>
-                                    <a class="dropdown-item" href="#">Edit info</a>
-                                    <a class="dropdown-item text-danger category-deleter" href="#" data-id="${event.id}">Delete</a>
-                                </div>
-                            </div>
+                        <td style="padding: 12px; text-align: center; border-bottom: 1px solid #32394e;"></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #32394e;">${index + 1}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #32394e;"><b>${event.name}</b></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #32394e;">${event.event_code}</td>
+                        <td style="padding: 12px; text-align: right; border-bottom: 1px solid #32394e;">
+                            <a class="category-deleter" href="#" data-id="${event.id}">
+                                
+<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                            </a>
                         </td>
                     `;
                 tbody.appendChild(tr);

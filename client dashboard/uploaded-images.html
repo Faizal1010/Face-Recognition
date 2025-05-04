@@ -44,9 +44,11 @@
                             window.location.href = 'http://localhost:3000/super-admin-dashboard/login'
                         }
                         else{
-                            console.log("working")
                             const storage_used_span = document.getElementById('storage_used_span')
-                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used}`
+                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
+
+                            const expiry_date_span = document.getElementById('expiry_date_span')
+                            expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
                         }
                     })
         });
@@ -64,6 +66,29 @@
     </script>
 
     <style>
+        * {
+    box-sizing: border-box;
+}
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+.main-wrap {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+.content-main {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+.image-section {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+.imageGrid {
+    max-width: 100%;
+    overflow-x: hidden;
+}
         .imageGrid {
             display: flex;
             flex-wrap: wrap;
@@ -219,9 +244,12 @@
             <div class="col-search">
                 <form class="searchform">
                     <div class="input-group">
-                        <span id="storage_used_span" style="color: white; font-size: 20px;">
-
-                        </span>
+                        <div>
+                            <span id="storage_used_span" style="color: white; font-size: 13px;">
+                            </span><br>
+                            <span id="expiry_date_span" style="color: white; font-size: 13px;">
+                            </span>
+                        </div>
                     </div>
 
                 </form>

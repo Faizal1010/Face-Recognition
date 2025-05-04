@@ -6,7 +6,6 @@
   <title>Find Yourself - Face Recognition</title>
   <script>
     document.addEventListener('DOMContentLoaded',() => {
-
         const eventCode = localStorage.getItem('eventId')
         fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
                 .then(response => {
@@ -566,7 +565,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
-      eventCode = urlParams.get("eventId");
+      eventCode = urlParams.get("eventId").toUpperCase();
       if (eventCode) {
         console.log("Event ID from URL:", eventCode);
         // Fetch labels immediately after getting eventCode

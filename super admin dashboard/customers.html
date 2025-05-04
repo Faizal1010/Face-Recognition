@@ -36,7 +36,6 @@
               alert('Unauthorized access. Admins only.');
               window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page
           }
-
       });
   
       // Function to decode the JWT and extract the payload
@@ -75,7 +74,6 @@
               <li class="menu-item active">
                   <a class="menu-link" href="http://localhost:3000/super-admin-dashboard/customers">
                       <i class="icon material-icons md-group"></i>
-
                       <span class="text">Customers</span>
                   </a>
               </li>
@@ -128,12 +126,6 @@
             <i class="material-icons md-apps"></i>
           </button>
           <ul class="nav">
-            <!-- <li class="nav-item">
-              <a class="nav-link btn-icon" href="#">
-                <i class="material-icons md-notifications animation-shake"></i>
-                <span class="badge rounded-pill">3</span>
-              </a>
-            </li> -->
             <li class="nav-item">
               <a class="nav-link btn-icon darkmode" href="#">
                 <i class="material-icons md-nights_stay"></i>
@@ -144,54 +136,9 @@
                 ><i class="material-icons md-cast"></i
               ></a>
             </li>
-            <!-- <li class="dropdown nav-item">
-              <a
-                class="dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                id="dropdownLanguage"
-                aria-expanded="false"
-                ><i class="material-icons md-public"></i
-              ></a>
-              <div
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="dropdownLanguage"
-              >
-                <a class="dropdown-item text-brand" href="#"
-                  ><img
-                    src="http://localhost:3000/assets/imgs/theme/flag-us.png"
-                    alt="English"
-                  />English</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="http://localhost:3000/assets/imgs/theme/flag-fr.png"
-                    alt="Français"
-                  />Français</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="http://localhost:3000/assets/imgs/theme/flag-jp.png"
-                    alt="Français"
-                  />日本語</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><img
-                    src="http://localhost:3000/assets/imgs/theme/flag-cn.png"
-                    alt="Français"
-                  />中国人</a
-                >
-              </div>
-            </li> -->
             <li class="dropdown nav-item">
               <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="http://localhost:3000/assets/imgs/people/avatar-2.png" alt="User" /></a>
               <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                  <!-- <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
-                  <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
-                  <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
-                  <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
-                  <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a> -->
-                  <!-- <div class="dropdown-divider"></div> -->
                   <a id="logout" class="dropdown-item text-danger" href="#"><i class="material-icons md-exit_to_app"></i>Logout</a>
               </div>
           </li>
@@ -231,7 +178,7 @@
                 <a class="page-link" href="#">01</a>
               </li>
               <li class="page-item"><a class="page-link" href="#">02</a></li>
-              <li class="page-item"><a class="page-link" href="#">03</a></li>
+              <li class "page-item"><a class="page-link" href="#">03</a></li>
               <li class="page-item">
                 <a class="page-link dot" href="#">...</a>
               </li>
@@ -260,8 +207,8 @@
         </div>
       </footer>
 
-      <div onclick="closePopup()" id="overlay" style="background-color: rgba(0, 0, 0, 0.7); width: 100vw; height: 100vh; display: none; position: fixed; z-index: 999; top: 0; left: 0;">
-        <div id="popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1c1e26; color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; width: 700px; max-height: 80vh; overflow-y: auto; z-index: 1000;">
+      <div id="overlay" style="background-color: rgba(0, 0, 0, 0.7); width: 100vw; height: 100vh; display: none; position: fixed; z-index: 999; top: 0; left: 0;">
+        <div id="popup" onclick="event.stopPropagation();" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1c1e26; color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; width: 700px; max-height: 80vh; overflow-y: auto; z-index: 1000;">
             <div style="margin-bottom: 20px;">
                 <h2 style="margin: 0 0 10px 0; font-size: 24px;">Client Details</h2>
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; font-size: 16px;">
@@ -296,6 +243,28 @@
             </button>
         </div>
     </div>
+
+    <div id="upgrade-overlay" style="background-color: rgba(0, 0, 0, 0.7); width: 100vw; height: 100vh; display: none; position: fixed; z-index: 999; top: 0; left: 0;">
+      <div id="upgrade-popup" onclick="event.stopPropagation();" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #1c1e26; color: #fff; padding: 20px; border-radius: 8px; max-width: 90%; width: 500px; z-index: 1000;">
+        <div style="margin-bottom: 20px;">
+          <h2 style="margin: 0 0 10px 0; font-size: 24px;">Upgrade Client Plan</h2>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 16px;">
+            <label for="upgrade-plan-select" style="font-weight: bold;">Select Plan:</label>
+            <select id="upgrade-plan-select" style="background-color: #2a2d36; color: #fff; border: 1px solid #fff; padding: 10px; border-radius: 5px; font-size: 16px;">
+              <!-- <option value="">Select a plan</option> -->
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 10px;">
+          <button onclick="upgradePlan()" style="background-color: #3BB77E; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 48%; font-size: 16px;">
+            Upgrade
+          </button>
+          <button onclick="closeUpgradePopup()" style="background-color: #ff4444; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 48%; font-size: 16px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
       
     </main>
     <script src="http://localhost:3000/assets/js/vendors/jquery-3.6.0.min.js"></script>
@@ -308,6 +277,7 @@
 
     <script>
       let allClients = [];
+      let currentClientId = null;
     
       function showDeleteConfirmation(event) {
         event.preventDefault();
@@ -520,7 +490,103 @@
         popup.style.display = 'none'; // Hide the popup
         overlay.style.display = 'none'; // Hide the overlay
       }
+
+      // Function to open the upgrade plan popup
+      function openUpgradePopup(event) {
+        event.preventDefault();
+        const clientId = event.target.closest('a').getAttribute('data-id');
+        currentClientId = clientId;
+        const popup = document.getElementById('upgrade-popup');
+        const overlay = document.getElementById('upgrade-overlay');
+        const planSelect = document.getElementById('upgrade-plan-select');
+        
+        // Reset dropdown
+        // planSelect.innerHTML = '<option value="">Select a plan</option>';
+        
+        // Show popup
+        popup.style.display = 'block';
+        overlay.style.display = 'block';
+        
+        // Fetch plans
+        fetch('/plan/fetch-all-plans', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          const plans = data.plans;
+          if (!plans || plans.length === 0) {
+            const noPlansOption = document.createElement('option');
+            noPlansOption.value = '';
+            noPlansOption.textContent = 'No Plans Available';
+            planSelect.appendChild(noPlansOption);
+          } else {
+            const select = document.getElementById('upgrade-plan-select')
+            select.innerHTML = ''
+            plans.forEach(plan => {
+              const option = document.createElement('option');
+              option.value = plan.storage_limit + '+' + plan.validity;
+              option.textContent = plan.plan_name + " - " + plan.storage_limit + " GB" + " - " + plan.validity + " days";
+              planSelect.appendChild(option);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching plans:', error);
+          planSelect.innerHTML = '<option value="">Error loading plans</option>';
+        });
+      }
     
+      // Function to close the upgrade popup
+      function closeUpgradePopup() {
+        const popup = document.getElementById('upgrade-popup');
+        const overlay = document.getElementById('upgrade-overlay');
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+        currentClientId = null;
+      }
+    
+      // Function to upgrade the plan
+      async function upgradePlan() {
+    const planSelect = document.getElementById('upgrade-plan-select');
+    const selectedPlan = planSelect.value;
+    
+    if (!selectedPlan) {
+        alert('Please select a plan.');
+        return;
+    }
+
+    try {
+        const [storage_limit, validity] = selectedPlan.split('+');
+        const updateData = {
+            storage_limit: parseInt(storage_limit),
+            validity: parseInt(validity),
+            customerId: currentClientId
+        };
+
+        const response = await fetch(`http://localhost:3000/plan/upgrade-plan/${currentClientId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+            alert('Plan upgraded successfully!');
+            closeUpgradePopup();
+        } else {
+            const errorData = await response.json();
+            alert(`Error upgrading plan: ${errorData.message || 'Unknown error'}`);
+        }
+    } catch (error) {
+        console.error('Error upgrading plan:', error);
+        alert('An error occurred while upgrading the plan.');
+    }
+}
+      
       // Function to filter and display client by email or client ID
       function retrieveBYEmail() {
         const searchInput = document.getElementById('TagInput').value.trim().toLowerCase();
@@ -552,8 +618,14 @@
         document.getElementById('grid-card').addEventListener('click', (event) => {
           if (event.target.closest('.btn-light') && event.target.innerText.includes('Details')) {
             openPopup(event);
+          } else if (event.target.closest('.btn-upgrade')) {
+            openUpgradePopup(event);
           }
         });
+
+        // Event listener to close popups when clicking on overlay
+        document.getElementById('overlay').addEventListener('click', closePopup);
+        document.getElementById('upgrade-overlay').addEventListener('click', closeUpgradePopup);
       });
     
       // Function to render clients
@@ -570,20 +642,27 @@
           console.log(client);
           const productArticle = document.createElement('div');
           productArticle.classList.add('col');
-          productArticle.innerHTML = `<div class="card card-product-grid">
+          productArticle.innerHTML = `<div class="card card-product-grid" style="position: relative;">
                         <a class="img-wrap" style="height: 200px;">
                           <img style="object-fit: cover;" src="http://localhost:3000/assets/clientsProfiles/${client.Email}/${client.Profile}" alt="Product" />
                         </a>
                         <div class="info-wrap">
                           <a class="title text-truncate">${client.FirstName} ${client.LastName} - ${client.CustomerId}</a>
                           <div class="price mb-2">${client.Email}</div>
-               
                           <a data-id="${client.CustomerId}" onclick="showDeleteConfirmation(event)" class="btn btn-sm font-sm btn-light rounded">
                             <i class="material-icons md-delete_forever"></i> Delete
                           </a>
                           <a data-id="${client.CustomerId}" class="btn btn-sm font-sm btn-light rounded">
                             <i class="material-icons md-comment"></i> Details </a>
                         </div>
+                        <a data-id="${client.CustomerId}" class="btn btn-sm font-sm btn-upgrade rounded" style="position: absolute; top: 10px; right: 10px; background-color: #3BB77E; color: white; display: none;">
+                          <i class="material-icons md-upgrade"></i> Upgrade
+                        </a>
+                        <style>
+                          .card-product-grid:hover .btn-upgrade {
+                            display: block !important;
+                          }
+                        </style>
                       </div>`;
     
           cardBody.appendChild(productArticle);

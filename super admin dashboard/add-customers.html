@@ -311,10 +311,10 @@
         plans.forEach(plan => {
           const option = document.createElement('option');
           option.value = plan.storage_limit + "+" + plan.validity; // assuming the event has an 'id' field
-          option.textContent = plan.plan_name + " - " + plan.storage_limit + " GB"; // assuming the event has a 'name' field
+          option.textContent = plan.plan_name + " - " + plan.storage_limit + " GB" + " - " + plan.validity + " days"; // assuming the event has a 'name' field
           planSelect.appendChild(option);
         });
-  
+
       // Add event listener to log selected option
       planSelect.addEventListener('change', function() {
           const selectedOption = planSelect.options[planSelect.selectedIndex];

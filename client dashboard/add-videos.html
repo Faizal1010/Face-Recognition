@@ -56,9 +56,11 @@ if (!clientId) {
                             window.location.href = 'http://localhost:3000/super-admin-dashboard/login'
                         }
                         else{
-                            console.log("working")
                             const storage_used_span = document.getElementById('storage_used_span')
-                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used}`
+                            storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
+
+                            const expiry_date_span = document.getElementById('expiry_date_span')
+                            expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
                         }
                     })
             });
@@ -135,9 +137,12 @@ if (!clientId) {
                 <div class="col-search">
                     <form class="searchform">
                         <div class="input-group">
-                            <span id="storage_used_span" style="color: white; font-size: 20px;">
-
-                            </span>
+                            <div>
+                                <span id="storage_used_span" style="color: white; font-size: 13px;">
+                                </span><br>
+                                <span id="expiry_date_span" style="color: white; font-size: 13px;">
+                                </span>
+                            </div>
                         </div>
 
                     </form>
@@ -186,7 +191,7 @@ if (!clientId) {
                     <div class="col-9">
                         <div class="content-header">
                             <div>
-                                <h2 class="content-title">Add New Images</h2>
+                                <h2 class="content-title">Add New Videos</h2>
                                 <span style="color: red;">Do not close this page or browser while uploading.</span>
                             </div>
                             <!-- <div>
@@ -198,7 +203,7 @@ if (!clientId) {
                     <form style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 800px; margin: auto; font-family: Arial, sans-serif;">
                                                <!-- Image -->
                                                <div style="flex: 1 1 45%; display: flex; flex-direction: column;">
-                                                <label style="margin-bottom: 5px;">Image:</label>
+                                                <label style="margin-bottom: 5px;">Video:</label>
                                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                                   <input required type="file" id="videoInput" accept="video/*" style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; " multiple>
                                                   <!-- <p id="error-message" style="color: red; display: none;">You can only select up to 4 images!</p> -->
