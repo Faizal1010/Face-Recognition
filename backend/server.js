@@ -297,6 +297,7 @@ app.use('/auth', require('./routes/authRoutes'));
 app.use('/clients', require('./routes/clientRoutes'));
 app.use('/event', require('./routes/eventRoutes'));
 app.use('/plan', require('./routes/planRoutes'));
+app.use('/carousel', require('./routes/carouselRoutes'));
 
 app.use('/client-dashboard', require('./routes/clientDashboard'))
 app.use('/super-admin-dashboard', require('./routes/superAdminDashboard'))

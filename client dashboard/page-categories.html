@@ -16,7 +16,7 @@
     <!-- Template CSS -->
     <script src="http://localhost:3000/assets/js/vendors/color-modes.js"></script>
     <link href="http://localhost:3000/assets/css/main.css?v=6.0" rel="stylesheet" type="text/css" />
-    <style>
+    <!-- <style>
         * {
             box-sizing: border-box;
         }
@@ -27,6 +27,7 @@
         .main-wrap {
             max-width: 100%;
             overflow-x: hidden;
+            scrollbar-width: none;
         }
         .content-main {
             max-width: 100%;
@@ -48,7 +49,7 @@
         body.popup-active {
             overflow: hidden;
         }
-    </style>
+    </style> -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
@@ -136,6 +137,12 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a class="menu-link" href="http://localhost:3000/client-dashboard/carousel">
+                        <i class="icon material-icons md-view_carousel"></i>
+                        <span class="text">Carousel</span>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a class="menu-link" id="add-images">
                         <i class="icon material-icons md-add_photo_alternate"></i>
                         <span class="text">Add Images</span>
@@ -169,36 +176,36 @@
             <div class="col-nav">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
                 <ul class="nav">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link btn-icon" href="#">
                             <i class="material-icons md-notifications animation-shake"></i>
                             <span class="badge rounded-pill">3</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                     </li>
-                    <li class="dropdown nav-item">
+                    <!-- <li class="dropdown nav-item">
                         <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
+                        <div class="dropdown-menu dropdown-menu-start" aria-labelledby="dropdownLanguage">
                             <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
                             <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
                             <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
                             <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
                         </div>
-                    </li>
+                    </li> -->
                     <li class="dropdown nav-item">
                         <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User" /></a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                            <!-- <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
                             <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
-                            <div class="dropdowndivider"></div>
+                            <div class="dropdown-divider"></div> -->
                             <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
                         </div>
                     </li>
@@ -209,11 +216,9 @@
             <div class="content-header">
                 <div>
                     <h2 class="content-title card-title">Categories</h2>
-                    <p>Add, edit or delete a category</p>
+                    <p>Add or delete a category.</p>
                 </div>
-                <div>
-                    <input type="text" placeholder="Search Categories" class="form-control bg-white" />
-                </div>
+
             </div>
             <div class="card">
                 <div class="card-body">
@@ -299,10 +304,10 @@
                     <script>
                         document.write(new Date().getFullYear());
                     </script>
-                    © Nest - HTML Ecommerce Template .
+                    &copy; Managed and maintained by <b>DigitallyKaro.</b>
                 </div>
                 <div class="col-sm-6">
-                    <div class="text-sm-end">All rights reserved</div>
+                    <div class="text-sm-end">All rights reserved.</div>
                 </div>
             </div>
         </footer>

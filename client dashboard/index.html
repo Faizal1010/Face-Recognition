@@ -32,7 +32,6 @@
                     const checkExistenceOfClient = fetch(`/clients/code-client/${decodedToken.id}`)
                     .then(response=>response.json())
                     .then(data=>{
-                        console.log(data, "data s")
                         if(data.success == !true){
                             alert("Client doesn't exist.")
                             window.location.href = 'http://localhost:3000/super-admin-dashboard/login'
@@ -59,6 +58,127 @@
                 }
             }
         
+            function populateClientCards(data) {
+        const client = data.client;
+
+        // Card 1: Client Name
+        document.getElementById('client-name').textContent = `${client.FirstName} ${client.LastName}`;
+
+        // Card 2: Customer ID
+        document.getElementById('customer-id').textContent = client.CustomerId;
+
+        // Card 3: Contact Number
+        document.getElementById('contact-no').textContent = client.ContactNo;
+
+        // Card 4: Email
+        document.getElementById('email').textContent = client.Email;
+
+        // Card 5: Address
+        document.getElementById('address').textContent = `${client.Address}, ${client.City}, ${client.State} ${client.PostalCode}`;
+
+        // Card 6: Storage Usage
+        document.getElementById('storage-used').textContent = `${client.Storage_used} MB / ${client.Storage_limit} MB`;
+
+        // Card 7: Expiry Date
+        document.getElementById('expiry-date').textContent = new Date(client.Expiry_date).toLocaleDateString();
+
+        // Card 8: Notes
+        document.getElementById('notes').textContent = client.Notes || 'No notes available';
+        document.getElementById('total-images-size').textContent = client.totalImageSize || '0B';
+        document.getElementById('total-videos-size').textContent = client.totalVideoSize || '0B';
+
+        // Card 9: Events and Media Details (Dynamic)
+        const eventsMediaDiv = document.getElementById('events-media');
+        eventsMediaDiv.innerHTML = ''; // Clear loading message
+
+        if (client.events && client.events.length > 0) {
+            client.events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.style = 'background-color: #2a2d36; padding: 15px; border-radius: 5px; margin-bottom: 10px; width: 100%; box-sizing: border-box;';
+
+                const eventTitle = document.createElement('h4');
+                eventTitle.textContent = `${event.name} (Code: ${event.event_code})`;
+                eventTitle.style = 'margin: 0 0 10px 0; font-size: 18px;';
+
+                // Image Labels
+                const imageLabelsTitle = document.createElement('h5');
+                imageLabelsTitle.textContent = 'Images:';
+                imageLabelsTitle.style = 'margin: 10px 0 5px 0; font-size: 16px;';
+                const imageLabelsList = document.createElement('ul');
+                imageLabelsList.style = 'margin: 0; padding-left: 20px;';
+                if (event.imageLabels && event.imageLabels.length > 0) {
+                    event.imageLabels.forEach(label => {
+                        const labelItem = document.createElement('li');
+                        labelItem.textContent = `${label.name} - ${label.imageCount} images`;
+                        labelItem.style = 'margin: 5px 0;';
+                        imageLabelsList.appendChild(labelItem);
+                    });
+                } else {
+                    const noImages = document.createElement('li');
+                    noImages.textContent = 'No images';
+                    noImages.style = 'margin: 5px 0; font-style: italic;';
+                    imageLabelsList.appendChild(noImages);
+                }
+
+                // Video Labels
+                const videoLabelsTitle = document.createElement('h5');
+                videoLabelsTitle.textContent = 'Videos:';
+                videoLabelsTitle.style = 'margin: 10px 0 5px 0; font-size: 16px;';
+                const videoLabelsList = document.createElement('ul');
+                videoLabelsList.style = 'margin: 0; padding-left: 20px;';
+                if (event.videoLabels && event.videoLabels.length > 0) {
+                    event.videoLabels.forEach(label => {
+                        const labelItem = document.createElement('li');
+                        labelItem.textContent = `${label.name} - ${label.videoCount} videos`;
+                        labelItem.style = 'margin: 5px 0;';
+                        videoLabelsList.appendChild(labelItem);
+                    });
+                } else {
+                    const noVideos = document.createElement('li');
+                    noVideos.textContent = 'No videos';
+                    noVideos.style = 'margin: 5px 0; font-style: italic;';
+                    videoLabelsList.appendChild(noVideos);
+                }
+
+                eventDiv.appendChild(eventTitle);
+                eventDiv.appendChild(imageLabelsTitle);
+                eventDiv.appendChild(imageLabelsList);
+                eventDiv.appendChild(videoLabelsTitle);
+                eventDiv.appendChild(videoLabelsList);
+                eventsMediaDiv.appendChild(eventDiv);
+            });
+        } else {
+            const noEvents = document.createElement('p');
+            noEvents.textContent = 'No events found for this client.';
+            noEvents.style = 'margin: 0; font-style: italic;';
+            eventsMediaDiv.appendChild(noEvents);
+        }
+    }
+
+    // Fetch client data
+    fetch(`http://localhost:3000/clients/by-id-client/${decodedToken.id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data);
+        if (data.success) {
+            populateClientCards(data);
+        } else {
+            console.error('Failed to retrieve client details:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching client data:', error);
+    });
         </script>
         
     </head>
@@ -109,6 +229,12 @@
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a class="menu-link" href="http://localhost:3000/client-dashboard/carousel">
+                            <i class="icon material-icons md-view_carousel"></i>
+                            <span class="text">Carousel</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a class="menu-link" id="add-images">
                             <i class="icon material-icons md-add_photo_alternate"></i>
                             <span class="text">Add Images</span>
@@ -121,8 +247,8 @@
                         </a>
                     </li>                   
                 </ul>
-                <br />
-                <br />
+                <br/>
+                <br/>
             </nav>
         </aside>
         <main class="main-wrap">
@@ -143,19 +269,19 @@
                 <div class="col-nav">
                     <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
                     <ul class="nav">
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link btn-icon" href="#">
                                 <i class="material-icons md-notifications animation-shake"></i>
                                 <span class="badge rounded-pill">3</span>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                         </li>
-                        <li class="dropdown nav-item">
+                        <!-- <li class="dropdown nav-item">
                             <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
                             <div class="dropdown-menu dropdown-menu-start" aria-labelledby="dropdownLanguage">
                                 <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
@@ -163,16 +289,16 @@
                                 <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
                                 <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
                             </div>
-                        </li>
+                        </li> -->
                         <li class="dropdown nav-item">
                             <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User" /></a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                                <!-- <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
                                 <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
-                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-divider"></div> -->
                                 <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
                             </div>
                         </li>
@@ -187,384 +313,142 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-lg-3">
-                        <div class="card card-body mb-4">
-                            <article class="icontext">
-                                <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
-                                <div class="text">
-                                    <h6 class="mb-1 card-title">TOTAL AMOUNT</h6>
-                                    <span>₹10,000</span>
-                                    <span class="text-sm"> OVERALL </span>
-                                </div>
-                            </article>
-                        </div>
+                    
+        <!-- Card 1: Client Name -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">CLIENT NAME</h6>
+                        <span id="client-name">Loading...</span>
+                        <span class="text-sm">FULL NAME</span>
                     </div>
-                    <div class="col-lg-3">
-                        <div class="card card-body mb-4">
-                            <article class="icontext">
-                                <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
-                                <div class="text">
-                                    <h6 class="mb-1 card-title">ORDERS</h6>
-                                    <span>12</span>
-                                    <span class="text-sm"> TOTAL ORDERS </span>
-                                </div>
-                            </article>
-                        </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 2: Customer ID -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">CUSTOMER ID</h6>
+                        <span id="customer-id">Loading...</span>
+                        <span class="text-sm">UNIQUE ID</span>
                     </div>
-                    <div class="col-lg-3">
-                        <div class="card card-body mb-4">
-                            <article class="icontext">
-                                <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
-                                <div class="text">
-                                    <h6 class="mb-1 card-title">QUOTATION</h6>
-                                    <span>5</span>
-                                    <span class="text-sm"> OVERALL </span>
-                                </div>
-                            </article>
-                        </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 3: Contact Number -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">CONTACT NUMBER</h6>
+                        <span id="contact-no">Loading...</span>
+                        <span class="text-sm">PHONE</span>
                     </div>
-                    <div class="col-lg-3">
-                        <div class="card card-body mb-4">
-                            <article class="icontext">
-                                <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
-                                <div class="text">
-                                    <h6 class="mb-1 card-title">DUE PAYMENT</h6>
-                                    <span>₹6000</span>
-                                    <span class="text-sm"> OVERALL </span>
-                                </div>
-                            </article>
-                        </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 4: Email -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">EMAIL</h6>
+                        <span id="email">Loading...</span>
+                        <span class="text-sm">CONTACT EMAIL</span>
                     </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 5: Address -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">ADDRESS</h6>
+                        <span id="address">Loading...</span>
+                        <span class="text-sm">CITY, STATE, PIN</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 6: Storage Usage -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">STORAGE USAGE</h6>
+                        <span id="storage-used">Loading...</span>
+                        <span class="text-sm">USED / LIMIT</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 7: Expiry Date -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">EXPIRY DATE</h6>
+                        <span id="expiry-date">Loading...</span>
+                        <span class="text-sm">SUBSCRIPTION END</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 8: Notes -->
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">NOTES</h6>
+                        <span id="notes">Loading...</span>
+                        <span class="text-sm">ADDITIONAL INFO</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">TOTAL IMAGES SIZE</h6>
+                        <span id="total-images-size">Loading...</span>
+                        <span class="text-sm">ADDITIONAL INFO</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">TOTAL VIDEOS SIZE</h6>
+                        <span id="total-videos-size">Loading...</span>
+                        <span class="text-sm">ADDITIONAL INFO</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <!-- Card 9: Events and Labels (Dynamic, No Scrollbar, Responsive) -->
+        <div class="col-12">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <div class="text">
+                        <h6 class="mb-1 card-title">EVENTS & MEDIA DETAILS</h6>
+                        <div id="events-media" style="color: white;">
+                            <p>Loading...</p>
+                        </div>
+                        <span class="text-sm">EVENTS, LABELS, AND MEDIA COUNTS</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    
                 </div>
-                <div class="row">
-                    <div class="col-xl-8 col-lg-12">
-                        <!-- <div class="card mb-4">
-                            <article class="card-body">
-                                <h5 class="card-title">Sale statistics</h5>
-                                <canvas id="myChart" height="120px"></canvas>
-                            </article>
-                        </div> -->
-                        <div class="row">
-                            <div class="col-lg-5">
-                                <div class="card mb-4">
-                                    <article class="card-body" id="notification-box" style="height: 300px;">
-                                        <h5 class="card-title">Notifications</h5>
-                                        <div class="new-member-list" style="max-height: 250px; height: 250px; overflow-y: auto; padding-right: 10px;">
-                                            <div style="background-color: #222736; border-radius: 7px; padding: 5px; margin-bottom: 5px;">1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti fuga porro nemo impedit magni rerum rem cupiditate reiciendis ad beatae.</div>
-                                            <div style="border-radius: 7px; padding: 5px; margin-bottom: 5px;">2. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Mollitia repudiandae ea maiores nisi illo voluptatibus impedit libero dolor ducimus fugit.</div>
-                                            <div style="background-color: #222736; border-radius: 7px; padding: 5px; margin-bottom: 5px;">1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti fuga porro nemo impedit magni rerum rem cupiditate reiciendis ad beatae.</div>
-                                            <div style="border-radius: 7px; padding: 5px; margin-bottom: 5px;">2. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Mollitia repudiandae ea maiores nisi illo voluptatibus impedit libero dolor ducimus fugit.</div>
-                                            <div style="background-color: #222736; border-radius: 7px; padding: 5px; margin-bottom: 5px;">1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti fuga porro nemo impedit magni rerum rem cupiditate reiciendis ad beatae.</div>
-                                            <div style="border-radius: 7px; padding: 5px; margin-bottom: 5px;">1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti fuga porro nemo impedit magni rerum rem cupiditate reiciendis ad beatae.</div>
-
-                                        </div>
-                                    </article>
-                                </div>
-                            </div>
-                            <div class="col-lg-7">
-                                <div class="card mb-4">
-                                    <article class="card-body">
-                                        <h5 class="card-title">Recent activities</h5>
-                                        <ul class="verti-timeline list-unstyled font-sm">
-                                            <li class="event-list">
-                                                <div class="event-timeline-dot">
-                                                    <i class="material-icons md-play_circle_outline font-xxl"></i>
-                                                </div>
-                                                <div class="media">
-                                                    <div class="me-3">
-                                                        <h6><span>Today</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <div>Lorem ipsum dolor sit amet consectetur</div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="event-list active">
-                                                <div class="event-timeline-dot">
-                                                    <i class="material-icons md-play_circle_outline font-xxl animation-fade-right"></i>
-                                                </div>
-                                                <div class="media">
-                                                    <div class="me-3">
-                                                        <h6><span>17 May</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <div>Debitis nesciunt voluptatum dicta reprehenderit</div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="event-list">
-                                                <div class="event-timeline-dot">
-                                                    <i class="material-icons md-play_circle_outline font-xxl"></i>
-                                                </div>
-                                                <div class="media">
-                                                    <div class="me-3">
-                                                        <h6><span>13 May</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <div>Accusamus voluptatibus voluptas.</div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="event-list">
-                                                <div class="event-timeline-dot">
-                                                    <i class="material-icons md-play_circle_outline font-xxl"></i>
-                                                </div>
-                                                <div class="media">
-                                                    <div class="me-3">
-                                                        <h6><span>05 April</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <div>At vero eos et accusamus et iusto odio dignissi</div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="event-list">
-                                                <div class="event-timeline-dot">
-                                                    <i class="material-icons md-play_circle_outline font-xxl"></i>
-                                                </div>
-                                                <div class="media">
-                                                    <div class="me-3">
-                                                        <h6><span>26 Mar</span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <div>Responded to need “Volunteer Activities</div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </article>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-12">
-                        <!-- <div class="card mb-4">
-                            <article class="card-body">
-                                <h5 class="card-title">Revenue Base on Area</h5>
-                                <canvas id="myChart2" height="217"></canvas>
-                            </article>
-                        </div> -->
-                        <div class="card mb-4">
-                            <article class="card-body">
-                                <h5 class="card-title">Marketing Chanel</h5>
-                                <span class="text-muted font-xs">Facebook</span>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 15%">15%</div>
-                                </div>
-                                <span class="text-muted font-xs">Instagram</span>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 65%">65%</div>
-                                </div>
-                                <span class="text-muted font-xs">Google</span>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 51%">51%</div>
-                                </div>
-                                <span class="text-muted font-xs">Twitter</span>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 80%">80%</div>
-                                </div>
-                                <span class="text-muted font-xs">Other</span>
-                                <div class="progress mb-3">
-                                    <div class="progress-bar" role="progressbar" style="width: 80%">80%</div>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-                </div>
-                <div class="card mb-4">
-                    <header class="card-header">
-                        <h4 class="card-title">Latest orders</h4>
-                        <div class="row align-items-center">
-                            <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                                <div class="custom_select">
-                                    <select class="form-select select-nice">
-                                        <option selected>All Categories</option>
-                                        <option>Women's Clothing</option>
-                                        <option>Men's Clothing</option>
-                                        <option>Cellphones</option>
-                                        <option>Computer & Office</option>
-                                        <option>Consumer Electronics</option>
-                                        <option>Jewelry & Accessories</option>
-                                        <option>Home & Garden</option>
-                                        <option>Luggage & Bags</option>
-                                        <option>Shoes</option>
-                                        <option>Mother & Kids</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 col-6">
-                                <input type="date" value="02.05.2021" class="form-control" />
-                            </div>
-                            <div class="col-md-2 col-6">
-                                <div class="custom_select">
-                                    <select class="form-select select-nice">
-                                        <option selected>Status</option>
-                                        <option>All</option>
-                                        <option>Paid</option>
-                                        <option>Chargeback</option>
-                                        <option>Refund</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <div class="table-responsive">
-                                <table class="table align-middle table-nowrap mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="text-center">
-                                                <div class="form-check align-middle">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck01" />
-                                                    <label class="form-check-label" for="transactionCheck01"></label>
-                                                </div>
-                                            </th>
-                                            <th class="align-middle" scope="col">Order ID</th>
-                                            <th class="align-middle" scope="col">Billing Name</th>
-                                            <th class="align-middle" scope="col">Date</th>
-                                            <th class="align-middle" scope="col">Total</th>
-                                            <th class="align-middle" scope="col">Payment Status</th>
-                                            <th class="align-middle" scope="col">Payment Method</th>
-                                            <th class="align-middle" scope="col">View Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck02" />
-                                                    <label class="form-check-label" for="transactionCheck02"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2540</a></td>
-                                            <td>Neal Matthews</td>
-                                            <td>07 Oct, 2021</td>
-                                            <td>$400</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-success">Paid</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Mastercard</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck03" />
-                                                    <label class="form-check-label" for="transactionCheck03"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2541</a></td>
-                                            <td>Jamal Burnett</td>
-                                            <td>07 Oct, 2021</td>
-                                            <td>$380</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-danger">Chargeback</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Visa</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck04" />
-                                                    <label class="form-check-label" for="transactionCheck04"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2542</a></td>
-                                            <td>Juan Mitchell</td>
-                                            <td>06 Oct, 2021</td>
-                                            <td>$384</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-success">Paid</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Paypal</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck05" />
-                                                    <label class="form-check-label" for="transactionCheck05"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2543</a></td>
-                                            <td>Barry Dick</td>
-                                            <td>05 Oct, 2021</td>
-                                            <td>$412</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-success">Paid</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Mastercard</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck06" />
-                                                    <label class="form-check-label" for="transactionCheck06"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2544</a></td>
-                                            <td>Ronald Taylor</td>
-                                            <td>04 Oct, 2021</td>
-                                            <td>$404</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-warning">Refund</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Visa</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="transactionCheck07" />
-                                                    <label class="form-check-label" for="transactionCheck07"></label>
-                                                </div>
-                                            </td>
-                                            <td><a href="#" class="fw-bold">#SK2545</a></td>
-                                            <td>Jacob Hunter</td>
-                                            <td>04 Oct, 2021</td>
-                                            <td>$392</td>
-                                            <td>
-                                                <span class="badge badge-pill badge-soft-success">Paid</span>
-                                            </td>
-                                            <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> Paypal</td>
-                                            <td>
-                                                <a href="#" class="btn btn-xs"> View details</a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <!-- table-responsive end// -->
-                    </div>
-                </div>
-                <div class="pagination-area mt-30 mb-50">
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-start">
-                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                            <li class="page-item"><a class="page-link" href="#">02</a></li>
-                            <li class="page-item"><a class="page-link" href="#">03</a></li>
-                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link" href="#">16</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+              
             </section>
             <!-- content-main end// -->
             <footer class="main-footer font-xs">
@@ -573,10 +457,10 @@
                         <script>
                             document.write(new Date().getFullYear());
                         </script>
-                        &copy; Nest - HTML Ecommerce Template .
+                        &copy; Managed and maintained by <b>DigitallyKaro.</b>
                     </div>
                     <div class="col-sm-6">
-                        <div class="text-sm-end">All rights reserved</div>
+                        <div class="text-sm-end">All rights reserved.</div>
                     </div>
                 </div>
             </footer>
@@ -601,14 +485,12 @@
                 }
                 try {
                     payload = JSON.parse(atob(token.split('.')[1])); // Decode the payload
-                    console.log(payload.id, " is this client id")
                     const addImagesLink = document.getElementById('add-images')
                     addImagesLink.href = `http://localhost:3000/client-dashboard/add-images?clientId=${encodeURIComponent(payload.id)}`;
 
 
                     const addVideosLink = document.getElementById('add-videos')
                     addVideosLink.href = `http://localhost:3000/client-dashboard/add-videos?clientId=${encodeURIComponent(payload.id)}`;
-                    console.log('Decoded JWT Payload:', payload);
                 } catch (error) {
                     console.error('Error decoding JWT token:', error);
                 }

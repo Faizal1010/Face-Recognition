@@ -27,5 +27,8 @@ router.get('/add-videos', (req, res) => {
         res.sendFile(path.join(__dirname, '../../client dashboard/add-videos.html'))
 })
 
+router.get('/carousel', (req, res) =>{
+    res.sendFile(path.join(__dirname, '../../client dashboard/carousel.html'))
+})
 
 module.exports = router
