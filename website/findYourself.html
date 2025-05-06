@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Yourself - Face Recognition</title>
+  <!-- Add a favicon link to suppress 404 error -->
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script>
+    document.addEventListener('DOMContentLoaded',() => {
+        const eventCode = localStorage.getItem('eventId')
+        fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
+                .then(response => {
+                    if (!response.ok) {
+                        window.location.href = 'http://localhost:3000/gallery.html'
+                    }
+                })
+    })
+</script>
+  <style>
+    html{
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #f0f4f8;
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    #main-content {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;
+    }
+
+    #main-content > div {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #main-content h1 {
+      font-size: 2.5rem;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    #main-content p {
+      font-size: 1rem;
+      margin: 5px 0;
+      text-align: center;
+    }
+
+    #main-content a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: 1px solid white;
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    #main-content .social-icons {
+      margin-top: 10px;
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    #main-content .social-icons a {
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      overflow: hidden;
+    }
+
+    #main-content .social-icons img {
+      height: 80%;
+      width: 80%;
+      object-fit: contain;
+    }
+
+    /* Main Content Section */
+    .main-container {
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin: 20px 0 10px;
+    }
+
+    p.description {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Button and Labels Layout */
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    #scanFaceButton {
+      background-color: #3BB77E;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #scanFaceButton:hover:not(:disabled) {
+      background-color: #34a66d;
+    }
+
+    #scanFaceButton:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    #scanFaceButton svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .labels-container {
+      width: 70%;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 10px 0;
+    }
+
+    .labels {
+      display: inline-flex;
+      gap: 10px;
+    }
+
+    .custom-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      margin: 5px;
+      border-radius: 25px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #3BB77E;
+      color: white;
+      border: none;
+      transition: opacity 0.3s ease-in-out;
+      flex-shrink: 0;
+    }
+
+    .custom-checkbox-label:hover {
+      opacity: 0.9;
+    }
+
+    .custom-checkbox-label input[type="checkbox"] {
+      display: none;
+    }
+
+    .custom-checkbox-label .tick {
+      font-size: 20px;
+      color: white;
+      visibility: hidden;
+      margin-right: 5px;
+    }
+
+    .custom-checkbox-label input[type="checkbox"]:checked ~ .tick {
+      visibility: visible;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 95%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      margin: 0 0 20px;
+      color: #333;
+      font-size: 1.5rem;
+    }
+
+    .modal-content .close-btn {
+      position: absolute;
+      top: 17px;
+      right: 20px;
+      font-size: 30px;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.3s ease;
+    }
+
+    .modal-content .close-btn:hover {
+      color: #333;
+    }
+
+    .modal-content .toggle-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-content .toggle-buttons button {
+      background-color: #3BB77E;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .modal-content .toggle-buttons button:disabled {
+      background-color: #2a8a5a;
+      cursor: default;
+    }
+
+    .modal-content .toggle-buttons button:hover:not(:disabled) {
+      background-color: #34a66d;
+    }
+
+    /* Video and Canvas Container */
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 20px;
+    }
+
+    video, canvas {
+      border: 2px solid #3BB77E;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      background: #000; /* Ensure video background is black to avoid white screen */
+    }
+
+    input[type="file"] {
+      margin: 10px 0;
+      padding: 8px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #3BB77E;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #34a66d;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    /* Image Grid Styling */
+    .imageGrid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .imageGridItem {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 200px;
+      height: 220px;
+    }
+
+    .imageGridItem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .imageGridItem:hover img {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 600px) {
+      .controls-container {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .labels-container {
+        width: 100%;
+      }
+      .imageGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .imageGridItem {
+        width: 180px;
+        height: 170px;
+      }
+      .modal-content .toggle-buttons {
+        flex-direction: column;
+      }
+    }
+
+    /* Lightbox Styling */
+    .imageLightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 999999999;
+    }
+
+    .imageLightbox img {
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 8px;
+    }
+
+    .imageClose,
+    .imagePrev,
+    .imageNext {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 24px;
+      border-radius: 5px;
+    }
+
+    .imagePrev,
+    .imageNext {
+      background: rgba(62, 62, 62, 0.3);
+    }
+
+    .imageClose {
+      top: 17px;
+      right: 20px;
+      font-size: 30px;
+    }
+
+    .imagePrev {
+      left: 20px;
+    }
+
+    .imageNext {
+      right: 20px;
+    }
+
+    .imageClose:hover,
+    .imagePrev:hover,
+    .imageNext:hover {
+      background: rgba(62, 62, 62, 0.5);
+    }
+
+    /* Spinner Styling */
+    #loadingIndicator {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      z-index: 1000;
+    }
+
+    #loadingIndicator.visible {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3BB77E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    /* Download Button Styling */
+    .downloadButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255, 255, 255, 0);
+      border: none;
+      border-radius: 5px;
+      padding: 3px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .downloadButton:hover {
+      background-color: rgba(255, 255, 255, 0) !important; /* Ensure transparency on hover */
+    }
+
+    .imageGridItem:hover .downloadButton {
+      opacity: 1;
+    }
+
+    .downloadSpinner {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3BB77E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 10;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div style="position: relative; width: 100%; height: 100vh; background: url('https://cdn0.weddingwire.in/article/1678/3_2/1280/jpg/8761-wedding-background-images-infinitememories-lead.webp') no-repeat center center/cover;">
+    <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
+      <!-- Image carousel container -->
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <img src="" alt="Wedding moment 1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 1; transition: opacity 1s ease-in-out; z-index: 1;">
+        <img src="" alt="Wedding moment 2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
+        <img src="" alt="Wedding moment 3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
+      </div>
+      <!-- Text and buttons overlay -->
+      <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box; z-index: 2;">
+        <div style="position: absolute; bottom: 30px; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+          <h1 style="font-size: 2.5rem; margin: 10px 0; color: white;">Annyasha & Sudipta Stories</h1>
+          <p style="font-size: 1rem; margin: 5px 0;">THURSDAY, MAR 13, 2025</p>
+          <a href="#matchedGallery" style="display: inline-block; margin-top: 20px; padding: 10px 20px; border: 1px solid white; color: white; text-decoration: none; font-size: 1rem;">VIEW GALLERY</a>
+          <p style="margin-top: 20px; font-size: 1rem;">📞 9901982765</p>
+          <div style="margin-top: 10px;">
+            <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+              <img src="asset/social-media-icons/facebook.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+            </a>
+            <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+              <img src="asset/social-media-icons/instagram.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+            </a>
+            <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+              <img src="asset/social-media-icons/whatsapp.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+            </a>
+            <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+              <img src="asset/social-media-icons/twitter.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+            </a>
+            <a style="height: 40px; width: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 5px; background-color: white; overflow: hidden;" href="#">
+              <img src="asset/social-media-icons/youtube.png" alt="" style="height: 80%; width: 80%; object-fit: contain;">
+            </a>
+          </div>
+        </div>
+      </div>
+      <script>
+        let displayPics = [];
+        let currentSlide = 0;
+        const photoSlides = document.querySelectorAll('img[alt^="Wedding moment"]');
+  
+        async function retrieveDisplayPics(eventKey) {
+          try {
+            const fetchResponse = await fetch(`/carousel/images/${eventKey}`);
+            const fetchedData = await fetchResponse.json();
+            displayPics = fetchedData.images.map(photo => ({
+              id: photo.id,
+              url: `data:image/jpeg;base64,${photo.data}`
+            }));
+            renderSlides();
+          } catch (error) {
+            console.error('Error retrieving display pics:', error);
+          }
+        }
+  
+        function renderSlides() {
+          photoSlides.forEach((photo, pos) => {
+            if (displayPics[pos]) {
+              photo.src = displayPics[pos].url;
+            }
+          });
+          photoSlides[0].style.opacity = '1';
+          photoSlides[0].style.zIndex = '1';
+        }
+  
+        function cycleNextSlide() {
+          photoSlides[currentSlide].style.opacity = '0';
+          photoSlides[currentSlide].style.zIndex = '0';
+          currentSlide = (currentSlide + 1) % photoSlides.length;
+          photoSlides[currentSlide].style.opacity = '1';
+          photoSlides[currentSlide].style.zIndex = '1';
+        }
+  
+        const eventKey = localStorage.getItem('eventId');
+        if (eventKey) {
+          retrieveDisplayPics(eventKey);
+        } else {
+          console.error('No eventKey found in localStorage');
+        }
+  
+        setInterval(cycleNextSlide, 5000); // Change slide every 5 seconds
+      </script>
+    </div>
+  </div>  
+
+    <div class="controls-container">
+      <div class="labels-container">
+        <div class="labels" id="labelss"></div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="scanFaceButton">
+          Scan Face
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+            <path d="M2.5 8.18677C2.60406 6.08705 2.91537 4.77792 3.84661 3.84664C4.77792 2.91537 6.08705 2.60406 8.18677 2.5M21.5 8.18677C21.3959 6.08705 21.0846 4.77792 20.1534 3.84664C19.2221 2.91537 17.9129 2.60406 15.8132 2.5M15.8132 21.5C17.9129 21.3959 19.2221 21.0846 20.1534 20.1534C21.0846 19.2221 21.3959 17.9129 21.5 15.8132M8.18676 21.5C6.08705 21.3959 4.77792 21.0846 3.84664 20.1534C2.91537 19.2221 2.60406 17.9129 2.5 15.8132" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M17.5 17L17.2978 16.1511C17.1307 15.4497 16.5989 14.8925 15.9061 14.6929L13.5 13.9994L13.4997 12.5318C14.3964 11.9266 14.9997 10.7955 14.9997 9.5C14.9997 7.567 13.6565 6 11.9997 6C10.3428 6 8.99966 7.567 8.99966 9.5C8.99966 10.7955 9.60296 11.9266 10.4997 12.5318L10.5 13.9994L8.10885 14.6994C7.43747 14.896 6.91757 15.429 6.73787 16.1051L6.5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button id="downloadAllButton" style="background-color: #3BB77E; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 5px;">
+          Download All
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+            <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal for Face Scanning -->
+    <div id="scanModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">×</span>
+        <h2>Scan Your Face</h2>
+        <div class="toggle-buttons">
+          <button id="captureModeBtn" onclick="toggleMode('capture')">Capture via Camera</button>
+          <button id="uploadModeBtn" onclick="toggleMode('upload')">Upload Image</button>
+        </div>
+        <div id="captureSection">
+          <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+          </div>
+        </div>
+        <div id="uploadSection" style="display: none;">
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <button id="detectButton">Detect</button>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator">
+      <div class="spinner"></div>
+      <span>Loading your Images...</span>
+    </div>
+
+    <h2>Matched Images</h2>
+    <div class="imageGrid" id="matchedGallery"></div>
+
+    <!-- Lightbox for Image Preview -->
+    <div class="imageLightbox" id="imageLightbox">
+      <span class="imageClose" onclick="closeImageLightbox()">×</span>
+      <img id="imageLightboxImg">
+      <button class="imagePrev" onclick="changeImageDisplay(-1)">❮</button>
+      <button class="imageNext" onclick="changeImageDisplay(1)">❯</button>
+    </div>
+
+  <script>
+    let eventCode;
+    let images = []; // For lightbox navigation
+    let currentIndex = 0; // For lightbox navigation
+    let currentMode = 'capture'; // Default mode: capture or upload
+    let stream = null; // Store webcam stream globally
+    let isStartingWebcam = false; // Flag to prevent overlapping webcam start
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      eventCode = urlParams.get("eventId").toUpperCase();
+      if (eventCode) {
+        // Fetch labels immediately after getting eventCode
+        fetch(`http://localhost:3000/get-labels/${eventCode}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error(`Failed to fetch labels: ${response.status}`);
+          return response.json();
+        })
+        .then(labels => displayLabels(new Set(labels)))
+        .catch(err => console.error('Error fetching labels:', err));
+
+        // Add event listener for Download All button
+        const downloadAllButton = document.getElementById('downloadAllButton');
+        downloadAllButton.addEventListener('click', () => downloadAllMatchedImages());
+      }
+    });
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const fileInput = document.getElementById('fileInput');
+    const gallery = document.getElementById('matchedGallery');
+    const scanModal = document.getElementById('scanModal');
+    const scanFaceButton = document.getElementById('scanFaceButton');
+    const captureModeBtn = document.getElementById('captureModeBtn');
+    const uploadModeBtn = document.getElementById('uploadModeBtn');
+    const captureSection = document.getElementById('captureSection');
+    const uploadSection = document.getElementById('uploadSection');
+    const detectButton = document.getElementById('detectButton');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    // Function to start webcam with better error handling
+    async function startWebcam() {
+      if (stream || isStartingWebcam) return; // Avoid overlapping starts
+      isStartingWebcam = true;
+      try {
+        // Request webcam access with specific constraints
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: "user" // Prefer front-facing camera
+          }
+        });
+
+        // Ensure the video element is visible and ready
+        video.srcObject = stream;
+        video.style.display = 'block';
+
+        // Wait for the video metadata to load before playing
+        await new Promise((resolve, reject) => {
+          video.onloadedmetadata = () => {
+            video.play().then(() => {
+              resolve();
+            }).catch(err => {
+              console.error('Error playing video:', err);
+              reject(err);
+            });
+          };
+          video.onerror = () => {
+            reject(new Error('Video element error'));
+          };
+        });
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        alert('Failed to access webcam. Please ensure you have granted camera permissions and that a webcam is available.');
+      } finally {
+        isStartingWebcam = false;
+      }
+    }
+
+    // Function to stop webcam safely
+    function stopWebcam() {
+      if (stream) {
+        video.pause(); // Pause the video first
+        let tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        stream = null;
+        video.srcObject = null;
+        video.style.display = 'none';
+      }
+    }
+
+    // Open modal when "Scan Face" is clicked
+    scanFaceButton.addEventListener('click', async () => {
+      scanModal.style.display = 'flex';
+      toggleMode('capture'); // Default to capture mode
+      await startWebcam(); // Start webcam when modal opens
+    });
+
+    // Close modal
+    function closeModal() {
+      scanModal.style.display = 'none';
+      // Reset sections
+      video.style.display = 'block';
+      canvas.style.display = 'none';
+      fileInput.value = ''; // Clear file input
+      stopWebcam(); // Stop webcam when modal closes
+    }
+
+    // Toggle between capture and upload modes
+    async function toggleMode(mode) {
+      currentMode = mode;
+      if (mode === 'capture') {
+        captureModeBtn.disabled = true;
+        uploadModeBtn.disabled = false;
+        captureSection.style.display = 'block';
+        uploadSection.style.display = 'none';
+        fileInput.value = ''; // Clear file input
+        video.style.display = 'block';
+        canvas.style.display = 'none';
+        await startWebcam(); // Ensure webcam is started in capture mode
+      } else {
+        captureModeBtn.disabled = false;
+        uploadModeBtn.disabled = true;
+        captureSection.style.display = 'none';
+        uploadSection.style.display = 'block';
+        video.style.display = 'block';
+        canvas.style.display = 'none';
+        stopWebcam(); // Stop webcam in upload mode
+      }
+    }
+
+    // Detect button handler
+    detectButton.addEventListener('click', async () => {
+      detectButton.disabled = true;
+      loadingIndicator.classList.add('visible');
+
+      if (currentMode === 'capture') {
+        await processImageFromCamera();
+        closeModal(); // Close after processing
+      } else {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          alert('Please upload an image first.');
+          loadingIndicator.classList.remove('visible');
+          detectButton.disabled = false;
+          return;
+        }
+        await processUploadedImage(file);
+        closeModal(); // Close after processing
+      }
+      
+      loadingIndicator.classList.remove('visible');
+      detectButton.disabled = false;
+    });
+
+    async function processImageFromCamera() {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/jpeg');
+      });
+      await sendImageToServer(blob);
+    }
+
+    async function processUploadedImage(file) {
+      // Directly send the file as a blob
+      await sendImageToServer(file);
+    }
+
+    async function sendImageToServer(imageBlob) {
+      const selectedLabels = [];
+      const checkboxes = document.querySelectorAll('#labelss input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          selectedLabels.push(checkbox.value);
+        }
+      });
+
+      if (selectedLabels.length === 0) {
+        checkboxes.forEach(checkbox => selectedLabels.push(checkbox.value));
+      }
+
+      const formData = new FormData();
+      formData.append('image', imageBlob);
+      formData.append('labels', JSON.stringify(selectedLabels));
+      formData.append('event_code', eventCode);
+
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts) {
+        try {
+          const response = await fetch('/recognize', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server responded with ${response.status}: ${errorText}`);
+          }
+
+          const data = await response.json();
+          gallery.innerHTML = '';
+
+          if (!Array.isArray(data) || data.length === 0) {
+            gallery.innerHTML = '<p>No matching images found.</p>';
+            return;
+          }
+
+          // Store images with their IDs and data
+          images = data.map(img => ({
+            id: img.id,
+            data: img.data
+          }));
+
+          await displayImages(images);
+          return;
+
+        } catch (err) {
+          console.error('Fetch error:', err.name, err.message, err.stack);
+          attempts++;
+          if (attempts === maxAttempts) {
+            alert(`An error occurred after ${maxAttempts} attempts: ${err.message}`);
+            return;
+          }
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    }
+
+    async function displayImages(images) {
+      gallery.innerHTML = '';
+      for (let index = 0; index < images.length; index++) {
+        const img = images[index];
+        const div = document.createElement("div");
+        div.className = "imageGridItem";
+        div.setAttribute("data-id", img.id);
+        div.style.position = "relative";
+
+        const image = document.createElement("img");
+        // Ensure the Base64 string is correctly formatted
+        image.src = `data:image/jpeg;base64,${img.data}`;
+        image.loading = "lazy";
+        image.alt = `Image ${img.id}`;
+        image.style.display = "block";
+        // Add error handling for image loading
+        image.onerror = () => {
+          console.error(`Failed to load image with ID ${img.id}. Base64 data may be invalid.`);
+          image.src = ''; // Clear the src to prevent broken image icon
+          image.alt = 'Failed to load image';
+        };
+        image.onload = () => {};
+
+        const downloadButton = document.createElement("button");
+        downloadButton.className = "downloadButton";
+        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+          <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`;
+
+        const spinner = document.createElement("div");
+        spinner.className = "downloadSpinner";
+
+        downloadButton.onclick = async () => {
+          spinner.style.display = "block";
+          try {
+            const response = await fetch(`http://localhost:3000/original/${img.id}`, {
+              method: 'GET',
+            });
+            if (!response.ok) throw new Error('Failed to fetch original image');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `image_${img.id}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error("Error downloading image:", error);
+            alert("Failed to download the image.");
+          } finally {
+            spinner.style.display = "none";
+          }
+        };
+
+        image.onclick = () => openImageLightbox(index);
+
+        div.appendChild(image);
+        div.appendChild(downloadButton);
+        div.appendChild(spinner);
+        gallery.appendChild(div);
+      }
+    }
+
+    async function downloadAllMatchedImages() {
+      if (!images || images.length === 0) {
+        alert("No matched images to download.");
+        return;
+      }
+
+      const downloadButton = document.getElementById('downloadAllButton');
+      const originalContent = downloadButton.innerHTML;
+      const downloadSpinner = document.createElement("div");
+      downloadSpinner.className = "downloadSpinner";
+      downloadSpinner.style.display = "flex";
+      downloadSpinner.style.justifyContent = "center";
+      downloadSpinner.style.alignItems = "center";
+      downloadSpinner.style.width = "24px";
+      downloadSpinner.style.height = "24px";
+      downloadSpinner.style.margin = "auto";
+      downloadSpinner.style.position = "relative";
+      downloadButton.innerHTML = "";
+      downloadButton.appendChild(downloadSpinner);
+
+      try {
+        const imageIds = images.map(img => img.id);
+        const response = await fetch('http://localhost:3000/download-matched-images', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            imageIds,
+            eventId: eventCode
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Failed to fetch ZIP: ${response.status} - ${errorData}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `event_${eventCode}_matched_images.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error downloading ZIP:", error);
+        alert("Failed to download images. Check the console for details.");
+      } finally {
+        downloadButton.innerHTML = originalContent;
+      }
+    }
+
+    function displayLabels(labels) {
+      const Ul = document.getElementById('labelss');
+      Ul.innerHTML = '';
+      labels.forEach(label => {
+        const labelContainer = document.createElement('label');
+        labelContainer.classList.add('custom-checkbox-label');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = label;
+        checkbox.value = label;
+        checkbox.checked = true;
+
+        const tickElement = document.createElement('span');
+        tickElement.classList.add('tick');
+        tickElement.innerText = '✓';
+
+        const labelText = document.createElement('span');
+        labelText.innerText = label;
+
+        labelContainer.appendChild(checkbox);
+        labelContainer.appendChild(tickElement);
+        labelContainer.appendChild(labelText);
+
+        Ul.appendChild(labelContainer);
+      });
+    }
+
+    // Lightbox Functions
+    function openImageLightbox(index) {
+      currentIndex = index;
+      document.getElementById("imageLightbox").style.display = "flex";
+      updateImageLightbox();
+    }
+
+    function closeImageLightbox() {
+      document.getElementById("imageLightbox").style.display = "none";
+    }
+
+    function changeImageDisplay(step) {
+      currentIndex = (currentIndex + step + images.length) % images.length;
+      updateImageLightbox();
+    }
+
+    async function updateImageLightbox() {
+      const lightboxImg = document.getElementById("imageLightboxImg");
+      lightboxImg.src = `data:image/jpeg;base64,${images[currentIndex].data}`;
+
+      let downloadButton = document.getElementById("lightboxDownloadButton");
+      if (!downloadButton) {
+        downloadButton = document.createElement("button");
+        downloadButton.id = "lightboxDownloadButton";
+        downloadButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="white" fill="none">
+          <path d="M12 14.5L12 4.5M12 14.5C11.2998 14.5 9.99153 12.5057 9.5 12M12 14.5C12.7002 14.5 14.0085 12.5057 14.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M20 16.5C20 18.982 19.482 19.5 17 19.5H7C4.518 19.5 4 18.982 4 16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`;
+        downloadButton.style.position = "absolute";
+        downloadButton.style.top = "0px";
+        downloadButton.style.right = "60px";
+        downloadButton.style.backgroundColor = "rgba(255, 255, 255, 0)";
+        downloadButton.style.border = "none";
+        downloadButton.style.borderRadius = "5px";
+        downloadButton.style.padding = "3px";
+        downloadButton.style.cursor = "pointer";
+
+        downloadButton.onclick = async () => {
+          try {
+            const response = await fetch(`http://localhost:3000/original/${images[currentIndex].id}`, {
+              method: 'GET',
+            });
+            if (!response.ok) throw new Error('Failed to fetch original image');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `image_${images[currentIndex].id}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error("Error downloading image:", error);
+            alert("Failed to download the image.");
+          }
+        };
+
+        document.getElementById("imageLightbox").appendChild(downloadButton);
+      }
+    }
+
+    // Prevent page unload during fetch
+    window.addEventListener('beforeunload', (e) => {
+      if (detectButton.disabled) {
+        e.preventDefault();
+        e.returnValue = 'A request is in progress. Are you sure you want to leave?';
+      }
+    });
+  </script>
+</body>
+</html>

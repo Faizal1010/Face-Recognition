@@ -24,4 +24,8 @@ router.get('/original/:id', imageController.getOriginalImage);
 // for downloading all images with selected labels
 router.post('/download-all-selected', imageController.downloadAllSelectedImages);
 
+// for downloading all matched images with ids
+router.post('/download-matched-images', imageController.downloadMatchedImages);
+
+
 module.exports = router;

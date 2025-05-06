@@ -212,8 +212,8 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                         return res.send([]);
                     }
 
-                    // Now fetch images using the mapped image_ids
-                    db.query('SELECT image FROM images WHERE id IN (?)', [imageIds], (err, results) => {
+                    // Now fetch images and their IDs using the mapped image_ids
+                    db.query('SELECT id, image FROM images WHERE id IN (?)', [imageIds], (err, results) => {
                         if (err) {
                             console.error('Database error (fetching images):', err);
                             // Cleanup before sending response
@@ -237,14 +237,17 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                             });
                             return res.send([]);
                         }
-                        const base64Images = results.map(r => {
+                        const imageDataWithIds = results.map(r => {
                             if (!r.image) {
                                 console.warn('No image data for result:', r);
                                 return null;
                             }
-                            return r.image.toString('base64');
-                        }).filter(img => img !== null);
-                        // console.log('Base64 images to send:', base64Images);
+                            return {
+                                id: r.id,
+                                data: r.image.toString('base64')
+                            };
+                        }).filter(item => item !== null);
+                        // console.log('Images with IDs to send:', imageDataWithIds);
                         // Cleanup before sending response
                         fs.unlink(req.file.path, (unlinkErr) => {
                             if (unlinkErr) console.error(`⚠️ Error deleting image file: ${req.file.path}`);
@@ -252,7 +255,7 @@ app.post('/recognize', upload.single('image'), (req, res) => {
                         fs.unlink(jsonFilePath, (unlinkErr) => {
                             if (unlinkErr) console.error(`⚠️ Error deleting JSON file: ${jsonFilePath}`);
                         });
-                        res.send(base64Images);
+                        res.send(imageDataWithIds);
                         console.log('Response sent successfully');
                     });
                 });
@@ -282,7 +285,7 @@ app.post('/recognize', upload.single('image'), (req, res) => {
 
 // for findYourself page
 app.get('/find', (req, res) => {
-    res.sendFile(path.join(__dirname, '../website/findYourself-main.html'));
+    res.sendFile(path.join(__dirname, '../website/findYourself.html'));
 });
 
 // for videos page

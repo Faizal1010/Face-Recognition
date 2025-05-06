@@ -231,7 +231,16 @@ const deleteClient = async (req, res) => {
             });
         });
 
-        // Step 4: Delete related videos (depends on client_id) and their files
+        // Step 4: Delete related carousel (depends on client_id)
+        const deleteCarouselQuery = 'DELETE FROM carousel WHERE client_id = ?';
+        await new Promise((resolve, reject) => {
+            db.query(deleteCarouselQuery, [clientId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+
+        // Step 5: Delete related videos (depends on client_id) and their files
         const videoQuery = 'SELECT filename, event_code FROM videos WHERE client_id = ?';
         const videoResults = await new Promise((resolve, reject) => {
             db.query(videoQuery, [clientId], (err, results) => {
@@ -282,7 +291,7 @@ const deleteClient = async (req, res) => {
             });
         });
 
-        // Step 5: Delete related events (depends on client_id)
+        // Step 6: Delete related events (depends on client_id)
         const deleteEventsQuery = 'DELETE FROM events WHERE client_id = ?';
         await new Promise((resolve, reject) => {
             db.query(deleteEventsQuery, [clientId], (err, result) => {
@@ -291,7 +300,7 @@ const deleteClient = async (req, res) => {
             });
         });
 
-        // Step 6: Delete the client folder
+        // Step 7: Delete the client folder
         const emailFolderPath = path.join(__dirname, '../../public/assets/clientsProfiles', email);
         try {
             await new Promise((resolve, reject) => {
@@ -306,7 +315,7 @@ const deleteClient = async (req, res) => {
             // Not failing the request since folder deletion is secondary
         }
 
-        // Step 7: Delete the client
+        // Step 8: Delete the client
         const deleteClientQuery = 'DELETE FROM client WHERE CustomerId = ?';
         const deleteResult = await new Promise((resolve, reject) => {
             db.query(deleteClientQuery, [clientId], (err, result) => {

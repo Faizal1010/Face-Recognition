@@ -557,4 +557,67 @@ exports.downloadAllSelectedImages = (req, res) => {
             }
         });
     });
-};  
+};
+
+exports.downloadMatchedImages = (req, res) => {
+    const { imageIds, eventId } = req.body;
+    console.log("Selected Image IDs and Event ID for download:", imageIds, eventId);
+
+    if (!imageIds || imageIds.length === 0 || !eventId) {
+        return res.status(400).json({ error: "Image IDs and eventId are required" });
+    }
+
+    // Query to fetch images by IDs and ensure they belong to the event
+    const query = 'SELECT id, image FROM images WHERE id IN (?) AND event_code = ? ORDER BY id ASC';
+    db.query(query, [imageIds, eventId], (err, results) => {
+        if (err) {
+            console.error("Error fetching images for download:", err);
+            return res.status(500).json({ error: "Error fetching images" });
+        }
+
+        if (results.length === 0) {
+            return res.status(200).json({ message: "No images found for the selected IDs" });
+        }
+
+        // Set up the response headers for a ZIP file download
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="event_${eventId}_matched_images.zip"`);
+
+        // Create a new ZIP archive
+        const archive = archiver('zip', {
+            zlib: { level: 9 } // Maximum compression level
+        });
+
+        // Pipe the archive data to the response
+        archive.pipe(res);
+
+        // Process each image and add it to the ZIP
+        Promise.all(results.map(async (r) => {
+            // Optionally compress the image with sharp (consistent with your existing code)
+            const compressedBuffer = await sharp(r.image)
+                .jpeg({ quality: 80 }) // Adjust quality as needed
+                .toBuffer();
+
+            // Add the image to the ZIP with a unique filename
+            archive.append(compressedBuffer, { name: `image_${r.id}.jpg` });
+        }))
+        .then(() => {
+            // Finalize the archive once all images are added
+            archive.finalize();
+        })
+        .catch(err => {
+            console.error("Error processing images for ZIP:", err);
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Error creating ZIP file" });
+            }
+        });
+
+        // Handle archive errors
+        archive.on('error', (err) => {
+            console.error("Archive error:", err);
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Error creating ZIP file" });
+            }
+        });
+    });
+};

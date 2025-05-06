@@ -84,7 +84,9 @@
 
         // Card 8: Notes
         document.getElementById('notes').textContent = client.Notes || 'No notes available';
+
         document.getElementById('total-images-size').textContent = client.totalImageSize || '0B';
+        
         document.getElementById('total-videos-size').textContent = client.totalVideoSize || '0B';
 
         // Card 9: Events and Media Details (Dynamic)
@@ -94,7 +96,7 @@
         if (client.events && client.events.length > 0) {
             client.events.forEach(event => {
                 const eventDiv = document.createElement('div');
-                eventDiv.style = 'background-color: #2a2d36; padding: 15px; border-radius: 5px; margin-bottom: 10px; width: 100%; box-sizing: border-box;';
+                eventDiv.style = 'background-color: #222736; padding: 15px; border-radius: 5px; margin-bottom: 10px; width: 100%; box-sizing: border-box;';
 
                 const eventTitle = document.createElement('h4');
                 eventTitle.textContent = `${event.name} (Code: ${event.event_code})`;
@@ -185,6 +187,16 @@
 
     <body>
         <div class="screen-overlay"></div>
+        <!-- Popup Overlay -->
+        <div id="popup-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000;"></div>
+        <!-- Popup Container -->
+        <div id="popup-container" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2a2d36; border-radius: 10px; padding: 20px; z-index: 1001; max-width: 500px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h5 id="popup-title" style="margin: 0; font-size: 18px; color: #fff;"></h5>
+                <button id="popup-close" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+            <p id="popup-content" style="margin: 0; font-size: 16px; color: #ddd; word-wrap: break-word; max-height: 300px; overflow-y: auto;"></p>
+        </div>
         <aside class="navbar-aside" id="offcanvas_aside">
             <div class="aside-top">
                 <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
@@ -194,14 +206,6 @@
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
                 </div>
             </div>
-            <!-- <div class="" style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="http://localhost:3000/client-dashboard" class="brand-wrap">
-                    <img id="logo" style="width: 250px;" src="" class="logo" alt="Nest Dashboard" />
-                </a>
-                <div>
-                    <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
-                </div>
-            </div> -->
             <nav>
                 <ul class="menu-aside">
                     <li class="menu-item active">
@@ -263,42 +267,20 @@
                                 </span>
                             </div>
                         </div>
-
                     </form>
                 </div>
                 <div class="col-nav">
                     <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"><i class="material-icons md-apps"></i></button>
                     <ul class="nav">
-                        <!-- <li class="nav-item">
-                            <a class="nav-link btn-icon" href="#">
-                                <i class="material-icons md-notifications animation-shake"></i>
-                                <span class="badge rounded-pill">3</span>
-                            </a>
-                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                         </li>
-                        <!-- <li class="dropdown nav-item">
-                            <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
-                            <div class="dropdown-menu dropdown-menu-start" aria-labelledby="dropdownLanguage">
-                                <a class="dropdown-item text-brand" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-us.png" alt="English" />English</a>
-                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-fr.png" alt="Français" />Français</a>
-                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-jp.png" alt="Français" />日本語</a>
-                                <a class="dropdown-item" href="#"><img src="http://localhost:3000/assets/imgs/theme/flag-cn.png" alt="Français" />中国人</a>
-                            </div>
-                        </li> -->
                         <li class="dropdown nav-item">
                             <a class="dropdown-toggle" id="user-profile" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="" alt="User" /></a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                                <!-- <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
-                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
-                                <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
-                                <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
-                                <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
-                                <div class="dropdown-divider"></div> -->
                                 <button id="logout" class="dropdown-item text-danger"><i class="material-icons md-exit_to_app"></i>Logout</button>
                             </div>
                         </li>
@@ -316,132 +298,132 @@
                     
         <!-- Card 1: Client Name -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('CLIENT NAME', document.getElementById('client-name').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">CLIENT NAME</h6>
-                        <span id="client-name">Loading...</span>
-                        <span class="text-sm">FULL NAME</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">CLIENT NAME</h6>
+                        <span id="client-name" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">FULL NAME</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 2: Customer ID -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('CUSTOMER ID', document.getElementById('customer-id').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">CUSTOMER ID</h6>
-                        <span id="customer-id">Loading...</span>
-                        <span class="text-sm">UNIQUE ID</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">CUSTOMER ID</h6>
+                        <span id="customer-id" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">UNIQUE ID</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 3: Contact Number -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('CONTACT NUMBER', document.getElementById('contact-no').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">CONTACT NUMBER</h6>
-                        <span id="contact-no">Loading...</span>
-                        <span class="text-sm">PHONE</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">CONTACT NUMBER</h6>
+                        <span id="contact-no" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">PHONE</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 4: Email -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('EMAIL', document.getElementById('email').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">EMAIL</h6>
-                        <span id="email">Loading...</span>
-                        <span class="text-sm">CONTACT EMAIL</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">EMAIL</h6>
+                        <span id="email" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">CONTACT EMAIL</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 5: Address -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('ADDRESS', document.getElementById('address').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">ADDRESS</h6>
-                        <span id="address">Loading...</span>
-                        <span class="text-sm">CITY, STATE, PIN</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">ADDRESS</h6>
+                        <span id="address" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">CITY, STATE, PIN</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 6: Storage Usage -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('STORAGE USAGE', document.getElementById('storage-used').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">STORAGE USAGE</h6>
-                        <span id="storage-used">Loading...</span>
-                        <span class="text-sm">USED / LIMIT</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">STORAGE USAGE</h6>
+                        <span id="storage-used" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">USED / LIMIT</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 7: Expiry Date -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('EXPIRY DATE', document.getElementById('expiry-date').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">EXPIRY DATE</h6>
-                        <span id="expiry-date">Loading...</span>
-                        <span class="text-sm">SUBSCRIPTION END</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">EXPIRY DATE</h6>
+                        <span id="expiry-date" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">SUBSCRIPTION END</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 8: Notes -->
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('NOTES', document.getElementById('notes').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">NOTES</h6>
-                        <span id="notes">Loading...</span>
-                        <span class="text-sm">ADDITIONAL INFO</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">NOTES</h6>
+                        <span id="notes" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">ADDITIONAL INFO</span>
                     </div>
                 </article>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('TOTAL IMAGES SIZE', document.getElementById('total-images-size').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">TOTAL IMAGES SIZE</h6>
-                        <span id="total-images-size">Loading...</span>
-                        <span class="text-sm">ADDITIONAL INFO</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">TOTAL IMAGES SIZE</h6>
+                        <span id="total-images-size" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">ADDITIONAL INFO</span>
                     </div>
                 </article>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 150px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;" onclick="showPopup('TOTAL VIDEOS SIZE', document.getElementById('total-videos-size').textContent)">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">TOTAL VIDEOS SIZE</h6>
-                        <span id="total-videos-size">Loading...</span>
-                        <span class="text-sm">ADDITIONAL INFO</span>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">TOTAL VIDEOS SIZE</h6>
+                        <span id="total-videos-size" style="font-size: 16px; font-weight: 500; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Loading...</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">ADDITIONAL INFO</span>
                     </div>
                 </article>
             </div>
         </div>
         <!-- Card 9: Events and Labels (Dynamic, No Scrollbar, Responsive) -->
         <div class="col-12">
-            <div class="card card-body mb-4">
+            <div class="card card-body mb-4" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <article class="icontext">
                     <div class="text">
-                        <h6 class="mb-1 card-title">EVENTS & MEDIA DETAILS</h6>
+                        <h6 class="mb-1 card-title" style="font-size: 14px; color: #666;">EVENTS & MEDIA DETAILS</h6>
                         <div id="events-media" style="color: white;">
                             <p>Loading...</p>
                         </div>
-                        <span class="text-sm">EVENTS, LABELS, AND MEDIA COUNTS</span>
+                        <span class="text-sm" style="font-size: 12px; color: #999;">EVENTS, LABELS, AND MEDIA COUNTS</span>
                     </div>
                 </article>
             </div>
@@ -457,7 +439,7 @@
                         <script>
                             document.write(new Date().getFullYear());
                         </script>
-                        &copy; Managed and maintained by <b>DigitallyKaro.</b>
+                        © Managed and maintained by <b>DigitallyKaro.</b>
                     </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end">All rights reserved.</div>
@@ -494,41 +476,6 @@
                 } catch (error) {
                     console.error('Error decoding JWT token:', error);
                 }
-        
-                // fetch(`http://localhost:8000/notification/by-client-id/${payload.id}`, {
-                //     method: 'GET',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     }
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     const notificationBox = document.getElementById('notification-box');
-                //     notificationBox.innerHTML = "";
-        
-                //     // Sort notifications by createdAt in descending order (newest first)
-                //     const sortedNotifications = data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-                //     // Get the newest 5 notifications
-                //     const latestNotifications = sortedNotifications.slice(0, 5);
-        
-                //     // Display the latest notifications
-                //     latestNotifications.forEach((notification, index) => {
-                //         const div = document.createElement('div');
-                //         if ((index + 1) % 2 !== 0) {
-                //             div.style.backgroundColor = '#222736';
-                //             div.style.borderRadius = '7px';
-                //             div.style.padding = '10px';
-                //             div.style.marginBottom = '5px';
-                //         } else {
-                //             div.style.borderRadius = '7px';
-                //             div.style.padding = '10px';
-                //             div.style.marginBottom = '5px';
-                //         }
-                //         div.innerText = `${index + 1}. ${notification.Notification}`;
-                //         notificationBox.appendChild(div);
-                //     });
-                // });
                 
             });
         </script>
@@ -547,6 +494,23 @@
         })
       </script>
 
+      <!-- Popup Functionality -->
+      <script>
+        function showPopup(title, content) {
+            document.getElementById('popup-title').textContent = title;
+            document.getElementById('popup-content').textContent = content;
+            document.getElementById('popup-overlay').style.display = 'block';
+            document.getElementById('popup-container').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup-overlay').style.display = 'none';
+            document.getElementById('popup-container').style.display = 'none';
+        }
+
+        document.getElementById('popup-close').addEventListener('click', closePopup);
+        document.getElementById('popup-overlay').addEventListener('click', closePopup);
+      </script>
 
         <!-- Logout -->
         <script>
