@@ -594,4 +594,107 @@ const getClientByCustomerId = async (req, res) => {
     }
 };
 
-module.exports = { addClient, getClient, deleteClient, uploadProfile, getLatestClients, getClientById, getClientByCustomerId};
+const getAdminDashboardData = async (req, res) => {
+    try {
+        // Query 1: Count total clients
+        const clientCountQuery = 'SELECT COUNT(*) AS clientCount FROM client';
+        const clientCountResult = await new Promise((resolve, reject) => {
+            db.query(clientCountQuery, (err, results) => {
+                if (err) reject(err);
+                else resolve(results[0]);
+            });
+        });
+
+        // Query 2: Count total events
+        const eventCountQuery = 'SELECT COUNT(*) AS eventCount FROM events';
+        const eventCountResult = await new Promise((resolve, reject) => {
+            db.query(eventCountQuery, (err, results) => {
+                if (err) reject(err);
+                else resolve(results[0]);
+            });
+        });
+
+        // Query 3: Count total images and calculate total image size
+        const imageStatsQuery = `
+            SELECT 
+                COUNT(*) AS imageCount,
+                SUM(LENGTH(image)) AS totalImageSize
+            FROM images
+        `;
+        const imageStatsResult = await new Promise((resolve, reject) => {
+            db.query(imageStatsQuery, (err, results) => {
+                if (err) reject(err);
+                else resolve(results[0]);
+            });
+        });
+
+        // Query 4: Fetch all video filenames for size calculation
+        const videoFilesQuery = `
+            SELECT filename, event_code
+            FROM videos
+        `;
+        const videoFilesResults = await new Promise((resolve, reject) => {
+            db.query(videoFilesQuery, (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+        // Calculate total video size using callback-based fs.stat
+        let totalVideoSize = 0;
+        let totalVideoCount = videoFilesResults.length;
+
+        for (const video of videoFilesResults) {
+            const videoPath = path.join(__dirname, '../videos', video.event_code, video.filename);
+            try {
+                const stats = await new Promise((resolve, reject) => {
+                    fs.stat(videoPath, (err, stats) => {
+                        if (err) reject(err);
+                        else resolve(stats);
+                    });
+                });
+                totalVideoSize += stats.size;
+                console.log(`Found video: ${videoPath}, size: ${stats.size} bytes`);
+            } catch (err) {
+                console.error(`Failed to read video file ${videoPath}:`, err.message);
+                if (err.code === 'ENOENT') {
+                    console.error(`Video file does not exist: ${videoPath}`);
+                }
+            }
+        }
+
+        // Format sizes to MB or GB
+        const formatSize = (sizeInBytes) => {
+            if (sizeInBytes >= 1024 * 1024 * 1024) { // GB
+                return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+            } else if (sizeInBytes >= 1024 * 1024) { // MB
+                return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
+            } else { // Bytes
+                return `${sizeInBytes} Bytes`;
+            }
+        };
+
+        // Send success response with aggregated data
+        res.status(200).json({
+            success: true,
+            message: "Admin dashboard data retrieved successfully",
+            data: {
+                totalClients: clientCountResult.clientCount,
+                totalEvents: eventCountResult.eventCount,
+                totalImages: imageStatsResult.imageCount,
+                totalImageSize: formatSize(imageStatsResult.totalImageSize || 0),
+                totalVideos: totalVideoCount,
+                totalVideoSize: formatSize(totalVideoSize)
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching admin dashboard data:', error);
+        res.status(500).json({
+            success: false,
+            message: "Could not retrieve dashboard data due to an internal error",
+            error: error.message
+        });
+    }
+};
+
+module.exports = { addClient, getClient, deleteClient, uploadProfile, getLatestClients, getClientById, getClientByCustomerId, getAdminDashboardData};

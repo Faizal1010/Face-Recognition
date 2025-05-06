@@ -96,10 +96,11 @@
         if (client.events && client.events.length > 0) {
             client.events.forEach(event => {
                 const eventDiv = document.createElement('div');
-                eventDiv.style = 'background-color: #222736; padding: 15px; border-radius: 5px; margin-bottom: 10px; width: 100%; box-sizing: border-box;';
+                eventDiv.className = 'card card-body mb-2'; // Use card classes for theme consistency
+                eventDiv.style = 'padding: 15px; border-radius: 5px; margin-bottom: 10px; width: 100%; box-sizing: border-box;'; // Remove background-color
 
                 const eventTitle = document.createElement('h4');
-                eventTitle.textContent = `${event.name} (Code: ${event.event_code})`;
+                eventTitle.innerHTML = `<u>${event.name} (Code: ${event.event_code})</u>`;
                 eventTitle.style = 'margin: 0 0 10px 0; font-size: 18px;';
 
                 // Image Labels
@@ -193,7 +194,7 @@
         <div id="popup-container" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2a2d36; border-radius: 10px; padding: 20px; z-index: 1001; max-width: 500px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h5 id="popup-title" style="margin: 0; font-size: 18px; color: #fff;"></h5>
-                <button id="popup-close" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+                <button id="popup-close" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">×</button>
             </div>
             <p id="popup-content" style="margin: 0; font-size: 16px; color: #ddd; word-wrap: break-word; max-height: 300px; overflow-y: auto;"></p>
         </div>
