@@ -7,7 +7,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const uploadDir = path.join(__dirname, 'uploads');
+const uploadDir = path.join(__dirname, 'Uploads');
 
 const upload = multer({ 
     dest: uploadDir, 
@@ -130,7 +130,7 @@ app.post('/upload', upload.array('image', 500), async (req, res) => {
 // Recognize endpoint
 app.post('/recognize', upload.single('image'), (req, res) => {
     console.log('Processing /recognize request');
-    const jsonFilePath = path.join(__dirname, 'uploads', `recognize_${Date.now()}.json`);
+    const jsonFilePath = path.join(__dirname, 'Uploads', ` BUDGETrecognize_${Date.now()}.json`);
     const jsonData = {
         imagePath: req.file.path,
         labels: req.body.labels || '[]',
@@ -154,8 +154,9 @@ app.post('/recognize', upload.single('image'), (req, res) => {
             });
             return res.status(500).send(`Error recognizing image: ${err.message}`);
         }
+        // Read result from the same JSON file
         try {
-            const parsedData = JSON.parse(output.trim());
+            const parsedData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
             console.log('Python output:', parsedData);
             if (parsedData.error) {
                 // Cleanup before sending response
@@ -308,7 +309,7 @@ app.use('/super-admin-dashboard', require('./routes/superAdminDashboard'))
 
 
 
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, 'Uploads');
 if (fs.existsSync(uploadsDir)) {
     fs.readdirSync(uploadsDir).forEach(file => {
         const filePath = path.join(uploadsDir, file);

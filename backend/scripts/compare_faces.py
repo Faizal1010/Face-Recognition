@@ -40,13 +40,11 @@ def compare_faces(image_path, label_filter, event_code_filter):
         # Read the query image
         img = cv2.imread(image_path)
         if img is None:
-            print(json.dumps({"error": f"Failed to load image at {image_path}"}))
-            return
+            return {"error": f"Failed to load image at {image_path}"}
         
         faces = app.get(img)
         if len(faces) == 0:
-            print(json.dumps({"status": "no_match_found"}))
-            return
+            return {"status": "no_match_found"}
         
         # Use the first detected face for comparison
         query_embedding = faces[0].normed_embedding
@@ -98,13 +96,12 @@ def compare_faces(image_path, label_filter, event_code_filter):
         conn.close()
 
         if matched_images:
-            print(json.dumps({"status": "match_found", "matched_images": matched_images}))
+            return {"status": "match_found", "matched_images": matched_images}
         else:
-            print(json.dumps({"status": "no_match_found"}))
+            return {"status": "no_match_found"}
 
     except Exception as e:
-        print(json.dumps({"error": f"Error recognizing image: {str(e)}"}))  # Output to stdout
-        sys.exit(1)
+        return {"error": f"Error recognizing image: {str(e)}"}
 
 if __name__ == "__main__":
     json_file_path = sys.argv[1]
@@ -115,9 +112,16 @@ if __name__ == "__main__":
         label_filter = json_data["labels"]
         event_code_filter = json_data["event_code"]
         if not event_code_filter:
-            print(json.dumps({"error": "Event code is required."}))
+            result = {"error": "Event code is required."}
         else:
-            compare_faces(image_path, label_filter, event_code_filter)
+            result = compare_faces(image_path, label_filter, event_code_filter)
+        
+        # Write result to the same JSON file
+        with open(json_file_path, 'w', encoding='utf-8') as file:
+            json.dump(result, file)
+        
     except Exception as e:
-        print(json.dumps({"error": f"Failed to read JSON file: {str(e)}"}))
+        # Write error to the same JSON file
+        with open(json_file_path, 'w', encoding='utf-8') as file:
+            json.dump({"error": f"Failed to read JSON file: {str(e)}"}, file)
         sys.exit(1)
