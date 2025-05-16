@@ -166,19 +166,19 @@
                                 </style>
                                 <div class="mb-4">
                                     <label for="plan_name" class="form-label">Plan Name:</label>
-                                    <input id="plan_name" type="text" placeholder="Type here" class="form-control" id="product_name" />
+                                    <input id="plan_name" type="text" placeholder="Type here" class="form-control" required/>
                                 </div>
                                 <div class="mb-4">
                                     <label for="strage_limit" class="form-label">Storage Limit: (in GB)</label>
-                                    <input id="storage_limit" type="number" placeholder="Type here" class="form-control"/>
+                                    <input id="storage_limit" type="number" placeholder="Type here" class="form-control" required/>
                                 </div>
                                 <div class="mb-4">
                                     <label for="validity" class="form-label">Validity: (No. of days)</label>
-                                    <input id="validity" type="number" class="form-control" style="background-color: #1a2530; color: #fff; border: 1px solid #2c3e50; border-radius: 4px; padding: 8px;"/>
+                                    <input id="validity" type="number" class="form-control" style="background-color: #1a2530; color: #fff; border: 1px solid #2c3e50; border-radius: 4px; padding: 8px;" required/>
                                 </div>
                                 <div class="mb-4">
                                     <label class="plan_description">Description</label>
-                                    <textarea id="plan_description" placeholder="Type here" class="form-control"></textarea>
+                                    <textarea id="plan_description" placeholder="Type here" class="form-control" required></textarea>
                                 </div>
                                 <div class="d-grid">
                                     <button class="btn btn-primary" id="create-event">Create Plan</button>
@@ -203,7 +203,7 @@
                                 </table>
                                 <style>
                                     table tr:hover {
-                                        background-color: #f1f1f1;
+                                        background-color: #5b798d;
                                     }
                                 </style>
                             </div>

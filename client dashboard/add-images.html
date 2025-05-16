@@ -61,8 +61,7 @@ if (!clientId) {
                             storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
 
                             const expiry_date_span = document.getElementById('expiry_date_span')
-                            expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
-                        }
+                            expiry_date_span.innerText = `Expiry Date : ${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(data.client.Expiry_date)).split('/').join('-')}`;                        }
                     })
             });
         

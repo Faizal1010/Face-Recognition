@@ -48,8 +48,7 @@
                             storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
 
                             const expiry_date_span = document.getElementById('expiry_date_span')
-                            expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
-                        }
+                            expiry_date_span.innerText = `Expiry Date : ${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(data.client.Expiry_date)).split('/').join('-')}`;                        }
                     })
         });
 
@@ -70,24 +69,24 @@
     box-sizing: border-box;
 }
 html, body {
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
     max-width: 100%;
 }
 .main-wrap {
     max-width: 100%;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 .content-main {
     max-width: 100%;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 .image-section {
     max-width: 100%;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
 .imageGrid {
     max-width: 100%;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
 }
         .imageGrid {
             display: flex;
@@ -100,7 +99,7 @@ html, body {
         
         .imageGridItem {
             position: relative;
-            overflow: hidden;
+            /* overflow: hidden; */
             border-radius: 8px;
             cursor: pointer;
             width: 200px;

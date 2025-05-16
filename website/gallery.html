@@ -5,22 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wedding Story</title>
     <script>
-        document.addEventListener('DOMContentLoaded',() => {
-
-            const eventCode = localStorage.getItem('eventId')
-            fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
-                    .then(response => {
-                        if (response.ok) {
-                            console.log('heyyyy')
-                        } else {
-                            document.getElementById("popup").style.display = "flex";
-                            document.getElementById("main-content").style.display = "none";
-                        }
-                    })
-        })
+        document.addEventListener('DOMContentLoaded', () => {
+            const eventCode = localStorage.getItem('eventId');
+            if (eventCode) {
+                fetch(`http://localhost:3000/event/check-event/${eventCode}`, {
+                    method: "GET"
+                })
+                .then(response => {
+                    if (response.ok) {
+                        localStorage.setItem("eventId", eventCode);
+                        savedEventId = eventCode;
+                        loadLabels(eventCode);
+                        loadCarouselImages(eventCode); // Trigger carousel image loading here
+                        console.log("Event Code Entered:", eventCode);
+                        document.getElementById("popup").style.display = "none";
+                        document.getElementById("main-content").style.display = "block";
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error || "Unknown error occurred");
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking event:", error);
+                    alert(error.message);
+                    document.getElementById("popup").style.display = "flex";
+                    document.getElementById("main-content").style.display = "none";
+                });
+            }
+        });
     </script>
     <style>
-        html{
+        html {
             scroll-behavior: smooth;
         }
         /* Full-screen popup */
@@ -148,7 +164,7 @@
                 width: 180px;
                 height: 170px;
             }
-            #imageLabelFilters{
+            #imageLabelFilters {
                 width: 100%;
             }
         }
@@ -160,7 +176,7 @@
         }
 
         /* Spinner styles adapted from video file */
-        .imageSpinner, .downloadSpinner {
+        .imageSpinner, .downloadSpinner, .carousel-spinner {
             display: none;
             position: absolute;
             top: 50%;
@@ -173,6 +189,14 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             z-index: 10;
+        }
+
+        .carousel-spinner {
+            display: flex;
+            width: 48px;
+            height: 48px;
+            border-width: 4px;
+            z-index: 3;
         }
 
         @keyframes spin {
@@ -195,10 +219,8 @@
 
     <!-- Main Content (Hidden Initially) -->
     <div id="main-content">
-        <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;">
-            <img src="" alt="Wedding moment 1" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 1; transition: opacity 1s ease-in-out; z-index: 1;">
-            <img src="" alt="Wedding moment 2" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
-            <img src="" alt="Wedding moment 3" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1s ease-in-out; z-index: 0;">
+        <div style="position: relative; width: 100%; height: 100vh; overflow: hidden;" id="carousel-container">
+            <div class="carousel-spinner" style="display: flex;"></div>
             <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; box-sizing: border-box; z-index: 2;">
                 <div style="position: absolute; bottom: 30px; text-align: center;">
                     <h1 style="font-size: 2.5rem; margin: 10px 0;">Saikat & Rajrupa Stories</h1>
@@ -227,45 +249,112 @@
             <script>
                 let carouselImages = [];
                 let currentIndex = 0;
-                const sliderImages = document.querySelectorAll('img[alt^="Wedding moment"]');
-        
+                let sliderImages = [];
+                const maxRetries = 3;
+                let retryCount = 0;
+
                 async function loadCarouselImages(eventId) {
+                    if (!eventId) {
+                        console.error('No eventId provided for loading carousel images');
+                        document.querySelector('.carousel-spinner').style.display = 'none';
+                        return;
+                    }
                     try {
                         const response = await fetch(`/carousel/images/${eventId}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                         const data = await response.json();
-                        console.log(data)
+                        console.log('Carousel images fetched:', data);
                         carouselImages = data.images.map(img => ({
                             id: img.id,
                             data: `data:image/jpeg;base64,${img.data}`
                         }));
+                        if (carouselImages.length === 0) {
+                            throw new Error('No images received from backend');
+                        }
+                        retryCount = 0; // Reset retry count on success
+                        createCarouselImages();
                         displayCarousel();
                     } catch (error) {
                         console.error('Error loading carousel images:', error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            console.log(`Retrying... Attempt ${retryCount}/${maxRetries}`);
+                            setTimeout(() => loadCarouselImages(eventId), 2000);
+                        } else {
+                            console.error('Max retries reached. Failed to load carousel images.');
+                            document.querySelector('.carousel-spinner').style.display = 'none';
+                        }
                     }
                 }
-        
+
+                function createCarouselImages() {
+                    const container = document.getElementById('carousel-container');
+                    // Clear any existing images
+                    container.querySelectorAll('img[alt^="Wedding moment"]').forEach(img => img.remove());
+                    // Create new images
+                    carouselImages.forEach((img, index) => {
+                        const image = document.createElement('img');
+                        image.src = img.data;
+                        image.alt = `Wedding moment ${index + 1}`;
+                        image.style.position = 'absolute';
+                        image.style.top = '0';
+                        image.style.left = '0';
+                        image.style.width = '100%';
+                        image.style.height = '100%';
+                        image.style.objectFit = 'cover';
+                        image.style.objectPosition = 'center';
+                        image.style.opacity = index === 0 ? '1' : '0';
+                        image.style.transition = 'opacity 1s ease-in-out';
+                        image.style.zIndex = index === 0 ? '1' : '0';
+                        container.insertBefore(image, container.firstChild);
+                    });
+                    sliderImages = document.querySelectorAll('img[alt^="Wedding moment"]');
+                    // Hide spinner once images are created
+                    document.querySelector('.carousel-spinner').style.display = 'none';
+                }
+
                 function displayCarousel() {
+                    let loadedImages = 0;
                     sliderImages.forEach((img, index) => {
-                        if (carouselImages[index]) {
-                            img.src = carouselImages[index].data;
+                        if (img.complete && img.naturalWidth !== 0) {
+                            loadedImages++;
+                            img.style.opacity = index === 0 ? '1' : '0';
+                            img.style.zIndex = index === 0 ? '1' : '0';
+                        } else {
+                            img.onload = () => {
+                                loadedImages++;
+                                img.style.opacity = index === 0 ? '1' : '0';
+                                img.style.zIndex = index === 0 ? '1' : '0';
+                                if (loadedImages === sliderImages.length) {
+                                    console.log('All carousel images loaded');
+                                }
+                            };
+                            img.onerror = () => {
+                                console.error(`Failed to load image ${index + 1}`);
+                                if (retryCount < maxRetries) {
+                                    retryCount++;
+                                    console.log(`Retrying... Attempt ${retryCount}/${maxRetries}`);
+                                    setTimeout(() => loadCarouselImages(localStorage.getItem('eventId')), 2000);
+                                }
+                            };
                         }
                     });
-                    sliderImages[0].style.opacity = '1';
-                    sliderImages[0].style.zIndex = '1';
+                    if (loadedImages === sliderImages.length) {
+                        console.log('All carousel images loaded');
+                    }
                 }
-        
+
                 function showNextImage() {
+                    if (sliderImages.length === 0) return;
                     sliderImages[currentIndex].style.opacity = '0';
                     sliderImages[currentIndex].style.zIndex = '0';
                     currentIndex = (currentIndex + 1) % sliderImages.length;
                     sliderImages[currentIndex].style.opacity = '1';
                     sliderImages[currentIndex].style.zIndex = '1';
                 }
-        
-                const eventId = localStorage.getItem('eventId')
-                // Replace 'yourEventId' with the actual event ID
-                loadCarouselImages(eventId);
-        
+
                 setInterval(showNextImage, 5000); // Change image every 5 seconds
             </script>
         </div>
@@ -332,6 +421,7 @@
                 const videoPageLink = document.getElementById("videoPageLink");
                 videoPageLink.href = `http://localhost:3000/video?eventId=${encodeURIComponent(savedEventId)}`;
                 loadLabels(savedEventId);
+                loadCarouselImages(savedEventId); // Trigger carousel image loading here
                 document.getElementById("popup").style.display = "none";
                 document.getElementById("main-content").style.display = "block";
             }
@@ -341,26 +431,35 @@
             let eventId = document.getElementById("eventCodeInput").value.trim();
             if (!eventId) {
                 alert("Please enter a valid event code.");
+                document.getElementById("popup").style.display = "flex";
+                document.getElementById("main-content").style.display = "none";
                 return;
             }
 
-            fetch(`http://localhost:3000/event/check-event/${eventId}`, { method: "HEAD" })
-                .then(response => {
-                    if (response.ok) {
-                        localStorage.setItem("eventId", eventId);
-                        savedEventId = eventId;
-                        loadLabels(eventId);
-                        console.log("Event Code Entered:", eventId);
-                        document.getElementById("popup").style.display = "none";
-                        document.getElementById("main-content").style.display = "block";
-                    } else {
-                        alert("Event does not exist or the code is incorrect.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error checking event:", error);
-                    alert("An error occurred. Please try again later.");
-                });
+            fetch(`http://localhost:3000/event/check-event/${eventId}`, {
+                method: "GET"
+            })
+            .then(response => {
+                if (response.ok) {
+                    localStorage.setItem("eventId", eventId);
+                    savedEventId = eventId;
+                    loadLabels(eventId);
+                    loadCarouselImages(eventId); // Trigger carousel image loading here
+                    console.log("Event Code Entered:", eventId);
+                    document.getElementById("popup").style.display = "none";
+                    document.getElementById("main-content").style.display = "block";
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.error || "Unknown error occurred");
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error checking event:", error);
+                alert(error.message);
+                document.getElementById("popup").style.display = "flex";
+                document.getElementById("main-content").style.display = "none";
+            });
         });
     </script>
 

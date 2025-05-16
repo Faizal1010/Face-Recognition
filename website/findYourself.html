@@ -9,12 +9,24 @@
   <script>
     document.addEventListener('DOMContentLoaded',() => {
         const eventCode = localStorage.getItem('eventId')
-        fetch(`http://localhost:3000/event/check-event/${eventCode}`, { method: "HEAD" })
-                .then(response => {
-                    if (!response.ok) {
-                        window.location.href = 'http://localhost:3000/gallery.html'
-                    }
-                })
+        fetch(`http://localhost:3000/event/check-event/${eventCode}`, {
+    method: "GET"
+})
+    .then(response => {
+        if (response.ok) {
+            localStorage.setItem("eventId", eventCode);
+            savedEventId = eventCode;
+        } else {
+            return response.json().then(data => {
+              localStorage.removeItem('eventId')
+                window.location.href = 'http://localhost:3000/gallery.html'
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error checking event:", error);
+        alert(error.message);
+    });
     })
 </script>
   <style>

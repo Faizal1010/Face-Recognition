@@ -10,6 +10,6 @@ router.delete('/delete-event/:id', deleteEvent)
 
 router.get('/client-events/:client_id', getEventsByClientId )
 
-router.head('/check-event/:event_code', checkEventExists )
+router.get('/check-event/:event_code', checkEventExists )
 
 module.exports = router 

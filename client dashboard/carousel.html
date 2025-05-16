@@ -42,8 +42,7 @@
                     storage_used_span.innerText = `Storage Left : ${data.client.Storage_limit - data.client.Storage_used} MB`
 
                     const expiry_date_span = document.getElementById('expiry_date_span')
-                    expiry_date_span.innerText = `Expiry Date : ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
-                }
+                    expiry_date_span.innerText = `Expiry Date : ${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(data.client.Expiry_date)).split('/').join('-')}`;                }
             })
         })
 
@@ -350,8 +349,7 @@
                     const storage_used_span = document.getElementById('storage_used_span');
                     storage_used_span.innerText = `Storage Left: ${data.client.Storage_limit - data.client.Storage_used} MB`;
                     const expiry_date_span = document.getElementById('expiry_date_span');
-                    expiry_date_span.innerText = `Expiry Date: ${new Date(data.client.Expiry_date).toISOString().split('T')[0]}`;
-                    const profile = document.getElementById('user-profile').querySelector('img');
+                    expiry_date_span.innerText = `Expiry Date : ${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(data.client.Expiry_date)).split('/').join('-')}`;                    const profile = document.getElementById('user-profile').querySelector('img');
                     profile.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/${data.client.Profile}`;
                     const logo = document.getElementById('logo');
                     logo.src = `http://localhost:3000/assets/clientsProfiles/${data.client.Email}/logo.png`;
@@ -379,7 +377,7 @@
                 if (!events || events.length === 0) {
                     const noEventsOption = document.createElement('option');
                     noEventsOption.value = '';
-                    noEventsOption.textContent = '_ue';
+                    noEventsOption.textContent = 'No events';
                     eventSelect.appendChild(noEventsOption);
                     return;
                 }

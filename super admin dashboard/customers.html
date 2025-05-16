@@ -98,25 +98,6 @@
     <main class="main-wrap">
       <header class="main-header navbar">
         <div class="col-search">
-          <form class="searchform">
-            <div class="input-group">
-              <input
-                list="search_terms"
-                type="text"
-                class="form-control"
-                placeholder="Search term"
-              />
-              <button class="btn btn-light bg" type="button">
-                <i class="material-icons md-search"></i>
-              </button>
-            </div>
-            <datalist id="search_terms">
-              <option value="Products"></option>
-              <option value="New orders"></option>
-              <option value="Apple iphone"></option>
-              <option value="Ahmed Hassan"></option>
-            </datalist>
-          </form>
         </div>
         <div class="col-nav">
           <button
@@ -170,27 +151,7 @@
           </div>
           <!-- card-body end// -->
         </div>
-        <!-- card end// -->
-        <div class="pagination-area mt-30 mb-50">
-          <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-start">
-              <li class="page-item active">
-                <a class="page-link" href="#">01</a>
-              </li>
-              <li class="page-item"><a class="page-link" href="#">02</a></li>
-              <li class "page-item"><a class="page-link" href="#">03</a></li>
-              <li class="page-item">
-                <a class="page-link dot" href="#">...</a>
-              </li>
-              <li class="page-item"><a class="page-link" href="#">16</a></li>
-              <li class="page-item">
-                <a class="page-link" href="#"
-                  ><i class="material-icons md-chevron_right"></i
-                ></a>
-              </li>
-            </ul>
-          </nav>
-        </div>
+
       </section>
       <!-- content-main end// -->
       <footer class="main-footer font-xs">
@@ -228,6 +189,8 @@
                     <span id="totalVideoSize" style="font-size: 16px;"></span>
                     <span style="font-weight: bold;">Video Count:</span>
                     <span id="videoCount" style="font-size: 16px;"></span>
+                    <span style="font-weight: bold;">Expiry Date:</span>
+                    <span id="expiryDate" style="font-size: 16px;"></span>
                 </div>
             </div>
     
@@ -359,6 +322,7 @@
         const totalImageSize = document.getElementById('totalImageSize');
         const totalVideoSize = document.getElementById('totalVideoSize');
         const videoCount = document.getElementById('videoCount');
+        const expiryDate = document.getElementById('expiryDate');
     
         // Reset content and show loading state
         clientName.value = '';
@@ -369,6 +333,7 @@
         totalImageSize.textContent = '';
         totalVideoSize.textContent = '';
         videoCount.textContent = '';
+        expiryDate.textContent = '';
         eventsContainer.innerHTML = '<p style="text-align: center; font-style: italic;">Loading...</p>';
     
         // Show popup immediately
@@ -410,6 +375,9 @@
             totalImageSize.textContent = data.client.totalImageSize || '0 Bytes';
             totalVideoSize.textContent = data.client.totalVideoSize || '0 Bytes';
             videoCount.textContent = data.client.videoCount || '0';
+
+            // Set expiry Date
+            expiryDate.innerText = `${new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(data.client.Expiry_date)).split('/').join('-')} (YYYY-MM-DD)`;
     
             // Populate events
             eventsContainer.innerHTML = ''; // Clear loading message
