@@ -26,9 +26,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false, // Relax for development (set to true in production)
         minVersion: 'TLSv1.2' // Enforce modern TLS versions
-    },
-    logger: true, // Enable logging for debugging
-    debug: true // Show detailed debug output
+    }
 });
 
 // Function to format category name

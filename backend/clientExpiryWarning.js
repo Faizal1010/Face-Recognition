@@ -23,9 +23,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false, // Relax for development
         minVersion: 'TLSv1.2' // Enforce modern TLS versions
-    },
-    logger: true, // Enable logging for debugging
-    debug: true // Show detailed debug output
+    }
 });
 
 // Cron job to check client expiry dates daily at midnight (Kolkata time)

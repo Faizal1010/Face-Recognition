@@ -7,6 +7,7 @@ const path = require('path');
 const cors = require('cors');
 require('dotenv').config()
 require('./cleanup')
+require('./clientExpiryWarning')
 
 const app = express();
 const uploadDir = path.join(__dirname, 'Uploads');
