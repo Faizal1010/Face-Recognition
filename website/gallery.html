@@ -443,6 +443,12 @@
                 if (response.ok) {
                     localStorage.setItem("eventId", eventId);
                     savedEventId = eventId;
+
+                                    const findYourselfLink = document.getElementById("findYourselfLink");
+                findYourselfLink.href = `http://localhost:3000/find?eventId=${encodeURIComponent(savedEventId)}`;
+
+                const videoPageLink = document.getElementById("videoPageLink");
+                videoPageLink.href = `http://localhost:3000/video?eventId=${encodeURIComponent(savedEventId)}`;
                     loadLabels(eventId);
                     loadCarouselImages(eventId); // Trigger carousel image loading here
                     console.log("Event Code Entered:", eventId);

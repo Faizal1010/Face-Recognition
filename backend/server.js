@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+require('dotenv').config()
 require('./cleanup')
 
 const app = express();
@@ -25,10 +26,10 @@ app.use(express.json({ limit: "500gb" }));
 app.use(express.urlencoded({ extended: true, limit: "500gb" }));
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'zxcvbnm1010@',
-    database: 'face_recognition'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
 });
 
 // Helper function to run Python script safely

@@ -8,6 +8,8 @@ import json
 import os
 import warnings
 import logging
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 
 # Suppressing warnings and unnecessary logs
 warnings.filterwarnings("ignore", category=UserWarning)  # Suppress all UserWarnings
@@ -50,13 +52,20 @@ def compare_faces(image_path, label_filter, event_code_filter):
         query_embedding = faces[0].normed_embedding
 
         # Connect to the database
-        conn = mysql.connector.connect(
-            host='localhost', 
-            user='root', 
-            password='zxcvbnm1010@', 
-            database='face_recognition'
-        )
-        cursor = conn.cursor()
+        try:
+            db_config = {
+                'host': os.getenv('DB_HOST'),
+                'user': os.getenv('DB_USER'),
+                'password': os.getenv('DB_PASSWORD'),
+                'database': os.getenv('DB_DATABASE')
+            }
+            missing_vars = [key for key, value in db_config.items() if not value]
+            if missing_vars:
+                return {"error": f"Missing environment variables: {', '.join(missing_vars)}"}
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
+        except mysql.connector.Error as err:
+            return {"error": f"MySQL Connection Failed: {err}"}
 
         # Ensure labels and event_code are lists
         label_filter = json.loads(label_filter) if isinstance(label_filter, str) else label_filter

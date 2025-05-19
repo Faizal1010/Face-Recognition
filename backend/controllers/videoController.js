@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { spawn } = require('child_process');
+require('dotenv').config();
 
 // Set up multer with a 4 GB file size limit
 const upload = multer({ 
@@ -18,10 +19,10 @@ const upload = multer({
 
 // DB Connection
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'zxcvbnm1010@',
-    database: 'face_recognition',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     connectionLimit: 10
 });
 

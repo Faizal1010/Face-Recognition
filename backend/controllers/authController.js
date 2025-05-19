@@ -1,15 +1,16 @@
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql2');
+require('dotenv').config();
 
 // JWT Secret Key
 const JWT_SECRET = 'sjbublbclqNRl893bp  83t395vb8nm3;cn'; // Replace with a strong, secure key
 
 // Create MySQL connection pool
 const pool = mysql.createPool({
-    host: 'localhost',       // Replace with your MySQL host
-    user: 'root',            // Replace with your MySQL username
-    password: 'zxcvbnm1010@',            // Replace with your MySQL password
-    database: 'face_recognition' // Replace with your database name
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
 
 // Promisify the pool query for easy async/await handling

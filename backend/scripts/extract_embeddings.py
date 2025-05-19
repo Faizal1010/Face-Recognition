@@ -1,5 +1,7 @@
 import os
 import warnings
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU usage for ONNX Runtime
 os.environ["ORT_DISABLE_CUDA"] = "1"       # Ensure ONNX runs only on CPU
 
@@ -31,12 +33,20 @@ def extract_and_store(image_paths, labels, client_ids, event_codes):
 
     # Connecting to MySQL
     try:
-        conn = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='zxcvbnm1010@',
-            database='face_recognition'
-        )
+        # Validate environment variables
+        db_config = {
+            'host': os.getenv('DB_HOST'),
+            'user': os.getenv('DB_USER'),
+            'password': os.getenv('DB_PASSWORD'),
+            'database': os.getenv('DB_DATABASE')
+        }
+        missing_vars = [key for key, value in db_config.items() if not value]
+        if missing_vars:
+            error_message = {"status": "error", "message": f"Missing environment variables: {', '.join(missing_vars)}"}
+            print(json.dumps(error_message))
+            sys.exit(1)
+
+        conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
     except mysql.connector.Error as err:
         error_message = {"status": "error", "message": f"MySQL Connection Failed: {err}"}
@@ -80,7 +90,7 @@ def extract_and_store(image_paths, labels, client_ids, event_codes):
             space_left = storage_limit - storage_used
             error_message = {
                 "status": "error",
-                "message": f"Photos were not uploaded. You only have {space_left:.2f} MB left. Please upgrade or upload images within left space."
+                "message": f"Photos were not uploaded. You only have {space_lock:.2f} MB left. Please upgrade or upload images within left space."
             }
             print(json.dumps(error_message))
             cursor.close()
