@@ -2,6 +2,9 @@ const mysql = require('mysql2');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+require('dotenv').config();
 
 // MySQL Database Connection
 const db = mysql.createConnection({
@@ -9,6 +12,23 @@ const db = mysql.createConnection({
     user: 'root',
     password: 'zxcvbnm1010@',
     database: 'face_recognition'
+});
+
+// Nodemailer Transporter Configuration
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_PORT == 465, // Use SSL for port 465
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    },
+    tls: {
+        rejectUnauthorized: false, // Relax for development (set to true in production)
+        minVersion: 'TLSv1.2' // Enforce modern TLS versions
+    },
+    logger: true, // Enable logging for debugging
+    debug: true // Show detailed debug output
 });
 
 // Function to format category name
@@ -46,7 +66,7 @@ const upload = multer({ storage }).fields([
     { name: 'logo', maxCount: 1 }
 ]);
 
-// Upload Profile handler
+// Upload Profile handler (unchanged)
 const uploadProfile = async (req, res) => {
     upload(req, res, (err) => {
         if (err) {
@@ -71,12 +91,12 @@ const uploadProfile = async (req, res) => {
             filePath: path.relative(
                 path.join(__dirname, '../../Frontend'),
                 req.files.profile[0].path
-            ), // Return relative path of profile image
+            ),
         });
     });
 };
 
-// Add Client handler (using MySQL)
+// Add Client handler (updated for verification)
 const addClient = async (req, res) => {
     try {
         const { FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date } = req.body;
@@ -91,57 +111,238 @@ const addClient = async (req, res) => {
             });
         }
 
-        // Extract storage limit from Storage_limit (format: storage_limit+validity) and convert from GB to MB
+        // Extract storage limit and convert from GB to MB
         const storageLimitValue = parseInt(Storage_limit.split('+')[0]);
         const storageLimitInMB = storageLimitValue * 1024;
 
-        // Create the client record in MySQL
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const createdAt = new Date();
+
+        // Store in pending_clients
         const query = `
-            INSERT INTO client (FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            INSERT INTO pending_clients (FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date, verification_token, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        const values = [FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, storageLimitInMB, Storage_used, Expiry_date || null];
+        const values = [
+            FirstName,
+            LastName,
+            Email,
+            ContactNo,
+            Password,
+            PostalCode,
+            State,
+            City,
+            Address,
+            Notes,
+            Profile,
+            CustomerId,
+            storageLimitInMB,
+            Storage_used,
+            Expiry_date || null,
+            verificationToken,
+            createdAt
+        ];
 
-        db.query(query, values, (err, result) => {
+        db.query(query, values, async (err, result) => {
             if (err) {
-                console.error('Error adding client:', err);
+                console.error('Error adding pending client:', err);
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({
+                        success: false,
+                        message: "A client with this email or customer ID already exists"
+                    });
+                }
                 return res.status(500).json({
                     success: false,
-                    message: "Client couldn't be added due to an internal error",
-                    error: err.message,
+                    message: "Client couldn't be added due to a database error",
+                    error: err.message
                 });
             }
 
-            // Return the newly added client (excluding Password for security)
-            const newClient = {
-                FirstName,
-                LastName,
-                Email,
-                ContactNo,
-                PostalCode,
-                State,
-                City,
-                Address,
-                Notes,
-                Profile,
-                CustomerId,
-                Storage_limit: storageLimitInMB,
-                Storage_used,
-                Expiry_date
+            // Send verification email
+            const verificationLink = `${process.env.APP_URL}/clients/verify/${verificationToken}`;
+            const mailOptions = {
+                from: `"Your App" <${process.env.SMTP_USER}>`,
+                to: Email,
+                subject: 'Verify Your Email Address',
+                html: `
+                    <h2>Welcome to Your App!</h2>
+                    <p>Please verify your email by clicking below:</p>
+                    <a href="${verificationLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Verify Email</a>
+                    <p>This link expires in 24 hours.</p>
+                `
             };
 
-            res.status(201).json({
-                success: true,
-                message: "Client added successfully",
-                client: newClient
-            });
+            try {
+                await transporter.sendMail(mailOptions);
+                res.status(201).json({
+                    success: true,
+                    message: "Verification email sent. Please check your inbox."
+                });
+            } catch (emailErr) {
+                console.error('Error sending verification email:', emailErr);
+                db.query('DELETE FROM pending_clients WHERE verification_token = ?', [verificationToken]);
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to send verification email",
+                    error: emailErr.message
+                });
+            }
         });
 
     } catch (error) {
         console.error('Error adding client:', error);
         res.status(500).json({
             success: false,
-            message: "Client couldn't be added due to an internal error",
+            message: "Client couldn't be added due to an unexpected error",
+            error: error.message
+        });
+    }
+};
+
+// Verify Client handler
+const verifyClient = async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        // Check token in pending_clients
+        const query = 'SELECT * FROM pending_clients WHERE verification_token = ?';
+        db.query(query, [token], async (err, results) => {
+            if (err) {
+                console.error('Error querying pending client:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: "Error verifying client",
+                    error: err.message
+                });
+            }
+
+            if (results.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid or expired verification token"
+                });
+            }
+
+            const pendingClient = results[0];
+            const createdAt = new Date(pendingClient.created_at);
+            const now = new Date();
+            const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
+
+            if (hoursDiff > 24) {
+                db.query('DELETE FROM pending_clients WHERE verification_token = ?', [token]);
+                return res.status(400).json({
+                    success: false,
+                    message: "Verification token has expired"
+                });
+            }
+
+            // Move to client table
+            const insertQuery = `
+                INSERT INTO client (FirstName, LastName, Email, ContactNo, Password, PostalCode, State, City, Address, Notes, Profile, CustomerId, Storage_limit, Storage_used, Expiry_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            const values = [
+                pendingClient.FirstName,
+                pendingClient.LastName,
+                pendingClient.Email,
+                pendingClient.ContactNo,
+                pendingClient.Password,
+                pendingClient.PostalCode,
+                pendingClient.State,
+                pendingClient.City,
+                pendingClient.Address,
+                pendingClient.Notes,
+                pendingClient.Profile,
+                pendingClient.CustomerId,
+                pendingClient.Storage_limit,
+                pendingClient.Storage_used,
+                pendingClient.Expiry_date || null
+            ];
+
+            db.query(insertQuery, values, async (insertErr, insertResult) => {
+                if (insertErr) {
+                    console.error('Error adding client to client table:', insertErr);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Error completing verification",
+                        error: insertErr.message
+                    });
+                }
+
+                // Delete from pending_clients
+                db.query('DELETE FROM pending_clients WHERE verification_token = ?', [token]);
+
+                // Send confirmation email
+                const mailOptions = {
+                    from: `"Your App" <${process.env.SMTP_USER}>`,
+                    to: pendingClient.Email,
+                    subject: 'Account Created Successfully',
+                    html: `
+                        <h2>Welcome, ${pendingClient.FirstName}!</h2>
+                        <p>Your account has been created.</p>
+                        <p>Details:</p>
+                        <ul>
+                            <li>Email: ${pendingClient.Email}</li>
+                            <li>Customer ID: ${pendingClient.CustomerId}</li>
+                        </ul>
+                        <p>Login at <a href="${process.env.APP_URL}">${process.env.APP_URL}</a>.</p>
+                    `
+                };
+
+                try {
+                    await transporter.sendMail(mailOptions);
+                    res.status(200).json({
+                        success: true,
+                        message: "Email verified and client added successfully",
+                        client: {
+                            FirstName: pendingClient.FirstName,
+                            LastName: pendingClient.LastName,
+                            Email: pendingClient.Email,
+                            ContactNo: pendingClient.ContactNo,
+                            PostalCode: pendingClient.PostalCode,
+                            State: pendingClient.State,
+                            City: pendingClient.City,
+                            Address: pendingClient.Address,
+                            Notes: pendingClient.Notes,
+                            Profile: pendingClient.Profile,
+                            CustomerId: pendingClient.CustomerId,
+                            Storage_limit: pendingClient.Storage_limit,
+                            Storage_used: pendingClient.Storage_used,
+                            Expiry_date: pendingClient.Expiry_date
+                        }
+                    });
+                } catch (emailErr) {
+                    console.error('Error sending confirmation email:', emailErr);
+                    res.status(200).json({
+                        success: true,
+                        message: "Email verified and client added, but confirmation email failed",
+                        client: {
+                            FirstName: pendingClient.FirstName,
+                            LastName: pendingClient.LastName,
+                            Email: pendingClient.Email,
+                            ContactNo: pendingClient.ContactNo,
+                            PostalCode: pendingClient.PostalCode,
+                            State: pendingClient.State,
+                            City: pendingClient.City,
+                            Address: pendingClient.Address,
+                            Notes: pendingClient.Notes,
+                            Profile: pendingClient.Profile,
+                            CustomerId: pendingClient.CustomerId,
+                            Storage_limit: pendingClient.Storage_limit,
+                            Storage_used: pendingClient.Storage_used,
+                            Expiry_date: pendingClient.Expiry_date
+                        }
+                    });
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error verifying client:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error verifying client",
             error: error.message
         });
     }
@@ -697,4 +898,4 @@ const getAdminDashboardData = async (req, res) => {
     }
 };
 
-module.exports = { addClient, getClient, deleteClient, uploadProfile, getLatestClients, getClientById, getClientByCustomerId, getAdminDashboardData};
+module.exports = { addClient, getClient, deleteClient, uploadProfile, getLatestClients, getClientById, getClientByCustomerId, getAdminDashboardData, verifyClient};

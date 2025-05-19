@@ -106,21 +106,9 @@ exports.uploadCarouselImage = async (req, res) => {
                                 return res.status(500).json({ success: false, message: 'Error uploading carousel image' });
                             }
 
-                            // Update client's storage usage
-                            db.query(
-                                'UPDATE client SET Storage_used = Storage_used + ? WHERE CustomerId = ?',
-                                [imageSizeMB, client_id],
-                                async (err) => {
-                                    if (err) {
-                                        console.error('Error updating storage usage:', err);
-                                        await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
-                                        return res.status(500).json({ success: false, message: 'Error updating storage usage' });
-                                    }
-                                    // Delete temporary file
-                                    await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
-                                    res.json({ success: true, message: 'Carousel image uploaded successfully' });
-                                }
-                            );
+                            // Delete temporary file
+                            await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
+                            res.json({ success: true, message: 'Carousel image uploaded successfully' });
                         }
                     );
                 } catch (err) {
@@ -262,21 +250,9 @@ exports.updateCarouselImage = async (req, res) => {
                                 return res.status(400).json({ success: false, message: 'No image updated' });
                             }
 
-                            // Update client's storage usage
-                            db.query(
-                                'UPDATE client SET Storage_used = Storage_used + ? WHERE CustomerId = ?',
-                                [sizeDifference, client_id],
-                                async (err) => {
-                                    if (err) {
-                                        console.error('Error updating storage usage:', err);
-                                        await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
-                                        return res.status(500).json({ success: false, message: 'Error updating storage usage' });
-                                    }
-                                    // Delete temporary file
-                                    await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
-                                    res.json({ success: true, message: 'Carousel image updated successfully' });
-                                }
-                            );
+                            // Delete temporary file
+                            await fs.unlink(image.path).catch(err => console.error('Error deleting temp file:', err));
+                            res.json({ success: true, message: 'Carousel image updated successfully' });
                         }
                     );
                 } catch (err) {

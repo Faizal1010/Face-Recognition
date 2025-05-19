@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+require('./cleanup')
 
 const app = express();
 const uploadDir = path.join(__dirname, 'Uploads');

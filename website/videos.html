@@ -329,7 +329,7 @@
     </div>
 
     <script>
-        let savedEventId = new URLSearchParams(window.location.search).get('eventId');
+        let savedEventId = localStorage.getItem('eventId');
         let videos = [];
         let currentPage = 1;
         const videosPerPage = 20;

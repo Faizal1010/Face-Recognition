@@ -235,7 +235,7 @@
                         <script>
                             document.write(new Date().getFullYear());
                         </script>
-                        &copy; Managed and maintained by <b>DigitallyKaro.</b>
+                        © Managed and maintained by <b>DigitallyKaro.</b>
                     </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end">All rights reserved.</div>
@@ -293,26 +293,56 @@
 
 <script>
     document.getElementById('submitButton').addEventListener('click', () => {
+        // Validate required fields
+        const firstName = document.getElementById('first-name').value;
+        const lastName = document.getElementById('last-name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const postalCode = document.getElementById('postal-code').value;
+        const plan = document.getElementById('plans').value;
+
+        // Check if required fields are empty
+        if (!firstName || !lastName || !email || !password || !confirmPassword || !postalCode || !plan) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        // Validate password: minimum 5 alphanumeric characters
+        const passwordRegex = /^[a-zA-Z0-9]{5,}$/;
+        if (!passwordRegex.test(password)) {
+            document.getElementById('alertPassword').innerText = '*Password must be at least 5 alphanumeric characters.';
+            return;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            document.getElementById('alertPassword').innerText = '*Passwords don\'t match!!!';
+            return;
+        }
+
+        // Reset alert message if validation passes
+        document.getElementById('alertPassword').innerText = '*';
 
         const getRandomLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
-};
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return letters.charAt(Math.floor(Math.random() * letters.length));
+        };
         const getRandomNumber = () => {
-    return Math.floor(Math.random() * 100);  // Random number between 0 and 99
-};
-// Generate random final letter (1 letter)
-const getFinalLetter = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return letters.charAt(Math.floor(Math.random() * letters.length));
-};
-// Combine all parts
-const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
-const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
-const finalLetter = getFinalLetter();  // One random letter for the end
+            return Math.floor(Math.random() * 100);  // Random number between 0 and 99
+        };
+        // Generate random final letter (1 letter)
+        const getFinalLetter = () => {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return letters.charAt(Math.floor(Math.random() * letters.length));
+        };
+        // Combine all parts
+        const lettersPart = getRandomLetter() + getRandomLetter();  // Two random letters
+        const numberPart = getRandomNumber().toString().padStart(2, '0');  // Ensure it's always 2 digits
+        const finalLetter = getFinalLetter();  // One random letter for the end
 
-// Store the final product code
-const customerId = 'C' + lettersPart + numberPart + finalLetter;
+        // Store the final product code
+        const customerId = 'C' + lettersPart + numberPart + finalLetter;
 
         // Calculate Expiry_date based on validity
         const planValue = document.getElementById('plans').value;
@@ -325,85 +355,82 @@ const customerId = 'C' + lettersPart + numberPart + finalLetter;
         }
 
         const clientDetails = {
-            FirstName: document.getElementById('first-name').value,
-            LastName: document.getElementById('last-name').value,
-            Email: document.getElementById('email').value,
+            FirstName: firstName,
+            LastName: lastName,
+            Email: email,
             ContactNo: document.getElementById('contact').value,
-            Password: document.getElementById('password').value,
-            PostalCode: document.getElementById('postal-code').value,
+            Password: password,
+            PostalCode: postalCode,
             State: document.getElementById('state').value,
             City: document.getElementById('city').value,
             Address: document.getElementById('address').value,
             Notes: document.getElementById('notes').value,
-            Storage_limit: document.getElementById('plans').value,
+            Storage_limit: planValue,
             Storage_used: 0,
             Expiry_date: expiryDate,
-            Profile: document.getElementById('profile').files[0]?.name || "", // Use the file name
+            Profile: document.getElementById('profile').files[0]?.name || "",
             CustomerId: customerId
         };
-        console.log(clientDetails.CustomerId)
-        if (clientDetails.Password === document.getElementById('confirm-password').value) {
-            // First fetch: Add client details
-            fetch('http://localhost:3000/clients/add-client', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(clientDetails)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Second fetch: Send image to the server
-                    const profileImage = document.getElementById('profile').files[0];
-                    const logo = document.getElementById('logo').files[0];
-                    const email = document.getElementById('email').value
-                    if (profileImage) {
-                        const formData = new FormData();
-                        formData.append('email', email)
-                        formData.append('profile', profileImage);
-                        formData.append('logo', logo);
-                        console.log([...formData.entries()]); // Logs all keys and values in the FormData
-                        fetch('http://localhost:3000/clients/upload-profile', {
-                            method: 'POST',
-                            body: formData // No need for headers with FormData
-                        })
-                        .then(imageResponse => imageResponse.json())
-                        .then(imageData => {
-                            if (imageData.success) {
-                                confirm('Client and profile image added successfully');
-                                location.reload()
-                            } else {
-                                confirm("Client added but image couldn't be uploaded.");
-                            }
-                        })
-                        .catch(err => console.error("Error uploading image:", err));
-                    } else {
-                        confirm('Client added successfully');
-                        location.reload();
-                    }
+        console.log(clientDetails.CustomerId);
+
+        // First fetch: Add client details
+        fetch('http://localhost:3000/clients/add-client', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(clientDetails)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Second fetch: Send image to the server
+                const profileImage = document.getElementById('profile').files[0];
+                const logo = document.getElementById('logo').files[0];
+                const email = document.getElementById('email').value;
+                if (profileImage) {
+                    const formData = new FormData();
+                    formData.append('email', email);
+                    formData.append('profile', profileImage);
+                    formData.append('logo', logo);
+                    console.log([...formData.entries()]); // Logs all keys and values in the FormData
+                    fetch('http://localhost:3000/clients/upload-profile', {
+                        method: 'POST',
+                        body: formData // No need for headers with FormData
+                    })
+                    .then(imageResponse => imageResponse.json())
+                    .then(imageData => {
+                        if (imageData.success) {
+                            confirm('Client and profile image added successfully');
+                            location.reload();
+                        } else {
+                            confirm("Client added but image couldn't be uploaded.");
+                        }
+                    })
+                    .catch(err => console.error("Error uploading image:", err));
                 } else {
-                    confirm("Client couldn't be added due to some error");
+                    confirm('Client added successfully');
+                    location.reload();
                 }
-            })
-            .catch(err => console.error("Error adding client:", err));
-        } else {
-            document.getElementById('alertPassword').innerText = '*Passwords don\'t match!!!';
-        }
+            } else {
+                confirm("Client couldn't be added due to some error");
+            }
+        })
+        .catch(err => console.error("Error adding client:", err));
     });
 </script>
 
 <script>
     document.getElementById('logout').addEventListener('click', function () {
-// Remove the token from localStorage
-localStorage.removeItem('token');
+        // Remove the token from localStorage
+        localStorage.removeItem('token');
 
-// Alert user about successful logout
-alert('You have been logged out successfully!');
+        // Alert user about successful logout
+        alert('You have been logged out successfully!');
 
-// Redirect to login page
-window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page after logout
-});
+        // Redirect to login page
+        window.location.href = 'http://localhost:3000/super-admin-dashboard/login'; // Redirect to login page after logout
+    });
 </script>
     </body>
 </html>

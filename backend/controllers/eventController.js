@@ -169,13 +169,6 @@ const deleteEvent = async (req, res) => {
                     totalStorageMB += imageSizeMB;
                 }
 
-                // 2.3: Calculate storage used by carousel images
-                const [carouselResults] = await db.promise().query('SELECT image FROM carousel WHERE event_code = ?', [event_code]);
-                for (const carousel of carouselResults) {
-                    const imageSizeMB = Buffer.byteLength(carousel.image) / (1024 * 1024); // Convert bytes to MB
-                    totalStorageMB += imageSizeMB;
-                }
-
                 // Step 3: Delete video files from filesystem
                 const videoDir = path.join('videos', event_code);
                 try {
